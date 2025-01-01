@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" strict="true">
+    <Properties>
+        <Property name="CONSOLE_LOG_PATTERN">%style{%date{DEFAULT}}{yellow} %highlight{%-5level}{FATAL=bright_red,
+            ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=black} %msg%n%throwable
+        </Property>
+        <Property name="FILE_LOG_PATTERN">%d [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="LOG_ROOT">logs</Property>
+        <Property name="LOG_ARCHIVE">${LOG_ROOT}/archive</Property>
+        <Property name="LOG_PATTERN_DEFAULT">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
+        <Property name="MAX_FILE_SIZE">1 MB</Property>
+        <Property name="MAX_HISTORY">5</Property>
+        <Property name="DATETIME">yyyy-MM-dd'T'HH:mm:ss.SSSZ</Property>
+        <Property name="DATE">yyyy-MM-dd</Property>
+    </Properties>
+
+    <Appenders>
+        <Appender type="Console" name="ConsoleAppender">
+            <Layout type="PatternLayout" pattern="${CONSOLE_LOG_PATTERN}"/>
+        </Appender>
+        <RollingFile name="FileAppender" fileName="${LOG_ROOT}/nvd-tool.log"
+                     filePattern="${LOG_ARCHIVE}/nvd-tool-%d{${DATE}}.%i.log">
+            <PatternLayout pattern="${FILE_LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${MAX_FILE_SIZE}"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${MAX_HISTORY}"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.github.phanikb.nvd" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
