@@ -194,12 +194,12 @@ public class ChangeItem {
     @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.sourceIdentifier == null)? 0 :this.sourceIdentifier.hashCode()));
-        result = ((result* 31)+((this.created == null)? 0 :this.created.hashCode()));
-        result = ((result* 31)+((this.cveId == null)? 0 :this.cveId.hashCode()));
         result = ((result* 31)+((this.eventName == null)? 0 :this.eventName.hashCode()));
         result = ((result* 31)+((this.details == null)? 0 :this.details.hashCode()));
         result = ((result* 31)+((this.cveChangeId == null)? 0 :this.cveChangeId.hashCode()));
+        result = ((result* 31)+((this.sourceIdentifier == null)? 0 :this.sourceIdentifier.hashCode()));
+        result = ((result* 31)+((this.created == null)? 0 :this.created.hashCode()));
+        result = ((result* 31)+((this.cveId == null)? 0 :this.cveId.hashCode()));
         return result;
     }
 
@@ -212,7 +212,7 @@ public class ChangeItem {
             return false;
         }
         ChangeItem rhs = ((ChangeItem) other);
-        return (((((((this.sourceIdentifier == rhs.sourceIdentifier)||((this.sourceIdentifier!= null)&&this.sourceIdentifier.equals(rhs.sourceIdentifier)))&&((this.created == rhs.created)||((this.created!= null)&&this.created.equals(rhs.created))))&&((this.cveId == rhs.cveId)||((this.cveId!= null)&&this.cveId.equals(rhs.cveId))))&&((this.eventName == rhs.eventName)||((this.eventName!= null)&&this.eventName.equals(rhs.eventName))))&&((this.details == rhs.details)||((this.details!= null)&&this.details.equals(rhs.details))))&&((this.cveChangeId == rhs.cveChangeId)||((this.cveChangeId!= null)&&this.cveChangeId.equals(rhs.cveChangeId))));
+        return (((((((this.eventName == rhs.eventName)||((this.eventName!= null)&&this.eventName.equals(rhs.eventName)))&&((this.details == rhs.details)||((this.details!= null)&&this.details.equals(rhs.details))))&&((this.cveChangeId == rhs.cveChangeId)||((this.cveChangeId!= null)&&this.cveChangeId.equals(rhs.cveChangeId))))&&((this.sourceIdentifier == rhs.sourceIdentifier)||((this.sourceIdentifier!= null)&&this.sourceIdentifier.equals(rhs.sourceIdentifier))))&&((this.created == rhs.created)||((this.created!= null)&&this.created.equals(rhs.created))))&&((this.cveId == rhs.cveId)||((this.cveId!= null)&&this.cveId.equals(rhs.cveId))));
     }
 
 }

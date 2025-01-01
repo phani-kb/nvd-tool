@@ -132,9 +132,9 @@ public class CvssV40 {
     @Override
     public int hashCode() {
         int result = 1;
+        result = ((result* 31)+((this.type == null)? 0 :this.type.hashCode()));
         result = ((result* 31)+((this.cvssData == null)? 0 :this.cvssData.hashCode()));
         result = ((result* 31)+((this.source == null)? 0 :this.source.hashCode()));
-        result = ((result* 31)+((this.type == null)? 0 :this.type.hashCode()));
         return result;
     }
 
@@ -147,7 +147,7 @@ public class CvssV40 {
             return false;
         }
         CvssV40 rhs = ((CvssV40) other);
-        return ((((this.cvssData == rhs.cvssData)||((this.cvssData!= null)&&this.cvssData.equals(rhs.cvssData)))&&((this.source == rhs.source)||((this.source!= null)&&this.source.equals(rhs.source))))&&((this.type == rhs.type)||((this.type!= null)&&this.type.equals(rhs.type))));
+        return ((((this.type == rhs.type)||((this.type!= null)&&this.type.equals(rhs.type)))&&((this.cvssData == rhs.cvssData)||((this.cvssData!= null)&&this.cvssData.equals(rhs.cvssData))))&&((this.source == rhs.source)||((this.source!= null)&&this.source.equals(rhs.source))));
     }
 
     public enum Type {

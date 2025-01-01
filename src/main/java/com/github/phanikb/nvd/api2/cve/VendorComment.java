@@ -126,8 +126,8 @@ public class VendorComment {
     public int hashCode() {
         int result = 1;
         result = ((result* 31)+((this.comment == null)? 0 :this.comment.hashCode()));
-        result = ((result* 31)+((this.lastModified == null)? 0 :this.lastModified.hashCode()));
         result = ((result* 31)+((this.organization == null)? 0 :this.organization.hashCode()));
+        result = ((result* 31)+((this.lastModified == null)? 0 :this.lastModified.hashCode()));
         return result;
     }
 
@@ -140,7 +140,7 @@ public class VendorComment {
             return false;
         }
         VendorComment rhs = ((VendorComment) other);
-        return ((((this.comment == rhs.comment)||((this.comment!= null)&&this.comment.equals(rhs.comment)))&&((this.lastModified == rhs.lastModified)||((this.lastModified!= null)&&this.lastModified.equals(rhs.lastModified))))&&((this.organization == rhs.organization)||((this.organization!= null)&&this.organization.equals(rhs.organization))));
+        return ((((this.comment == rhs.comment)||((this.comment!= null)&&this.comment.equals(rhs.comment)))&&((this.organization == rhs.organization)||((this.organization!= null)&&this.organization.equals(rhs.organization))))&&((this.lastModified == rhs.lastModified)||((this.lastModified!= null)&&this.lastModified.equals(rhs.lastModified))));
     }
 
 }

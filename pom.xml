@@ -3,15 +3,15 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.pk</groupId>
+    <groupId>com.github.phanikb</groupId>
     <artifactId>nvd-tool</artifactId>
     <name>nvd-tool</name>
     <version>1.0-SNAPSHOT</version>
-    <description>Tool to retrieve CVE/CPE data from NIST's NVD repository and CWE data maintained by MITRE</description>
+    <description>A CLI tool to fetch CVE and CPE data (including match criteria) from NIST's NVD API, along with CWE data from MITRE.</description>
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>

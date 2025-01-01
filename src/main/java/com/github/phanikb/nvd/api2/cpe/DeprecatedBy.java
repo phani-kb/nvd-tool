@@ -83,8 +83,8 @@ public class DeprecatedBy {
     public int hashCode() {
         int result = 1;
         result = ((result* 31)+((this.cpeName == null)? 0 :this.cpeName.hashCode()));
-        result = ((result* 31)+((this.additionalProperties == null)? 0 :this.additionalProperties.hashCode()));
         result = ((result* 31)+((this.cpeNameId == null)? 0 :this.cpeNameId.hashCode()));
+        result = ((result* 31)+((this.additionalProperties == null)? 0 :this.additionalProperties.hashCode()));
         return result;
     }
 
@@ -97,7 +97,7 @@ public class DeprecatedBy {
             return false;
         }
         DeprecatedBy rhs = ((DeprecatedBy) other);
-        return ((((this.cpeName == rhs.cpeName)||((this.cpeName!= null)&&this.cpeName.equals(rhs.cpeName)))&&((this.additionalProperties == rhs.additionalProperties)||((this.additionalProperties!= null)&&this.additionalProperties.equals(rhs.additionalProperties))))&&((this.cpeNameId == rhs.cpeNameId)||((this.cpeNameId!= null)&&this.cpeNameId.equals(rhs.cpeNameId))));
+        return ((((this.cpeName == rhs.cpeName)||((this.cpeName!= null)&&this.cpeName.equals(rhs.cpeName)))&&((this.cpeNameId == rhs.cpeNameId)||((this.cpeNameId!= null)&&this.cpeNameId.equals(rhs.cpeNameId))))&&((this.additionalProperties == rhs.additionalProperties)||((this.additionalProperties!= null)&&this.additionalProperties.equals(rhs.additionalProperties))));
     }
 
 }

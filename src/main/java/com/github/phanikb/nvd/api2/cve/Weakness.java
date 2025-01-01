@@ -124,9 +124,9 @@ public class Weakness {
     @Override
     public int hashCode() {
         int result = 1;
+        result = ((result* 31)+((this.type == null)? 0 :this.type.hashCode()));
         result = ((result* 31)+((this.description == null)? 0 :this.description.hashCode()));
         result = ((result* 31)+((this.source == null)? 0 :this.source.hashCode()));
-        result = ((result* 31)+((this.type == null)? 0 :this.type.hashCode()));
         return result;
     }
 
@@ -139,7 +139,7 @@ public class Weakness {
             return false;
         }
         Weakness rhs = ((Weakness) other);
-        return ((((this.description == rhs.description)||((this.description!= null)&&this.description.equals(rhs.description)))&&((this.source == rhs.source)||((this.source!= null)&&this.source.equals(rhs.source))))&&((this.type == rhs.type)||((this.type!= null)&&this.type.equals(rhs.type))));
+        return ((((this.type == rhs.type)||((this.type!= null)&&this.type.equals(rhs.type)))&&((this.description == rhs.description)||((this.description!= null)&&this.description.equals(rhs.description))))&&((this.source == rhs.source)||((this.source!= null)&&this.source.equals(rhs.source))));
     }
 
 }
