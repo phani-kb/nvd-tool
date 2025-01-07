@@ -59,5 +59,44 @@ public final class Util {
         return Optional.ofNullable(Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName));
     }
 
+    /**
+     * Finds a file from the classpath.
+     *
+     * @param fileName the name of the file to find
+     * @return a File object, or an empty Optional if the file is not found
+     */
+    public static Optional<File> findFileFromClasspath(final String fileName) {
+        if (isNullOrEmpty(fileName)) {
+            logger.error("File name cannot be null or empty");
+            return Optional.empty();
+        }
+        URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
+        return Optional.ofNullable(url).map(u -> new File(u.getFile()))
+                .or(() -> {
+                    logger.error("File {} does not exist", fileName);
+                    return Optional.empty();
+                });
+    }
 
+    /**
+     * Loads properties from a file.
+     *
+     * @param file the file to load
+     * @return the properties
+     */
+    public static Properties loadProperties(File file) {
+        Properties properties = new Properties();
+        if (file == null) return properties;
+
+        try (InputStream is = loadFileFromClasspath(file.getName()).orElse(null)) {
+            if (is == null) {
+                logger.error("File {} not found", file.getName());
+                return properties;
+            }
+            properties.load(is);
+        } catch (IOException e) {
+            logger.error("Error loading properties: {}", e.getMessage());
+        }
+        return properties;
+    }
 }

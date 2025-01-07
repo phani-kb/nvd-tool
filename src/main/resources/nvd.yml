@@ -23,6 +23,9 @@ nvd:
     url: https://nvd.nist.gov/feeds/json/cpematch/1.0/nvdcpematch-1.0.json.{archive-type} # CPE match URL
   cwe:
     url: https://cwe.mitre.org/data/xml/cwec_latest.xml.zip # 4.15
+  proxy:
+    host:
+    port:
   download:
     usingUri:
       maxConcurrentDownloads: 1
