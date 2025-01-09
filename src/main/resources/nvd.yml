@@ -31,4 +31,21 @@ nvd:
       maxConcurrentDownloads: 1
     usingApi:
       maxRetries: 3
+      maxDownloadAttempts: 10
+      retryIntervalInSecs: 30
+      delayBetweenRequestsInMs: 6000
+      lastModifiedDates:
+        maxRangeInDays: 120
+      changeDates:
+        maxRangeInDays: 120
+      processor:
+        maxThreads: 4
+        rateLimitWithKey: 50
+        rateLimitWithoutKey: 5
+        rollingWindowInSecs: 30
+        logEveryNProcessedElements: 20
+        producerWaitTimeToFinishInMinutes: 30
+        consumerWaitTimeToFinishInMinutes: 180
+  merge:
+    skipInvalidCollection: true
 
