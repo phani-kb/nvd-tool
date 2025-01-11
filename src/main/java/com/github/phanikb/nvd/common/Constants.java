@@ -20,6 +20,9 @@ public final class Constants {
     public static final String OUT_FILE_PREFIX = "nvd";
     public static final int DEFAULT_PRODUCER_TIMEOUT_IN_MINUTES = 5;
     public static final int DEFAULT_CONSUMER_TIMEOUT_IN_MINUTES = 60;
+    public static final int DEFAULT_MIN_RESULTS_PER_PAGE = 10;
+    public static final int DEFAULT_RATE_LIMIT = 5;
+    public static final int MIN_FREE_SPACE_IN_GB = 2; // in GB
     public static final int LOG_EVERY_N_PROCESSED_ELEMENTS = 10;
 
     private Constants() {
