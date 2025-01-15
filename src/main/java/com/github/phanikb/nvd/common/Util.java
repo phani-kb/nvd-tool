@@ -103,4 +103,22 @@ public final class Util {
         }
         return properties;
     }
+    public static void validateDateRange(LocalDateTime startDate, LocalDateTime endDate, boolean checkFormat) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("start date must be before or equal to end date.");
+        }
+        if (startDate.isAfter(DateFormats.TODAY_DATETIME)) {
+            throw new IllegalArgumentException("start date must be before or equal to today.");
+        }
+        if (endDate != null && endDate.isAfter(DateFormats.TODAY_DATETIME)) {
+            throw new IllegalArgumentException("end date must be before or equal to today.");
+        }
+
+        if (checkFormat) {
+            startDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
+            if (endDate != null) {
+                endDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
+            }
+        }
+    }
 }
