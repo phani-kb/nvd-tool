@@ -8,7 +8,7 @@ import picocli.CommandLine;
 
 import com.github.phanikb.nvd.common.Util;
 
-public abstract class BaseApiOptions implements com.github.phanikb.nvd.cli.api.IApiOptions {
+public abstract class BaseApiOptions implements IApiOptions {
     @Override
     public void validateOptions() {
     }
