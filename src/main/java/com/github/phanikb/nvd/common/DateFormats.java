@@ -9,6 +9,9 @@ import lombok.Getter;
 public final class DateFormats {
     public static final LocalDate TODAY = LocalDate.now();
     public static final LocalDateTime TODAY_DATETIME = LocalDateTime.now();
+    public static final int CURRENT_YEAR = TODAY.getYear();
+    public static final int START_YEAR = 2002;
+    public static final int END_YEAR = 2024;
     public static final DateTimeFormatter ISO_DATE_TIME_EXT_FORMATTER = DateFormat.ISO_DATE_TIME_EXT.getFormatter();
 
     @Getter
