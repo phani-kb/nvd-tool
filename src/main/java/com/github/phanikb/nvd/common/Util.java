@@ -83,6 +83,60 @@ public final class Util {
     }
 
     /**
+     * Gets the usable space in GB.
+     *
+     * @param dir the directory to check
+     * @return the usable space in GB
+     */
+    public static int getUsableSpace(File dir) {
+        return (int) (dir.getUsableSpace() / (1024 * 1024 * 1024));
+    }
+
+    /**
+     * Checks if the given URI is a valid download URI.
+     *
+     * @param uri the URI to check
+     * @return true if the URI is valid, false otherwise
+     */
+    public static boolean isValidDownloadUri(URI uri) {
+        String path = uri.getPath();
+        return !isNullOrEmpty(path) && !FilenameUtils.getName(path).isEmpty();
+    }
+
+
+    /**
+     * Extracts the contents of an archive file to the specified output directory.
+     *
+     * @param filename  the name of the archive file
+     * @param outputDir the directory to extract the contents to
+     * @throws NvdException if an error occurs during extraction
+     */
+    public static void extract(String filename, File outputDir) throws NvdException {
+        if (isNullOrEmpty(filename)) throw new NvdException("filename is null or empty");
+        if (outputDir == null) throw new NvdException("outputDir is null");
+
+        if (!outputDir.exists() || !outputDir.isDirectory() || !outputDir.canWrite()) {
+            throw new NvdException("Invalid outputDir: " + outputDir);
+        }
+
+        String extension = FilenameUtils.getExtension(filename);
+        if (isNullOrEmpty(extension)) throw new NvdException("cannot get extension from filename: " + filename);
+
+        ArchiveType archiveType = ArchiveType.of("." + extension);
+        if (archiveType == null) {
+            logger.error("unsupported archive format: {}", filename);
+            return;
+        }
+
+        File downloadedFile = new File(outputDir, filename);
+        try {
+            archiveType.extract(downloadedFile, outputDir);
+        } catch (IOException | ArchiveException | CompressorException e) {
+            throw new NvdException(e.getMessage(), e);
+        }
+    }
+
+    /**
      * Loads properties from a file.
      *
      * @param file the file to load
