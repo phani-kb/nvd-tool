@@ -1,0 +1,5 @@
+<ruleset name="myruleset">
+    <description>NVD tool ruleset</description>
+    <exclude-pattern>src/java/com.github/phanikb/nvd/api2/.*</exclude-pattern>
+    <rule ref="category/java/bestpractices.xml"/>
+</ruleset>

@@ -1,28 +1,29 @@
-# Description: Configuration file for the NVD API
-# to request an NVD API Key visit https://nvd.nist.gov/developers/request-an-api-key
+--- "Configuration file for the NVD API"
+--- "To request an NVD API Key visit https://nvd.nist.gov/developers/request-an-api-key"
+---
 nvd:
   notice: This tool uses data from the NVD API but is not endorsed or certified by the NVD.
   api:
     key:
-    keyUrl: https://nvd.nist.gov/developers/request-an-api-key
-    version: V2
+    keyUrl: "https://nvd.nist.gov/developers/request-an-api-key"
+    version: "V2"
   cve:
     apiV2:
-      endpoint: https://services.nvd.nist.gov/rest/json/cves/2.0 # URL stem for retrieving CVE information using 2.0 API
-    url: https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{download-type}.json.{archive-type}
+      endpoint: "https://services.nvd.nist.gov/rest/json/cves/2.0" # URL stem for retrieving CVE information using 2.0 API
+    url: "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{download-type}.json.{archive-type}"
   cveHistory:
     apiV2:
-      endpoint: https://services.nvd.nist.gov/rest/json/cvehistory/2.0 # URL stem for retrieving CVE history information using 2.0 API
+      endpoint: "https://services.nvd.nist.gov/rest/json/cvehistory/2.0" # URL stem for retrieving CVE history information using 2.0 API
   cpe:
     apiV2:
-      endpoint: https://services.nvd.nist.gov/rest/json/cpes/2.0 # URL stem for retrieving CPE information using 2.0 API
-    url: https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.{archive-type} # CPE dictionary URL
+      endpoint: "https://services.nvd.nist.gov/rest/json/cpes/2.0" # URL stem for retrieving CPE information using 2.0 API
+    url: "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.{archive-type}" # CPE dictionary URL
   cpeMatch:
     apiV2:
-      endpoint: https://services.nvd.nist.gov/rest/json/cpematch/2.0 # URL stem for retrieving CPE match criteria information using 2.0 API
-    url: https://nvd.nist.gov/feeds/json/cpematch/1.0/nvdcpematch-1.0.json.{archive-type} # CPE match URL
+      endpoint: "https://services.nvd.nist.gov/rest/json/cpematch/2.0 "# URL stem for retrieving CPE match criteria information using 2.0 API
+    url: "https://nvd.nist.gov/feeds/json/cpematch/1.0/nvdcpematch-1.0.json.{archive-type}" # CPE match URL
   cwe:
-    url: https://cwe.mitre.org/data/xml/cwec_latest.xml.zip # 4.15
+    url: "https://cwe.mitre.org/data/xml/cwec_latest.xml.zip" # 4.15
   proxy:
     host:
     port:
@@ -48,4 +49,3 @@ nvd:
         consumerWaitTimeToFinishInMinutes: 180
   merge:
     skipInvalidCollection: true
-
