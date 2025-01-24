@@ -55,8 +55,8 @@ public enum ArchiveType {
 
     private void extractArchive(File src, File destDir) throws IOException, ArchiveException {
         try (InputStream is = new FileInputStream(src);
-             ArchiveInputStream<? extends ArchiveEntry> archiveInputStream = new ArchiveStreamFactory().createArchiveInputStream(
-                     extension.substring(1), is)) {
+                ArchiveInputStream<? extends ArchiveEntry> archiveInputStream =
+                        new ArchiveStreamFactory().createArchiveInputStream(extension.substring(1), is)) {
 
             ArchiveEntry entry;
             while ((entry = archiveInputStream.getNextEntry()) != null) {
@@ -70,9 +70,10 @@ public enum ArchiveType {
 
     private void extractCompressed(File src, File destDir) throws IOException, CompressorException {
         try (InputStream is = new FileInputStream(src);
-             CompressorInputStream compressorInputStream = new CompressorStreamFactory().createCompressorInputStream(
-                     extension.substring(1), is);
-             OutputStream os = new FileOutputStream(new File(destDir, src.getName().replace(extension, "")))) {
+                CompressorInputStream compressorInputStream =
+                        new CompressorStreamFactory().createCompressorInputStream(extension.substring(1), is);
+                OutputStream os =
+                        new FileOutputStream(new File(destDir, src.getName().replace(extension, "")))) {
 
             IOUtils.copy(compressorInputStream, os);
         }
@@ -80,8 +81,8 @@ public enum ArchiveType {
 
     public void archive(File src, File destDir) throws IOException, ArchiveException {
         if (this == ZIP) {
-            try (ZipOutputStream zos = new ZipOutputStream(
-                    new FileOutputStream(new File(destDir, src.getName() + extension)))) {
+            try (ZipOutputStream zos =
+                    new ZipOutputStream(new FileOutputStream(new File(destDir, src.getName() + extension)))) {
                 zos.putNextEntry(new ZipEntry(src.getName()));
                 try (FileInputStream fis = new FileInputStream(src)) {
                     IOUtils.copy(fis, zos);
@@ -89,8 +90,8 @@ public enum ArchiveType {
                 zos.closeEntry();
             }
         } else if (this == GZ) {
-            try (GZIPOutputStream gzos = new GZIPOutputStream(
-                    new FileOutputStream(new File(destDir, src.getName() + extension)))) {
+            try (GZIPOutputStream gzos =
+                    new GZIPOutputStream(new FileOutputStream(new File(destDir, src.getName() + extension)))) {
                 try (FileInputStream fis = new FileInputStream(src)) {
                     IOUtils.copy(fis, gzos);
                 }

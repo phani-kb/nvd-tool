@@ -13,5 +13,4 @@ public enum CveDownloadType {
     CveDownloadType(String value) {
         this.value = value;
     }
-
 }

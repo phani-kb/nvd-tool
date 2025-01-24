@@ -21,5 +21,4 @@ public enum CveHistoryEventName {
     CVE_CISA_KEV_UPDATE("CVE CISA KEV Update");
 
     private final String value;
-
 }

@@ -1,8 +1,9 @@
+---
 --- "Configuration file for the NVD API"
 --- "To request an NVD API Key visit https://nvd.nist.gov/developers/request-an-api-key"
----
+...
 nvd:
-  notice: This tool uses data from the NVD API but is not endorsed or certified by the NVD.
+  notice: "This tool uses data from the NVD API but is not endorsed or certified by the NVD."
   api:
     key:
     keyUrl: "https://nvd.nist.gov/developers/request-an-api-key"

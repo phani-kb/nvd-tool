@@ -5,6 +5,7 @@ import java.io.Serial;
 public class NvdException extends Exception {
     @Serial
     private static final long serialVersionUID = 1L;
+
     public NvdException(String message) {
         super(message);
     }

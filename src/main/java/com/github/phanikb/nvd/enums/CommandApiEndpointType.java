@@ -1,8 +1,9 @@
 package com.github.phanikb.nvd.enums;
 
-import com.github.phanikb.nvd.common.NvdProperties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import com.github.phanikb.nvd.common.NvdProperties;
 
 @Getter
 @RequiredArgsConstructor

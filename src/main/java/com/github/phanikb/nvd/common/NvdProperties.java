@@ -3,8 +3,6 @@ package com.github.phanikb.nvd.common;
 import java.io.InputStream;
 import java.util.Optional;
 
-import static com.github.phanikb.nvd.common.Constants.DEFAULT_RETRY_INTERVAL_SECS;
-
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -14,6 +12,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+
+import static com.github.phanikb.nvd.common.Constants.DEFAULT_RETRY_INTERVAL_SECS;
 
 @Getter
 @Setter
@@ -27,7 +27,8 @@ public final class NvdProperties {
     }
 
     private static NvdProperties loadNvdProperties() {
-        Optional<InputStream> optionalInputStream = com.github.phanikb.nvd.common.Util.loadFileFromClasspath(Constants.NVD_PROPERTIES_FILE);
+        Optional<InputStream> optionalInputStream =
+                com.github.phanikb.nvd.common.Util.loadFileFromClasspath(Constants.NVD_PROPERTIES_FILE);
         return optionalInputStream.map(NvdProperties::getProperties).orElse(null);
     }
 
@@ -72,44 +73,40 @@ public final class NvdProperties {
     @ToString
     public static class Api {
         private String key;
-        @NonNull
-        private String keyUrl;
-        @NonNull
-        private ApiEndpointVersion version;
+
+        @NonNull private String keyUrl;
+
+        @NonNull private ApiEndpointVersion version;
     }
 
     @Getter
     @Setter
     @ToString
     public static class CveHistory {
-        @NonNull
-        private Endpoint apiV2;
+        @NonNull private Endpoint apiV2;
     }
 
     @Getter
     @Setter
     @ToString
     public static class Endpoint {
-        @NonNull
-        private String endpoint;
+        @NonNull private String endpoint;
     }
 
     @Getter
     @Setter
     @ToString
     public static class Url {
-        @NonNull
-        private String url;
+        @NonNull private String url;
     }
 
     @Getter
     @Setter
     @ToString
     public static class EndpointAndUrl {
-        @NonNull
-        private String url;
-        @NonNull
-        private Endpoint apiV2;
+        @NonNull private String url;
+
+        @NonNull private Endpoint apiV2;
     }
 
     @Getter
@@ -167,12 +164,16 @@ public final class NvdProperties {
     @ToString
     public static class Processor {
         private int maxThreads = 1;
+
         @Required
         private int rateLimitWithKey;
+
         @Required
         private int rateLimitWithoutKey;
+
         @Required
         private int rollingWindowInSecs;
+
         private int logEveryNProcessedElements = Constants.LOG_EVERY_N_PROCESSED_ELEMENTS;
         private int producerWaitTimeToFinishInMinutes = Constants.DEFAULT_PRODUCER_TIMEOUT_IN_MINUTES;
         private int consumerWaitTimeToFinishInMinutes = Constants.DEFAULT_CONSUMER_TIMEOUT_IN_MINUTES;

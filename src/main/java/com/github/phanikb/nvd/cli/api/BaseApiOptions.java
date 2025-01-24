@@ -10,8 +10,7 @@ import com.github.phanikb.nvd.common.Util;
 
 public abstract class BaseApiOptions implements IApiOptions {
     @Override
-    public void validateOptions() {
-    }
+    public void validateOptions() {}
 
     protected void validateCveId(String cveId) {
         if (cveId != null && !cveId.matches("CVE-\\d{4}-\\d{4,}")) {
@@ -22,7 +21,7 @@ public abstract class BaseApiOptions implements IApiOptions {
     protected void validateDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         Util.validateDateRange(startDate, endDate, true);
     }
-    
+
     public static class LocalDateTimeConverter implements CommandLine.ITypeConverter<LocalDateTime> {
         @Override
         public LocalDateTime convert(String value) {

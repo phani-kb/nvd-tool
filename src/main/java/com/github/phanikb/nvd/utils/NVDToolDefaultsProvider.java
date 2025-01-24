@@ -4,14 +4,14 @@ import java.io.File;
 import java.util.Optional;
 import java.util.Properties;
 
-import static com.github.phanikb.nvd.common.Constants.CLI_PROPERTIES_FILE;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.common.Util;
+
+import static com.github.phanikb.nvd.common.Constants.CLI_PROPERTIES_FILE;
 
 public class NVDToolDefaultsProvider implements CommandLine.IDefaultValueProvider {
     private static final String PROPERTY_SEPARATOR = ".";

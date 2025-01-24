@@ -14,8 +14,10 @@ import com.github.phanikb.nvd.cli.INvdCommand;
 import com.github.phanikb.nvd.enums.ArchiveType;
 
 @Getter
-@CommandLine.Command(name = "using-uri", mixinStandardHelpOptions = true,
-        subcommands = { CommandLine.HelpCommand.class},
+@CommandLine.Command(
+        name = "using-uri",
+        mixinStandardHelpOptions = true,
+        subcommands = {CommandLine.HelpCommand.class},
         description = "Download using traditional vulnerability data feeds.")
 public class UriDownloadCommand implements Callable<Integer>, INvdCommand {
     private static final Logger logger = LogManager.getLogger(UriDownloadCommand.class);
@@ -26,12 +28,17 @@ public class UriDownloadCommand implements Callable<Integer>, INvdCommand {
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
-    @CommandLine.Option(names = {"-x", "--extract"},
-            description = "Extract the downloaded files. Default: ${DEFAULT-VALUE}", defaultValue = "false")
+    @CommandLine.Option(
+            names = {"-x", "--extract"},
+            description = "Extract the downloaded files. Default: ${DEFAULT-VALUE}",
+            defaultValue = "false")
     private boolean extract;
 
-    @CommandLine.Option(names = {"-a", "--archive-type"}, type = ArchiveType.class,
-            description = "Archive type. Valid values: ${COMPLETION-CANDIDATES}.", paramLabel = "TYPE",
+    @CommandLine.Option(
+            names = {"-a", "--archive-type"},
+            type = ArchiveType.class,
+            description = "Archive type. Valid values: ${COMPLETION-CANDIDATES}.",
+            paramLabel = "TYPE",
             defaultValue = "ZIP")
     private ArchiveType archiveType;
 

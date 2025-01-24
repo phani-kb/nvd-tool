@@ -26,23 +26,27 @@ public abstract class LastModApiOptions extends BaseApiOptions {
     @Getter
     @ToString
     public static class LastModDateRange {
-        @CommandLine.Option(names = {"--lmsd", "--last-mod-start-date"}, paramLabel = "DATE",
+        @CommandLine.Option(
+                names = {"--lmsd", "--last-mod-start-date"},
+                paramLabel = "DATE",
                 converter = LocalDateTimeConverter.class,
                 required = true,
                 scope = CommandLine.ScopeType.INHERIT,
                 description = "Filter by last modified start date (yyyy-MM-dd HH:mm:ss).")
         private LocalDateTime lastModStartDate;
 
-        @CommandLine.Option(names = {"--lmed", "--last-mod-end-date"}, paramLabel = "DATE",
+        @CommandLine.Option(
+                names = {"--lmed", "--last-mod-end-date"},
+                paramLabel = "DATE",
                 converter = LocalDateTimeConverter.class,
                 scope = CommandLine.ScopeType.INHERIT,
                 description = "Filter by last modified end date (yyyy-MM-dd HH:mm:ss).")
         private LocalDateTime lastModEndDate = DateFormats.TODAY_DATETIME;
 
         public boolean isWithinAllowableRange() {
-            return lastModStartDate != null && lastModEndDate != null &&
-                    lastModEndDate.isBefore(lastModStartDate.plusDays(Constants.DEFAULT_MAX_RANGE_IN_DAYS));
+            return lastModStartDate != null
+                    && lastModEndDate != null
+                    && lastModEndDate.isBefore(lastModStartDate.plusDays(Constants.DEFAULT_MAX_RANGE_IN_DAYS));
         }
-
     }
 }

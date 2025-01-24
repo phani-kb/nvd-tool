@@ -15,6 +15,7 @@ import com.github.phanikb.nvd.common.Util;
 @Getter
 public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand {
     private static final Logger logger = LogManager.getLogger(BaseCommand.class);
+
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
 
@@ -38,12 +39,12 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
     protected void validateDirectory(File dir) {
         if (dir != null) {
             if (!dir.exists()) {
-                throw new CommandLine.ParameterException(spec.commandLine(),
-                                                         dir.getName() + " directory does not exist");
+                throw new CommandLine.ParameterException(
+                        spec.commandLine(), dir.getName() + " directory does not exist");
             }
             if (!dir.isDirectory()) {
-                throw new CommandLine.ParameterException(spec.commandLine(),
-                                                         dir.getName() + " directory is not a directory");
+                throw new CommandLine.ParameterException(
+                        spec.commandLine(), dir.getName() + " directory is not a directory");
             }
         }
     }
@@ -51,8 +52,8 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
     private void validateOutDirectory(File outDir) {
         validateDirectory(outDir);
         if (!outDir.canWrite()) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     outDir.getName() + " directory is not writable");
+            throw new CommandLine.ParameterException(
+                    spec.commandLine(), outDir.getName() + " directory is not writable");
         }
         logger.info("output directory: {}", outDir);
     }
@@ -60,8 +61,8 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
     private void validateOutputFile(String filename) {
         if (filename != null) {
             if (filename.contains(File.separator)) {
-                throw new CommandLine.ParameterException(spec.commandLine(),
-                                                         "output file name contains path separator");
+                throw new CommandLine.ParameterException(
+                        spec.commandLine(), "output file name contains path separator");
             }
             logger.info("output file: {}", filename);
         }
