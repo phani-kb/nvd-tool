@@ -10,7 +10,7 @@ import com.github.phanikb.nvd.common.CpeName;
 
 @Getter
 @ToString
-public class CpeMatchApiOptions extends com.github.phanikb.nvd.cli.api.LastModApiOptions {
+public class CpeMatchApiOptions extends LastModApiOptions {
     @CommandLine.Option(
             names = {"--mc-id", "--match-criteria-id"},
             paramLabel = "ID",
