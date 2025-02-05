@@ -5,12 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -133,6 +138,27 @@ public final class Util {
         return properties;
     }
 
+    public static int getMaxDownloadAttempts() {
+        return properties.getNvd().getDownload().getUsingApi().getMaxDownloadAttempts();
+    }
+
+    public static void waitToFinish(ExecutorService executor, int timeout, TimeUnit timeUnit) throws NvdException {
+        executor.shutdown();
+        try {
+            boolean finished = executor.awaitTermination(timeout, timeUnit);
+            if (!finished) {
+                throw new NvdException("task did not finish in time, timeout: " + timeout + " minutes.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new NvdException("task interrupted: " + e.getMessage(), e);
+        }
+    }
+
+    public static int getMaxThreads() {
+        return properties.getNvd().getDownload().getUsingApi().getProcessor().getMaxThreads();
+    }
+
     public static void validateDateRange(LocalDateTime startDate, LocalDateTime endDate, boolean checkFormat) {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("start date must be before or equal to end date.");
@@ -150,5 +176,59 @@ public final class Util {
                 endDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
             }
         }
+    }
+
+    public static void deleteDir(File outDir) {
+        if (outDir == null || !outDir.exists()) return;
+
+        try {
+            FileUtils.deleteDirectory(outDir);
+        } catch (IOException e) {
+            logger.error("failed to delete directory: {}", outDir);
+        }
+    }
+
+    public static File[] getFiles(File outDir, String outFilePrefix) {
+        return outDir.listFiles((dir, name) -> name.startsWith(outFilePrefix));
+    }
+
+    public static boolean skipInvalidCollection() {
+        return properties.getNvd().getMerge().isSkipInvalidCollection();
+    }
+
+    public static void compressFile(File outFile, ArchiveType format) {
+        if (outFile == null || !outFile.exists()) {
+            logger.error("output file is null or does not exist");
+            return;
+        }
+
+        try {
+            format.archive(outFile, outFile.getParentFile());
+        } catch (IOException | ArchiveException e) {
+            logger.error("failed to compress file: {}, error: {}", outFile.getAbsolutePath(), e.getMessage());
+        }
+    }
+
+    public static void createDir(Path outDir) throws NvdException {
+        if (outDir == null) return;
+
+        try {
+            Files.createDirectories(outDir);
+        } catch (IOException e) {
+
+            throw new NvdException("failed to create directory: " + outDir, e);
+        }
+    }
+
+    public static int getLogEveryNProcessedElements() {
+        return properties.getNvd().getDownload().getUsingApi().getProcessor().getLogEveryNProcessedElements();
+    }
+
+    public static int getProducerWaitTimeToFinishInMinutes() {
+        return properties.getNvd().getDownload().getUsingApi().getProcessor().getProducerWaitTimeToFinishInMinutes();
+    }
+
+    public static int getConsumerWaitTimeToFinishInMinutes() {
+        return properties.getNvd().getDownload().getUsingApi().getProcessor().getConsumerWaitTimeToFinishInMinutes();
     }
 }
