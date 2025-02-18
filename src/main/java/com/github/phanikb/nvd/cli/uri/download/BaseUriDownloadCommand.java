@@ -11,6 +11,8 @@ import org.apache.logging.log4j.Logger;
 
 import picocli.CommandLine;
 
+import com.github.phanikb.nvd.cli.processor.uri.IUriDownloadCommandProcessor;
+import com.github.phanikb.nvd.cli.processor.uri.UriDownloadCommandProcessor;
 import com.github.phanikb.nvd.cli.uri.IUriDownloadCommand;
 import com.github.phanikb.nvd.enums.ArchiveType;
 import com.github.phanikb.nvd.enums.TransferMethod;
@@ -28,6 +30,12 @@ public abstract class BaseUriDownloadCommand implements Callable<Integer>, IUriD
     @Override
     public Integer call() throws Exception {
         validateOptions();
+        IUriDownloadCommandProcessor processor = UriDownloadCommandProcessor.getProcessor(
+                getTransferMethod(), getFeedType(), getOutDir(), getArchiveType(), isExtract(), getUris());
+        processor.preProcess();
+        processor.process();
+        processor.postProcess();
+        processor.close();
 
         return 0;
     }
