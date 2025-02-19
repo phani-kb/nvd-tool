@@ -11,6 +11,7 @@ import picocli.CommandLine;
 
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
 import com.github.phanikb.nvd.common.NvdException;
+import com.github.phanikb.nvd.common.NvdProperties;
 import com.github.phanikb.nvd.enums.CommandApiEndpointType;
 
 import static com.github.phanikb.nvd.common.Constants.DEFAULT_MIN_RESULTS_PER_PAGE;
@@ -71,6 +72,19 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
         for (CommandApiEndpointType command : CommandApiEndpointType.values()) {
             if (command.getCommandName().equals(commandName)) {
                 return;
+            }
+        }
+        throw new IllegalArgumentException("Invalid command name: " + commandName);
+    }
+
+    @Override
+    public String getApiEndpoint(CommandLine.Model.CommandSpec spec) {
+        String commandName = spec.name();
+        for (CommandApiEndpointType command : CommandApiEndpointType.values()) {
+            if (command.getCommandName().equals(commandName)) {
+                String endpoint = NvdProperties.getApiEndpoint(command.getApiEndpointType());
+                logger.info("command: {} api endpoint: {}", commandName, endpoint);
+                return endpoint;
             }
         }
         throw new IllegalArgumentException("Invalid command name: " + commandName);

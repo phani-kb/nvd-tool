@@ -26,9 +26,26 @@ public final class NvdProperties {
         // prevent instantiation
     }
 
+    public static String getApiEndpoint(ApiEndpointType type) {
+        ApiEndpointVersion version = properties.getNvd().getApi().getVersion();
+        return switch (type) {
+            case CVE -> switch (version) {
+                case V2 -> properties.getNvd().getCve().getApiV2().getEndpoint();
+            };
+            case CPE -> switch (version) {
+                case V2 -> properties.getNvd().getCpe().getApiV2().getEndpoint();
+            };
+            case CPE_MATCH -> switch (version) {
+                case V2 -> properties.getNvd().getCpeMatch().getApiV2().getEndpoint();
+            };
+            case CVE_HISTORY -> switch (version) {
+                case V2 -> properties.getNvd().getCveHistory().getApiV2().getEndpoint();
+            };
+        };
+    }
+
     private static NvdProperties loadNvdProperties() {
-        Optional<InputStream> optionalInputStream =
-                com.github.phanikb.nvd.common.Util.loadFileFromClasspath(Constants.NVD_PROPERTIES_FILE);
+        Optional<InputStream> optionalInputStream = Util.loadFileFromClasspath(Constants.NVD_PROPERTIES_FILE);
         return optionalInputStream.map(NvdProperties::getProperties).orElse(null);
     }
 
