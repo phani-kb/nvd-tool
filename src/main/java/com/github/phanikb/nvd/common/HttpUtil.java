@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -52,19 +50,12 @@ public final class HttpUtil {
     }
 
     /**
-     * Gets a random user agent from the list of user agents.
+     * Gets a user agent string.
      *
-     * @return a random user agent string
+     * @return a user agent string
      */
     public static String getUserAgent() {
-        try {
-            SecureRandom sr = SecureRandom.getInstanceStrong();
-            String[] userAgents = UserAgents.getUserAgents().toArray(new String[0]);
-            return userAgents[sr.nextInt(userAgents.length)];
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Error getting user agent: {}", e.getMessage());
-            return UserAgents.getDefaultUserAgent();
-        }
+        return Util.getDefaultUserAgent();
     }
 
     /**

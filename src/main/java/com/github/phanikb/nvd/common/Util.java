@@ -231,4 +231,8 @@ public final class Util {
     public static int getConsumerWaitTimeToFinishInMinutes() {
         return properties.getNvd().getDownload().getUsingApi().getProcessor().getConsumerWaitTimeToFinishInMinutes();
     }
+
+    public static String getDefaultUserAgent() {
+        return BuildConfig.ARTIFACT_ID + "/" + BuildConfig.VERSION + " (https://github.com/phani-kb/nvd-tool)";
+    }
 }
