@@ -1,5 +1,7 @@
 package com.github.phanikb.nvd.common;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +10,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +23,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import com.github.phanikb.nvd.enums.ArchiveType;
 
@@ -194,6 +205,82 @@ public final class Util {
 
     public static boolean skipInvalidCollection() {
         return properties.getNvd().getMerge().isSkipInvalidCollection();
+    }
+
+    public static int mergeFiles(File[] files, File outFile, String collectionNodeName) throws NvdException {
+        if (files == null || files.length == 0) {
+            logger.warn("no files to merge");
+            return 0;
+        }
+
+        if (outFile == null) {
+            throw new NvdException("output file name is null or empty");
+        }
+
+        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JsonFactory jsonFactory = mapper.getFactory();
+
+        try (BufferedWriter writer = Files.newBufferedWriter(outFile.toPath())) {
+            JsonGenerator generator = jsonFactory.createGenerator(writer);
+            generator.useDefaultPrettyPrinter();
+            generator.writeStartObject();
+            generator.writeFieldName(collectionNodeName);
+            generator.writeStartArray();
+
+            JsonNode timestamp = null;
+            JsonNode version = null;
+            int actualResultsCount;
+            JsonNode format = null;
+            List<Integer> actualResults = new ArrayList<>();
+
+            for (File file : files) {
+                try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
+                    final JsonNode node = mapper.readTree(reader);
+                    final JsonNode collectionNode = node.get(collectionNodeName);
+
+                    if (collectionNode == null || !collectionNode.isArray()) {
+                        if (skipInvalidCollection()) {
+                            logger.warn("Skipped collection node in file: {}", file.getAbsolutePath());
+                            continue;
+                        } else {
+                            throw new NvdException("invalid collection node in file: " + file.getAbsolutePath());
+                        }
+                    }
+
+                    for (JsonNode child : collectionNode) {
+                        generator.writeTree(child);
+                    }
+
+                    actualResults.add(node.get("resultsPerPage").asInt());
+                    if (file.equals(files[files.length - 1])) {
+                        timestamp = node.get("timestamp");
+                        version = node.get("version");
+                        format = node.get("format");
+                    }
+                }
+            }
+
+            actualResultsCount =
+                    actualResults.stream().mapToInt(Integer::intValue).sum();
+
+            generator.writeEndArray();
+            generator.writeObjectField("timestamp", timestamp);
+            generator.writeObjectField("version", version);
+            generator.writeObjectField("format", format);
+            generator.writeObjectField("totalResults", actualResultsCount);
+            generator.writeEndObject();
+            generator.close();
+            logger.info(
+                    "merged downloaded files into {}, file size {} MB, total results: {}",
+                    outFile.getAbsolutePath(),
+                    FileUtils.sizeOf(outFile) / (1024 * 1024),
+                    actualResultsCount);
+
+            return actualResultsCount;
+        } catch (IOException e) {
+            throw new NvdException("failed to merge downloaded files: " + e.getMessage(), e);
+        }
     }
 
     public static void compressFile(File outFile, ArchiveType format) {

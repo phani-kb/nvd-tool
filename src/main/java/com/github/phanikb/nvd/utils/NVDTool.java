@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.cli.DownloadCommand;
+import com.github.phanikb.nvd.cli.MergeCommand;
 
 @CommandLine.Command(
         name = "NVDTool",
@@ -22,7 +23,7 @@ import com.github.phanikb.nvd.cli.DownloadCommand;
         synopsisHeading = "%n",
         descriptionHeading = "%n@|bold,underline Description|@:%n%n",
         optionListHeading = "%n@|bold,underline Options|@:%n",
-        subcommands = {DownloadCommand.class, CommandLine.HelpCommand.class},
+        subcommands = {DownloadCommand.class, MergeCommand.class, CommandLine.HelpCommand.class},
         description = "A tool to retrieve CVE/CPE data from NIST's NVD repository and CWE data maintained by MITRE.",
         footerHeading = "\nThis tool uses data from the NVD API but is not endorsed or certified by the NVD.\n",
         defaultValueProvider = NVDToolDefaultsProvider.class,
