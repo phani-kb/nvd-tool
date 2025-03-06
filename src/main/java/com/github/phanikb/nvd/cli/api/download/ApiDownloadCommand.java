@@ -22,7 +22,12 @@ import static com.github.phanikb.nvd.common.Constants.NVD_PROPERTIES_FILE;
 @CommandLine.Command(
         name = "using-api",
         mixinStandardHelpOptions = true,
-        subcommands = {CommandLine.HelpCommand.class},
+        subcommands = {
+            CpeApiDownloadCommand.class,
+            CpeMatchApiDownloadCommand.class,
+            CveHistoryApiDownloadCommand.class,
+            CommandLine.HelpCommand.class
+        },
         description = "Download data using the new APIs.")
 public class ApiDownloadCommand implements Callable<Integer>, INvdCommand {
     private static final Logger logger = LogManager.getLogger(ApiDownloadCommand.class);

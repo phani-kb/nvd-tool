@@ -9,6 +9,7 @@ import picocli.CommandLine;
 
 import com.github.phanikb.nvd.cli.api.CpeMatchApiOptions;
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
+import com.github.phanikb.nvd.enums.FeedType;
 
 @CommandLine.Command(
         name = "cpe-match",
@@ -41,6 +42,6 @@ public class CpeMatchApiDownloadCommand extends BaseApiDownloadCommand {
 
     @Override
     public ApiDownloader getApiDownloader() {
-        return null;
+        return super.getApiDownloader(FeedType.CPE_MATCH, getDates(cpeMatchApiOptions.getLastModDateRange()), spec);
     }
 }

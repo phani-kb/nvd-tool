@@ -1,18 +1,36 @@
 package com.github.phanikb.nvd.cli.api.download;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingDeque;
 
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import picocli.CommandLine;
 
+import com.github.phanikb.nvd.cli.api.LastModApiOptions;
+import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriConsumer;
+import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriProducer;
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
+import com.github.phanikb.nvd.common.DateFormats;
+import com.github.phanikb.nvd.common.NvdApiDate;
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.NvdProperties;
+import com.github.phanikb.nvd.common.QueueElement;
+import com.github.phanikb.nvd.common.Util;
+import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.CommandApiEndpointType;
+import com.github.phanikb.nvd.enums.FeedType;
+import com.github.phanikb.nvd.enums.NvdApiDateType;
 
 import static com.github.phanikb.nvd.common.Constants.DEFAULT_MIN_RESULTS_PER_PAGE;
 import static com.github.phanikb.nvd.common.Constants.DEFAULT_NUMBER_OF_PRODUCERS;
@@ -123,5 +141,58 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
     @Override
     public CountDownLatch getLatch() {
         return new CountDownLatch(DEFAULT_NUMBER_OF_PRODUCERS);
+    }
+
+    @Override
+    public List<NameValuePair> getQueryParams() {
+        List<NameValuePair> queryParams = new ArrayList<>();
+        if (getStartIndex() != null && getStartIndex() >= 0) {
+            queryParams.add(
+                    new BasicNameValuePair(ApiQueryParams.START_INDEX.getName(), Objects.toString(getStartIndex())));
+        }
+        queryParams.add(new BasicNameValuePair(
+                ApiQueryParams.RESULTS_PER_PAGE.getName(), Objects.toString(getMaxResultsPerPage())));
+        return queryParams;
+    }
+
+    public List<NameValuePair> getDateRangeQueryParams(
+            ApiQueryParams sd, LocalDateTime startDate, ApiQueryParams ed, LocalDateTime endDate) {
+        List<NameValuePair> queryParams = new ArrayList<>();
+        if (startDate != null) {
+            queryParams.add(
+                    new BasicNameValuePair(sd.getName(), startDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER)));
+            if (endDate != null) {
+                queryParams.add(
+                        new BasicNameValuePair(ed.getName(), endDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER)));
+            }
+        }
+        return queryParams;
+    }
+
+    protected List<NvdApiDate> getDates(LastModApiOptions.LastModDateRange lastModDateRange) {
+        List<NvdApiDate> dates = new ArrayList<>();
+        if (lastModDateRange != null) {
+            LocalDateTime startDate = lastModDateRange.getLastModStartDate();
+            LocalDateTime endDate = lastModDateRange.getLastModEndDate();
+            dates.add(new NvdApiDate(
+                    ApiQueryParams.LAST_MODIFIED_START_DATE.getName(), startDate, NvdApiDateType.START_DATE));
+            dates.add(
+                    new NvdApiDate(ApiQueryParams.LAST_MODIFIED_END_DATE.getName(), endDate, NvdApiDateType.END_DATE));
+        }
+        return dates;
+    }
+
+    protected ApiDownloader getApiDownloader(
+            FeedType feedType, List<NvdApiDate> dates, CommandLine.Model.CommandSpec spec) {
+        int poisonPerCreator = Util.getMaxThreads() / DEFAULT_NUMBER_OF_PRODUCERS;
+        int rpp = getMaxResultsPerPage();
+        String prefix = Util.getOutFilePrefix(feedType);
+        String endpoint = getApiEndpoint(spec);
+        IApiDownloadUriConsumer consumer;
+        IApiDownloadUriProducer producer;
+        BlockingDeque<QueueElement> downloadQueue = new LinkedBlockingDeque<>();
+        List<NameValuePair> queryParams = getQueryParams();
+        return new ApiDownloader(
+                feedType, getOutDir(), this.getOutFilename(), isDeleteTempDir(), isCompress(), rpp, null, null);
     }
 }

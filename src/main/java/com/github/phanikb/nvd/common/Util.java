@@ -32,6 +32,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import com.github.phanikb.nvd.enums.ArchiveType;
+import com.github.phanikb.nvd.enums.FeedType;
+
+import static com.github.phanikb.nvd.common.Constants.OUT_FILE_PREFIX;
 
 public final class Util {
     private static final Logger logger = LogManager.getLogger(Util.class);
@@ -168,6 +171,11 @@ public final class Util {
 
     public static int getMaxThreads() {
         return properties.getNvd().getDownload().getUsingApi().getProcessor().getMaxThreads();
+    }
+
+    public static String getOutFilePrefix(FeedType feedType) {
+        String apiVersion = properties.getNvd().getApi().getVersion().name();
+        return OUT_FILE_PREFIX + feedType.getName() + "-" + apiVersion;
     }
 
     public static void validateDateRange(LocalDateTime startDate, LocalDateTime endDate, boolean checkFormat) {
