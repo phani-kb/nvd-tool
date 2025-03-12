@@ -50,7 +50,11 @@ public abstract class UriDownloadCommandProcessor extends CommandProcessor imple
             ArchiveType archiveType,
             boolean extract,
             Set<URI> uris) {
-        return null;
+        if (transferMethod == TransferMethod.HTTP) {
+            return new HttpUriDownloadCommandProcessor(feedType, outDir, archiveType, extract, uris);
+        } else {
+            throw new IllegalArgumentException("Unsupported transfer method: " + transferMethod);
+        }
     }
 
     @Override
