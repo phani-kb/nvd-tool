@@ -23,6 +23,7 @@ import static com.github.phanikb.nvd.common.Constants.NVD_PROPERTIES_FILE;
         name = "using-api",
         mixinStandardHelpOptions = true,
         subcommands = {
+            CveApiDownloadCommand.class,
             CpeApiDownloadCommand.class,
             CpeMatchApiDownloadCommand.class,
             CveHistoryApiDownloadCommand.class,

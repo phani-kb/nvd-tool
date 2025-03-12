@@ -21,6 +21,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.hc.core5.util.TimeValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.phanikb.nvd.enums.ArchiveType;
 import com.github.phanikb.nvd.enums.FeedType;
 
+import static com.github.phanikb.nvd.common.Constants.DEFAULT_REQUEST_TIMEOUT_SECS;
 import static com.github.phanikb.nvd.common.Constants.OUT_FILE_PREFIX;
 
 public final class Util {
@@ -176,6 +178,32 @@ public final class Util {
     public static String getOutFilePrefix(FeedType feedType) {
         String apiVersion = properties.getNvd().getApi().getVersion().name();
         return OUT_FILE_PREFIX + feedType.getName() + "-" + apiVersion;
+    }
+
+    public static void sleepQuietly(int attempts) {
+        sleepQuietly(getExponentialBackoff(attempts));
+    }
+
+    private static TimeValue getExponentialBackoff(int attempts) {
+        return getExponentialBackoff(attempts, TimeValue.of(DEFAULT_REQUEST_TIMEOUT_SECS, TimeUnit.SECONDS));
+    }
+
+    private static TimeValue getExponentialBackoff(int attempts, TimeValue retryInterval) {
+        long millis = (long) Math.pow(2, attempts) * retryInterval.toMilliseconds();
+        return TimeValue.of(millis, TimeUnit.MILLISECONDS);
+    }
+
+    public static void sleepQuietly(TimeValue timeout) {
+        try {
+            Thread.sleep(timeout.toMilliseconds());
+        } catch (InterruptedException e) {
+            logger.warn("interrupted while sleeping for {} milliseconds", timeout.toMilliseconds());
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public static void sleep(int attempts, TimeValue retryInterval) throws InterruptedException {
+        Thread.sleep(getExponentialBackoff(attempts, retryInterval).toMilliseconds());
     }
 
     public static void validateDateRange(LocalDateTime startDate, LocalDateTime endDate, boolean checkFormat) {
