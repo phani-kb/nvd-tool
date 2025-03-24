@@ -10,6 +10,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -178,6 +181,23 @@ public final class Util {
     public static String getOutFilePrefix(FeedType feedType) {
         String apiVersion = properties.getNvd().getApi().getVersion().name();
         return OUT_FILE_PREFIX + feedType.getName() + "-" + apiVersion;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Temporal & TemporalAdjuster> T addDays(T date, long days) {
+        return (T) date.plus(days, ChronoUnit.DAYS);
+    }
+
+    public static <T extends Temporal & TemporalAdjuster> List<T> getRangeDates(
+            T startDate, T endDate, int maxDateRangeDays) {
+        List<T> dates = new ArrayList<>();
+        T tempDate = startDate;
+        while (ChronoUnit.DAYS.between(tempDate, endDate) >= 0) {
+            dates.add(tempDate);
+            tempDate = addDays(tempDate, maxDateRangeDays - 1);
+        }
+        dates.add(endDate);
+        return dates;
     }
 
     public static void sleepQuietly(int attempts) {
