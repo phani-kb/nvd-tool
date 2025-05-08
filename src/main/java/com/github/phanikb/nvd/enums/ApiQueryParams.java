@@ -1,5 +1,8 @@
 package com.github.phanikb.nvd.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 
 @Getter
@@ -52,5 +55,17 @@ public enum ApiQueryParams {
         if (feedTypes == null || feedTypes.length == 0) {
             throw new IllegalArgumentException("Feed types cannot be empty");
         }
+    }
+
+    public static List<String> getQueryParams(FeedType feedType) {
+        List<String> possibleQueryParams = new ArrayList<>();
+        for (ApiQueryParams apiQueryParam : ApiQueryParams.values()) {
+            for (FeedType type : apiQueryParam.feedTypes) {
+                if (type == feedType) {
+                    possibleQueryParams.add(apiQueryParam.name);
+                }
+            }
+        }
+        return possibleQueryParams;
     }
 }

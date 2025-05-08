@@ -17,7 +17,13 @@ import com.github.phanikb.nvd.enums.ArchiveType;
 @CommandLine.Command(
         name = "using-uri",
         mixinStandardHelpOptions = true,
-        subcommands = {CommandLine.HelpCommand.class},
+        subcommands = {
+            CveUriDownloadCommand.class,
+            CpeUriDownloadCommand.class,
+            CpeMatchUriDownloadCommand.class,
+            CweUriDownloadCommand.class,
+            CommandLine.HelpCommand.class
+        },
         description = "Download using traditional vulnerability data feeds.")
 public class UriDownloadCommand implements Callable<Integer>, INvdCommand {
     private static final Logger logger = LogManager.getLogger(UriDownloadCommand.class);
