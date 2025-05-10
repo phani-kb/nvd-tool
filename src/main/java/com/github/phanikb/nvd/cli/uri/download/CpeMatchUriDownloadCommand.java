@@ -1,7 +1,5 @@
 package com.github.phanikb.nvd.cli.uri.download;
 
-import java.util.concurrent.Callable;
-
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.common.Constants;
@@ -13,7 +11,7 @@ import com.github.phanikb.nvd.enums.FeedType;
         mixinStandardHelpOptions = true,
         subcommands = {CommandLine.HelpCommand.class},
         description = "Download CPE match data using traditional URLs.")
-public class CpeMatchUriDownloadCommand extends BaseUriDownloadCommand implements Callable<Integer> {
+public class CpeMatchUriDownloadCommand extends BaseUriDownloadCommand {
 
     @Override
     public String[] getUrls() {

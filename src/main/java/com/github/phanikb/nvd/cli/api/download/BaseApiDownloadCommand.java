@@ -66,7 +66,7 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
             downloader.generateOutputFile(downloader.getFeedType().getCollectionNodeName());
             downloader.deleteTempDir();
             return 0;
-        } catch (Exception e) {
+        } catch (NvdException e) {
             logger.error("error downloading data: {}", e.getMessage());
             throw new NvdException(e.getMessage(), e);
         }

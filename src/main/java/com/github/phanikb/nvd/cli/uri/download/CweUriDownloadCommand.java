@@ -1,7 +1,5 @@
 package com.github.phanikb.nvd.cli.uri.download;
 
-import java.util.concurrent.Callable;
-
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.common.NvdProperties;
@@ -12,7 +10,7 @@ import com.github.phanikb.nvd.enums.FeedType;
         mixinStandardHelpOptions = true,
         subcommands = {CommandLine.HelpCommand.class},
         description = "Download CWE data.")
-public class CweUriDownloadCommand extends BaseUriDownloadCommand implements Callable<Integer> {
+public class CweUriDownloadCommand extends BaseUriDownloadCommand {
 
     @Override
     public String[] getUrls() {

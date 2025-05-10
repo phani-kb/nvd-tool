@@ -22,7 +22,7 @@
     <jsonschema2pojo.version>1.2.1</jsonschema2pojo.version>
     <log4j-slf4j.version>2.24.1</log4j-slf4j.version>
     <log4j.version>2.23.1</log4j.version>
-    <lombok.version>1.18.34</lombok.version>
+    <lombok.version>1.18.38</lombok.version>
     <maven-artifact.version>3.9.9</maven-artifact.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
@@ -64,6 +64,13 @@
       <groupId>info.picocli</groupId>
       <artifactId>picocli</artifactId>
       <version>${picocli.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli-codegen</artifactId>
+      <version>${picocli.version}</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.pmd</groupId>
@@ -116,7 +123,6 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
