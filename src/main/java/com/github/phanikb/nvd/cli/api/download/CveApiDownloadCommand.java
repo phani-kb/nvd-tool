@@ -30,7 +30,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
     private CveApiOptions cveApiOptions;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         validateOptions();
         if (cveApiOptions.getLastModDateRange() != null) {
             logger.debug("last mod date range = {}", cveApiOptions.getLastModDateRange());
@@ -44,7 +44,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         if (!dates.isEmpty()) {
             validRange = true;
         } else if (areDateRangesWithinAllowableRange()) {
-            dates = null;
+            // dates = null;
             validRange = true;
         } else {
             dates = getDatesIfOnlyOneDateRangeIsOutsideAllowableRange();
@@ -216,7 +216,30 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
             }
         }
 
+        addBooleanParams(queryParams);
         return queryParams;
+    }
+
+    private void addBooleanParams(List<NameValuePair> queryParams) {
+        if (cveApiOptions.isHasCertAlerts()) {
+            queryParams.add(new BasicNameValuePair(ApiQueryParams.HAS_CERT_ALERTS.getName(), null));
+        }
+
+        if (cveApiOptions.isHasCertNotes()) {
+            queryParams.add(new BasicNameValuePair(ApiQueryParams.HAS_CERT_NOTES.getName(), null));
+        }
+
+        if (cveApiOptions.isHasKev()) {
+            queryParams.add(new BasicNameValuePair(ApiQueryParams.HAS_KEV.getName(), null));
+        }
+
+        if (cveApiOptions.isHasOval()) {
+            queryParams.add(new BasicNameValuePair(ApiQueryParams.HAS_OVAL.getName(), null));
+        }
+
+        if (cveApiOptions.isNoRejected()) {
+            queryParams.add(new BasicNameValuePair(ApiQueryParams.NO_REJECTED.getName(), null));
+        }
     }
 
     @Override
