@@ -12,6 +12,7 @@ import picocli.CommandLine;
 import com.github.phanikb.nvd.cli.api.CveApiOptions;
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
 import com.github.phanikb.nvd.common.Constants;
+import com.github.phanikb.nvd.common.DateFormats;
 import com.github.phanikb.nvd.common.NvdApiDate;
 import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.NvdApiDateType;
@@ -220,6 +221,8 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
 
         addBooleanParams(queryParams);
 
+        addDateRangeParams(queryParams);
+
         addVersionParams(queryParams);
 
         return queryParams;
@@ -274,6 +277,29 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
 
         if (cveApiOptions.isNoRejected()) {
             queryParams.add(new BasicNameValuePair(ApiQueryParams.NO_REJECTED.getName(), null));
+        }
+    }
+
+    private void addDateRangeParams(List<NameValuePair> queryParams) {
+        CveApiOptions.PubDateRange pubDateRange = cveApiOptions.getPubDateRange();
+        if (cveApiOptions.getPubDateRange() != null) {
+            queryParams.add(new BasicNameValuePair(
+                    ApiQueryParams.PUB_START_DATE.getName(),
+                    pubDateRange.getPubStartDate().format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER)));
+            if (cveApiOptions.getPubDateRange().getPubEndDate() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.PUB_END_DATE.getName(),
+                        pubDateRange.getPubEndDate().format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER)));
+            }
+        }
+
+        CveApiOptions.LastModDateRange lastModDateRange = cveApiOptions.getLastModDateRange();
+        if (lastModDateRange != null) {
+            queryParams.addAll(getDateRangeQueryParams(
+                    ApiQueryParams.LAST_MODIFIED_START_DATE,
+                    lastModDateRange.getLastModStartDate(),
+                    ApiQueryParams.LAST_MODIFIED_END_DATE,
+                    lastModDateRange.getLastModEndDate()));
         }
     }
 
