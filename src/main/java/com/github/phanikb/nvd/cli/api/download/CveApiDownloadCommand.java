@@ -216,8 +216,43 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
             }
         }
 
+        addMetricParams(queryParams);
+
         addBooleanParams(queryParams);
+
+        addVersionParams(queryParams);
+
         return queryParams;
+    }
+
+    private void addMetricParams(List<NameValuePair> queryParams) {
+        CveApiOptions.CvssMetrics cvssMetrics = cveApiOptions.getCvssMetrics();
+        if (cvssMetrics != null) {
+            if (cvssMetrics.getCvssV2Metrics() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.CVSS_V2_METRICS.getName(), cvssMetrics.getCvssV2Metrics()));
+            } else if (cvssMetrics.getCvssV3Metrics() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.CVSS_V3_METRICS.getName(), cvssMetrics.getCvssV3Metrics()));
+            } else if (cvssMetrics.getCvssV4Metrics() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.CVSS_V4_METRICS.getName(), cvssMetrics.getCvssV4Metrics()));
+            }
+        }
+
+        CveApiOptions.CvssSeverity cvssSeverity = cveApiOptions.getCvssSeverity();
+        if (cvssSeverity != null) {
+            if (cvssSeverity.getCvssV2Severity() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.CVSS_V2_SEVERITY.getName(), cvssSeverity.getCvssV2Severity()));
+            } else if (cvssSeverity.getCvssV3Severity() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.CVSS_V3_SEVERITY.getName(), cvssSeverity.getCvssV3Severity()));
+            } else if (cvssSeverity.getCvssV4Severity() != null) {
+                queryParams.add(new BasicNameValuePair(
+                        ApiQueryParams.CVSS_V4_SEVERITY.getName(), cvssSeverity.getCvssV4Severity()));
+            }
+        }
     }
 
     private void addBooleanParams(List<NameValuePair> queryParams) {
@@ -239,6 +274,26 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
 
         if (cveApiOptions.isNoRejected()) {
             queryParams.add(new BasicNameValuePair(ApiQueryParams.NO_REJECTED.getName(), null));
+        }
+    }
+
+    private void addVersionParams(List<NameValuePair> queryParams) {
+        if (cveApiOptions.getVersionEnd() != null) {
+            queryParams.add(new BasicNameValuePair(
+                    ApiQueryParams.VERSION_END.getName(),
+                    cveApiOptions.getVersionEnd().getVersionEnd()));
+            queryParams.add(new BasicNameValuePair(
+                    ApiQueryParams.VERSION_END_TYPE.getName(),
+                    cveApiOptions.getVersionEnd().getVersionEndType().getValue()));
+        }
+
+        if (cveApiOptions.getVersionStart() != null) {
+            queryParams.add(new BasicNameValuePair(
+                    ApiQueryParams.VERSION_START.getName(),
+                    cveApiOptions.getVersionStart().getVersionStart()));
+            queryParams.add(new BasicNameValuePair(
+                    ApiQueryParams.VERSION_START_TYPE.getName(),
+                    cveApiOptions.getVersionStart().getVersionStartType().getValue()));
         }
     }
 

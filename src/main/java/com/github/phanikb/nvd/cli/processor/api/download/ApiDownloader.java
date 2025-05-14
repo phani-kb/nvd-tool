@@ -1,6 +1,8 @@
 package com.github.phanikb.nvd.cli.processor.api.download;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +20,10 @@ import com.github.phanikb.nvd.common.Constants;
 import com.github.phanikb.nvd.common.HttpUtil;
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.Util;
+import com.github.phanikb.nvd.enums.ArchiveType;
 import com.github.phanikb.nvd.enums.FeedType;
+
+import static com.github.phanikb.nvd.common.Util.getOutFilePrefix;
 
 @Getter
 public class ApiDownloader extends NvdDownloader {
@@ -73,7 +78,30 @@ public class ApiDownloader extends NvdDownloader {
     }
 
     @Override
-    public void generateOutputFile(String collectionNodeName) throws NvdException {}
+    public void generateOutputFile(String collectionNodeName) throws NvdException {
+        File[] files = Util.getFiles(getOutDir(), getOutFilePrefix(getFeedType()));
+        if (files.length == 0) {
+            logger.warn("no files to merge");
+        }
+
+        if (files.length != totalFiles) {
+            logger.warn("number of files to merge does not match number of pages");
+        }
+
+        Arrays.sort(files, Comparator.comparing(File::getName));
+
+        // create output file above the output directory
+        File outFile = new File(getOutDir().getParent(), getOutFile());
+        int actualResults = Util.mergeFiles(files, outFile, collectionNodeName);
+        if (actualResults != totalResults) {
+            logger.warn("total results {} does not match expected count {}", actualResults, totalResults);
+        }
+
+        if (isCompress()) {
+            Util.compressFile(outFile, ArchiveType.ZIP);
+            logger.info("output file compressed");
+        }
+    }
 
     @Override
     public void deleteTempDir() {
