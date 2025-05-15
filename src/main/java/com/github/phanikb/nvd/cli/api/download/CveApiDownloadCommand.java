@@ -15,6 +15,7 @@ import com.github.phanikb.nvd.common.Constants;
 import com.github.phanikb.nvd.common.DateFormats;
 import com.github.phanikb.nvd.common.NvdApiDate;
 import com.github.phanikb.nvd.enums.ApiQueryParams;
+import com.github.phanikb.nvd.enums.FeedType;
 import com.github.phanikb.nvd.enums.NvdApiDateType;
 
 @CommandLine.Command(
@@ -31,7 +32,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
     private CveApiOptions cveApiOptions;
 
     @Override
-    public Integer call() {
+    public Integer call() throws Exception {
         validateOptions();
         if (cveApiOptions.getLastModDateRange() != null) {
             logger.debug("last mod date range = {}", cveApiOptions.getLastModDateRange());
@@ -45,7 +46,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         if (!dates.isEmpty()) {
             validRange = true;
         } else if (areDateRangesWithinAllowableRange()) {
-            // dates = null;
+            dates = null;
             validRange = true;
         } else {
             dates = getDatesIfOnlyOneDateRangeIsOutsideAllowableRange();
@@ -59,7 +60,8 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
                     "Date ranges are outside the allowable range of " + Constants.DEFAULT_MAX_RANGE_IN_DAYS + " days.");
         }
 
-        return 0;
+        ApiDownloader apiDownloader = super.getApiDownloader(FeedType.CVE, dates, spec);
+        return execute(apiDownloader);
     }
 
     private List<NvdApiDate> getDatesIfOnlyOneDateRangeIsOutsideAllowableRange() {

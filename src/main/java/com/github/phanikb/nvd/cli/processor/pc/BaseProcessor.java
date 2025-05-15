@@ -4,12 +4,20 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingDeque;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.util.TimeValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import lombok.Getter;
 
+import com.github.phanikb.nvd.api2.cpe.CpeApiJson20Schema;
+import com.github.phanikb.nvd.api2.cpe.match.CpematchApiJson20Schema;
+import com.github.phanikb.nvd.api2.cve.CveApiJson20Schema;
+import com.github.phanikb.nvd.api2.cve.history.CveHistoryApiJson20Schema;
+import com.github.phanikb.nvd.cli.processor.api.download.CustomHttpRequestRetryStrategy;
 import com.github.phanikb.nvd.common.HttpUtil;
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.QueueElement;
@@ -73,8 +81,21 @@ public abstract class BaseProcessor<T> implements Runnable {
         int retryInterval = HttpUtil.getRetryIntervalInSecs();
         int maxRetries = HttpUtil.getMaxRetries();
 
-        // TODO: get api results
-        return 0;
+        try (CloseableHttpClient httpclient = HttpClients.custom()
+                .setRetryStrategy(new CustomHttpRequestRetryStrategy(maxRetries, TimeValue.ofSeconds(retryInterval)))
+                .setDefaultHeaders(HttpUtil.getNvdDefaultHeaders())
+                .build()) {
+            T apiJson = HttpUtil.getApiJson(uri, httpclient, responseHandler);
+            return switch (type) {
+                case CVE -> ((CveApiJson20Schema) apiJson).getTotalResults();
+                case CVE_HISTORY -> ((CveHistoryApiJson20Schema) apiJson).getTotalResults();
+                case CPE -> ((CpeApiJson20Schema) apiJson).getTotalResults();
+                case CPE_MATCH -> ((CpematchApiJson20Schema) apiJson).getTotalResults();
+                default -> throw new NvdException("unsupported API JSON type: " + apiJson.getClass());
+            };
+        } catch (Exception e) {
+            throw new NvdException("failed to download " + type + " API JSON: " + e.getMessage(), e);
+        }
     }
 
     protected void createOutDir() throws NvdException {
