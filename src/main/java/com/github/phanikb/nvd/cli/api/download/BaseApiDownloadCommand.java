@@ -21,6 +21,10 @@ import com.github.phanikb.nvd.cli.api.LastModApiOptions;
 import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriConsumer;
 import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriProducer;
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
+import com.github.phanikb.nvd.cli.processor.pc.DatesConsumer;
+import com.github.phanikb.nvd.cli.processor.pc.DatesProducer;
+import com.github.phanikb.nvd.cli.processor.pc.StartIndexConsumer;
+import com.github.phanikb.nvd.cli.processor.pc.StartIndexProducer;
 import com.github.phanikb.nvd.common.DateFormats;
 import com.github.phanikb.nvd.common.NvdApiDate;
 import com.github.phanikb.nvd.common.NvdException;
@@ -32,8 +36,10 @@ import com.github.phanikb.nvd.enums.CommandApiEndpointType;
 import com.github.phanikb.nvd.enums.FeedType;
 import com.github.phanikb.nvd.enums.NvdApiDateType;
 
+import static com.github.phanikb.nvd.common.Constants.DEFAULT_DATETIME_POISON;
 import static com.github.phanikb.nvd.common.Constants.DEFAULT_MIN_RESULTS_PER_PAGE;
 import static com.github.phanikb.nvd.common.Constants.DEFAULT_NUMBER_OF_PRODUCERS;
+import static com.github.phanikb.nvd.common.Constants.DEFAULT_POISON;
 
 @CommandLine.Command(
         name = "base-api-download",
@@ -192,7 +198,35 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
         IApiDownloadUriProducer producer;
         BlockingDeque<QueueElement> downloadQueue = new LinkedBlockingDeque<>();
         List<NameValuePair> queryParams = getQueryParams();
+        if (dates != null && dates.size() == 2) {
+            producer = new DatesProducer(
+                    feedType,
+                    DEFAULT_DATETIME_POISON,
+                    poisonPerCreator,
+                    rpp,
+                    endpoint,
+                    getOutDir().toPath(),
+                    prefix,
+                    queryParams,
+                    dates,
+                    downloadQueue);
+            consumer = new DatesConsumer(
+                    feedType, DEFAULT_DATETIME_POISON, getOutDir().toPath(), prefix, downloadQueue);
+        } else {
+            producer = new StartIndexProducer(
+                    feedType,
+                    DEFAULT_POISON,
+                    poisonPerCreator,
+                    rpp,
+                    endpoint,
+                    getOutDir().toPath(),
+                    prefix,
+                    queryParams,
+                    downloadQueue);
+            consumer =
+                    new StartIndexConsumer(feedType, DEFAULT_POISON, getOutDir().toPath(), prefix, downloadQueue);
+        }
         return new ApiDownloader(
-                feedType, getOutDir(), this.getOutFilename(), isDeleteTempDir(), isCompress(), rpp, null, null);
+                feedType, getOutDir(), this.getOutFilename(), isDeleteTempDir(), isCompress(), rpp, consumer, producer);
     }
 }
