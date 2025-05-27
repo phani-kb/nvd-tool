@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.ToString;
 import picocli.CommandLine;
 
+/**
+ * Base class for common options used in various commands. This class provides options for specifying output directory
+ * and file.
+ */
 @Getter
 @ToString
 public class BaseCommonOptions {
