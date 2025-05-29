@@ -41,15 +41,11 @@ public enum ArchiveType {
     }
 
     public void extract(File src, File destDir) throws IOException, ArchiveException, CompressorException {
-        if (this == UNKNOWN) {
-            throw new IllegalArgumentException("unsupported file type: " + extension);
-        }
-        if (this == ZIP) {
-            extractArchive(src, destDir);
-        } else if (this == GZ) {
-            extractCompressed(src, destDir);
-        } else {
-            throw new IllegalArgumentException("cannot extract non-archive file: " + src);
+        switch (this) {
+            case UNKNOWN -> throw new IllegalArgumentException("unsupported file type: " + extension);
+            case ZIP -> extractArchive(src, destDir);
+            case GZ -> extractCompressed(src, destDir);
+            default -> throw new IllegalArgumentException("cannot extract non-archive file: " + src);
         }
     }
 
@@ -80,24 +76,26 @@ public enum ArchiveType {
     }
 
     public void archive(File src, File destDir) throws IOException, ArchiveException {
-        if (this == ZIP) {
-            try (ZipOutputStream zos =
-                    new ZipOutputStream(new FileOutputStream(new File(destDir, src.getName() + extension)))) {
-                zos.putNextEntry(new ZipEntry(src.getName()));
-                try (FileInputStream fis = new FileInputStream(src)) {
-                    IOUtils.copy(fis, zos);
-                }
-                zos.closeEntry();
-            }
-        } else if (this == GZ) {
-            try (GZIPOutputStream gzos =
-                    new GZIPOutputStream(new FileOutputStream(new File(destDir, src.getName() + extension)))) {
-                try (FileInputStream fis = new FileInputStream(src)) {
-                    IOUtils.copy(fis, gzos);
+        switch (this) {
+            case ZIP -> {
+                try (ZipOutputStream zos =
+                        new ZipOutputStream(new FileOutputStream(new File(destDir, src.getName() + extension)))) {
+                    zos.putNextEntry(new ZipEntry(src.getName()));
+                    try (FileInputStream fis = new FileInputStream(src)) {
+                        IOUtils.copy(fis, zos);
+                    }
+                    zos.closeEntry();
                 }
             }
-        } else {
-            throw new IllegalArgumentException("unsupported archive type: " + extension);
+            case GZ -> {
+                try (GZIPOutputStream gzos =
+                        new GZIPOutputStream(new FileOutputStream(new File(destDir, src.getName() + extension)))) {
+                    try (FileInputStream fis = new FileInputStream(src)) {
+                        IOUtils.copy(fis, gzos);
+                    }
+                }
+            }
+            default -> throw new IllegalArgumentException("unsupported archive type: " + extension);
         }
     }
 }

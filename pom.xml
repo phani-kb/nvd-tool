@@ -515,6 +515,9 @@
             <version>${jacoco.version}</version>
             <configuration>
               <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+              <excludes>
+                <exclude>**/com/github/phanikb/nvd/api2/**</exclude>
+              </excludes>
             </configuration>
             <executions>
               <execution>
