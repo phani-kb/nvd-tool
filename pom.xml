@@ -516,7 +516,16 @@
             <configuration>
               <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
               <excludes>
-                <exclude>**/com/github/phanikb/nvd/api2/**</exclude>
+                <exclude>com/github/phanikb/nvd/api2/**</exclude>
+                <exclude>com/github/phanikb/nvd/enums/CommandApiEndpointType*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/Cve*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/Cvss*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/DownloadMode*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/FeedType*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/NvdApiDateType*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/OutputFileFormat*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/TransferMethod*</exclude>
+                <exclude>com/github/phanikb/nvd/enums/VersionType*</exclude>
               </excludes>
             </configuration>
             <executions>
