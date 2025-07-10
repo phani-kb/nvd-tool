@@ -8,8 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BaseApiOptionsTest {
 
-    private static class TestableBaseApiOptions extends BaseApiOptions {
-    }
+    private static class TestableBaseApiOptions extends BaseApiOptions {}
 
     @Test
     void testValidateOptionsDoesNotThrow() {
