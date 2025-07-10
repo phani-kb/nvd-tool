@@ -23,10 +23,13 @@ public interface IApiDownloadCommand extends INvdCommand {
 
     String getApiEndpoint(CommandLine.Model.CommandSpec spec);
 
+    @Override
     File getOutDir();
 
+    @Override
     boolean isDeleteTempDir();
 
+    @Override
     String getOutFilename();
 
     boolean isCompress();

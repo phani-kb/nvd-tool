@@ -18,19 +18,51 @@ A command-line interface (CLI) tool to fetch CVE (Common Vulnerabilities and Exp
 
 ## Building the Project
 
-### Standard Build
+### Development Build
+
 ```bash
 mvn clean package
 ```
 
+This creates an executable JAR file with all dependencies included in the `target/` directory.
+
 ### Full Build (with schema regeneration)
+
 ```bash
 mvn clean post-clean package
 ```
 
 ### Generate Build Configuration
+
 ```bash
 mvn resources:copy-resources@generate-buildconfig
+```
+
+## Automated CI/CD
+
+This project uses GitHub Actions for automated:
+
+- **Continuous Integration**: Automated testing with coverage validation (80% threshold)
+- **Code Quality**: Formatting checks, SpotBugs security analysis, and PMD analysis  
+- **Automated Releases**: When a tag like `v0.1.0` is created, the workflow automatically builds and attaches the executable JAR to the GitHub release
+
+### Creating a Release
+
+1. Create and push a tag following semantic versioning:
+
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+2. Create a GitHub release using the tag - the CI/CD pipeline will automatically build and attach the executable JAR as a release asset.
+
+### Verifying the Build
+
+Test the executable JAR:
+
+```bash
+java -jar target/nvd-tool-0.1.0-SNAPSHOT.jar --help
 ```
 
 ## Usage
@@ -38,6 +70,7 @@ mvn resources:copy-resources@generate-buildconfig
 The tool provides several commands for different operations:
 
 ### Main Command Structure
+
 ```bash
 java -jar nvd-tool-1.0-SNAPSHOT.jar [COMMAND] [OPTIONS]
 ```
@@ -45,6 +78,7 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar [COMMAND] [OPTIONS]
 ### Available Commands
 
 #### Download Command
+
 Download CVE/CPE data from NIST NVD repository and CWE data from MITRE.
 
 ```bash
@@ -52,10 +86,12 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar download [SUBCOMMAND] [OPTIONS]
 ```
 
 **Download Subcommands:**
+
 - `api` - Download using NVD API 2.0
 - `uri` - Download using traditional URI methods
 
 #### API Download Subcommands
+
 ```bash
 # Download CVE data
 java -jar nvd-tool-1.0-SNAPSHOT.jar download api cve [OPTIONS]
@@ -71,6 +107,7 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar download api cve-history [OPTIONS]
 ```
 
 #### Merge Command
+
 Combine multiple downloaded data files.
 
 ```bash
@@ -87,6 +124,7 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar merge [OPTIONS]
 ### Examples
 
 #### Download recent CVE data
+
 ```bash
 java -jar nvd-tool-1.0-SNAPSHOT.jar download api cve \
   --output-dir ./data \
@@ -95,6 +133,7 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar download api cve \
 ```
 
 #### Download CPE data with specific results per page
+
 ```bash
 java -jar nvd-tool-1.0-SNAPSHOT.jar download api cpe \
   --output-dir ./cpe-data \
@@ -102,6 +141,7 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar download api cpe \
 ```
 
 #### Merge downloaded files
+
 ```bash
 java -jar nvd-tool-1.0-SNAPSHOT.jar merge \
   --input-dir ./data \
@@ -110,7 +150,7 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar merge \
 
 ## Project Structure
 
-```
+```text
 nvd-tool/
 ├── src/
 │   ├── main/
@@ -135,7 +175,9 @@ nvd-tool/
 ## Configuration
 
 ### Schema Generation
+
 The project uses `jsonschema2pojo-maven-plugin` to generate Java classes from JSON schemas for:
+
 - CVE API 2.0 schema
 - CPE API 2.0 schema  
 - CPE Match API 2.0 schema
@@ -144,6 +186,7 @@ The project uses `jsonschema2pojo-maven-plugin` to generate Java classes from JS
 ## Dependencies
 
 Key dependencies include:
+
 - **PicoCLI**: Command-line interface framework
 - **Apache HttpClient 5**: HTTP client for API requests
 - **Jackson**: JSON processing
@@ -155,6 +198,7 @@ Key dependencies include:
 ## Testing
 
 Run the test suite:
+
 ```bash
 mvn test
 ```
@@ -162,6 +206,7 @@ mvn test
 ## Code Quality
 
 Run code quality checks:
+
 ```bash
 # Spotless formatting check
 mvn spotless:check

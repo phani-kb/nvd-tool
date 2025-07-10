@@ -49,6 +49,7 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
         this.producerHelper = producerHelper;
     }
 
+    @Override
     public void run() {
         try {
             int resultsPerPage = getMaxResultsPerPage();

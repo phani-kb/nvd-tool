@@ -15,7 +15,7 @@ public class CpeName implements CommandLine.ITypeConverter<CpeName> {
 
     public static final int MIN_CPE_COMPONENTS = 3;
 
-    private String name = null;
+    private String name;
 
     public CpeName(String name) {
         this.name = name;

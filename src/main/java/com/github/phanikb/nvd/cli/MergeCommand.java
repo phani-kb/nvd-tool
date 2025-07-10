@@ -59,7 +59,7 @@ public class MergeCommand extends BaseCommand implements INvdMergeCommand {
             int actualCount = Util.mergeFiles(files, outFile, type.getFeedType().getCollectionNodeName());
             logger.info("number of records: {}", actualCount);
         } catch (NvdException e) {
-            throw new CommandLine.ParameterException(spec.commandLine(), e.getMessage());
+            throw new CommandLine.ParameterException(spec.commandLine(), e.getMessage(), e);
         }
         return 0;
     }

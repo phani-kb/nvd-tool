@@ -1,6 +1,7 @@
 package com.github.phanikb.nvd.common;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import lombok.Getter;
 
@@ -8,7 +9,7 @@ import lombok.Getter;
 public class RequestTracker {
     private final long windowInMillis;
     private final int maxRequests;
-    private final LinkedHashMap<String, Long> requestTimes = new LinkedHashMap<>();
+    private final Map<String, Long> requestTimes = new LinkedHashMap<>();
 
     public RequestTracker(int rateLimit, long windowSizeInMillis) {
         this.maxRequests = rateLimit;

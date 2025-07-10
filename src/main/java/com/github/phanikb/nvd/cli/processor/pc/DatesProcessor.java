@@ -92,14 +92,15 @@ public abstract class DatesProcessor<T> extends BaseProcessor<T> implements IDat
             throw new NvdException("Invalid date range");
         }
 
-        if (endDate == null || endDate.isAfter(LocalDateTime.now())) {
-            endDate = LocalDateTime.now();
+        LocalDateTime adjustedEndDate = endDate;
+        if (adjustedEndDate == null || adjustedEndDate.isAfter(LocalDateTime.now())) {
+            adjustedEndDate = LocalDateTime.now();
         }
 
-        if (startDate.plusYears(1).isBefore(endDate)) {
+        if (startDate.plusYears(1).isBefore(adjustedEndDate)) {
             logger.warn("date range is more than a year");
         } else {
-            if (startDate.plusDays(DEFAULT_MAX_RANGE_IN_DAYS).isBefore(endDate)) {
+            if (startDate.plusDays(DEFAULT_MAX_RANGE_IN_DAYS).isBefore(adjustedEndDate)) {
                 logger.warn("date range is more than {} days", DEFAULT_MAX_RANGE_IN_DAYS);
             }
         }
