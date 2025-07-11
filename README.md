@@ -1,5 +1,15 @@
 # NVD Tool
 
+[![Build Status](https://github.com/phani-kb/nvd-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/phani-kb/nvd-tool/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/phani-kb/nvd-tool/actions/workflows/security.yml/badge.svg)](https://github.com/phani-kb/nvd-tool/actions/workflows/security.yml)
+<!-- [![codecov](https://codecov.io/gh/phani-kb/nvd-tool/branch/main/graph/badge.svg)](https://codecov.io/gh/phani-kb/nvd-tool) -->
+[![Release](https://img.shields.io/github/v/release/phani-kb/nvd-tool.svg)](https://github.com/phani-kb/nvd-tool/releases)
+[![Top Language](https://img.shields.io/github/languages/top/phani-kb/nvd-tool.svg)](https://github.com/phani-kb/nvd-tool)
+[![Code Size](https://img.shields.io/github/languages/code-size/phani-kb/nvd-tool.svg)](https://github.com/phani-kb/nvd-tool)
+[![Java Version](https://img.shields.io/badge/Java-21-brightgreen.svg)](https://openjdk.org/projects/jdk/21/)
+[![Maven Version](https://img.shields.io/badge/Maven-3.6+-blue.svg)](https://maven.apache.org/)
+[![License](https://img.shields.io/github/license/phani-kb/nvd-tool.svg)](LICENSE)
+
 A command-line interface (CLI) tool to fetch CVE (Common Vulnerabilities and Exposures) and CPE (Common Platform Enumeration) data from NIST's National Vulnerability Database (NVD) API, along with CWE (Common Weakness Enumeration) data from MITRE.
 
 ## Features
