@@ -228,17 +228,18 @@
               <file>src/main/resources/license-header.txt</file>
             </licenseHeader>
           </java>
-          <!--yaml>
+          <yaml>
             <includes>
-              <include>src/**/*.yml</include>
+              <include>.github/workflows/*.yml</include>
             </includes>
             <jackson>
               <version>${jackson.version}</version>
-              <features>
-                <ORDER_MAP_ENTRIES_BY_KEYS>true</ORDER_MAP_ENTRIES_BY_KEYS>
-              </features>
+              <yamlFeatures>
+                <MINIMIZE_QUOTES>true</MINIMIZE_QUOTES>
+                <LITERAL_BLOCK_STYLE>true</LITERAL_BLOCK_STYLE>
+              </yamlFeatures>
             </jackson>
-          </yaml-->
+          </yaml>
         </configuration>
         <executions>
           <execution>
@@ -440,12 +441,12 @@
           <includes>
             <include>**/*Test.java</include>
           </includes>
-          <excludedEngines>
-            <excludedEngine>junit-vintage</excludedEngine>
-          </excludedEngines>
-          <includedEngines>
-            <includedEngine>junit-jupiter</includedEngine>
-          </includedEngines>
+          <excludeEngines>
+            <excludeEngine>junit-vintage</excludeEngine>
+          </excludeEngines>
+          <includeEngines>
+            <includeEngine>junit-jupiter</includeEngine>
+          </includeEngines>
         </configuration>
         <dependencies>
           <dependency>

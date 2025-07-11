@@ -60,3 +60,4 @@ replay_pid*
 .dbeaver/
 logs/
 *.db
+node_modules/

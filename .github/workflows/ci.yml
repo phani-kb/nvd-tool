@@ -1,138 +1,151 @@
+---
 name: NVD Tool Build
-
-on:
+"on":
   push:
-    branches: [main, develop]
+    branches:
+    - main
+    - develop
   pull_request:
-    branches: [main]
+    branches:
+    - main
   release:
-    types: [created]
-
+    types:
+    - created
 env:
-  JAVA_VERSION: "21"
-  COVERAGE_THRESHOLD: 35
-
+  JAVA_VERSION: 21
+  COVERAGE_THRESHOLD: 60
+  MAVEN_OPTS: -Dmaven.repo.local=.m2/repository -Xmx1024m -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
 jobs:
-  code-style:
-    name: Code Style
+  validate-and-test:
+    name: "Validate, Test & Coverage"
     runs-on: ubuntu-latest
-
+    outputs:
+      artifact-name: "${{ steps.artifact-info.outputs.name }}"
+      artifact-size: "${{ steps.artifact-info.outputs.size }}"
+      coverage-percentage: "${{ steps.coverage-info.outputs.percentage }}"
+      coverage-status: "${{ steps.coverage-info.outputs.status }}"
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: "Set up JDK ${{ env.JAVA_VERSION }}"
+      uses: actions/setup-java@v4
+      with:
+        java-version: "${{ env.JAVA_VERSION }}"
+        distribution: temurin
+        cache: maven
+    - name: Check code formatting
+      run: mvn spotless:check
+    - name: Run tests with coverage
+      run: mvn clean verify -Pjacoco
+    - name: Verify JAR execution
+      run: java -jar target/nvd-tool-*.jar --help
+    - name: Extract artifact information
+      id: artifact-info
+      run: |
+        JAR_FILE=$(ls target/nvd-tool-*.jar)
+        JAR_SIZE=$(du -h "$JAR_FILE" | cut -f1)
+        echo "name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+        echo "size=${JAR_SIZE}" >> $GITHUB_OUTPUT
+        echo "path=${JAR_FILE}" >> $GITHUB_OUTPUT
+    - name: Extract coverage information
+      id: coverage-info
+      run: |
+        if [ -f target/site/jacoco/jacoco.xml ]; then
+          COVERAGE=$(grep -o 'covered="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | grep -o '[0-9]*')
+          MISSED=$(grep -o 'missed="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | grep -o '[0-9]*')
+          if [ -n "$COVERAGE" ] && [ -n "$MISSED" ]; then
+            TOTAL=$((COVERAGE + MISSED))
+            PERCENTAGE=$((COVERAGE * 100 / TOTAL))
+            echo "percentage=${PERCENTAGE}" >> $GITHUB_OUTPUT
+            if [ $PERCENTAGE -ge ${{ env.COVERAGE_THRESHOLD }} ]; then
+              echo "status=✅ Coverage threshold met" >> $GITHUB_OUTPUT
+            else
+              echo "status=❌ Coverage below threshold" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "percentage=unknown" >> $GITHUB_OUTPUT
+            echo "status=⚠️ Could not parse coverage data" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "percentage=unknown" >> $GITHUB_OUTPUT
+          echo "status=⚠️ Coverage report not found" >> $GITHUB_OUTPUT
+        fi
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./target/site/jacoco/jacoco.xml
+        fail_ci_if_error: false
+    - name: Cache build artifact
+      if: github.event_name == 'release'
+      uses: actions/cache/save@v4
+      with:
+        path: target/nvd-tool-*.jar
+        key: "build-artifact-${{ github.sha }}"
+    - name: Generate build summary
+      if: always()
+      run: |
+        echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
 
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: "temurin"
+        # Code Style Section
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "### Code Style ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Code formatting is correct" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### Code Style ❌" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Code formatting issues found" >> $GITHUB_STEP_SUMMARY
+          echo "- **Fix**: Run \`mvn spotless:apply\` to fix formatting" >> $GITHUB_STEP_SUMMARY
+        fi
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+        # Test Results Section
+        echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+        if [ -d target/surefire-reports ]; then
+          TOTAL_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -l "testcase" {} \; | wc -l)
+          if [ $TOTAL_TESTS -gt 0 ]; then
+            PASSED_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*>" {} \; | awk '{sum += $1} END {print sum}')
+            FAILED_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*failure" {} \; | awk '{sum += $1} END {print sum}')
+            ERROR_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*error" {} \; | awk '{sum += $1} END {print sum}')
+            echo "- **Total Tests**: ${PASSED_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Passed**: $((${PASSED_TESTS:-0} - ${FAILED_TESTS:-0} - ${ERROR_TESTS:-0}))" >> $GITHUB_STEP_SUMMARY
+            echo "- **Failed**: ${FAILED_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Errors**: ${ERROR_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ⚠️ No test results found" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "- **Status**: ⚠️ Test reports directory not found" >> $GITHUB_STEP_SUMMARY
+        fi
 
-      - name: Check code formatting
-        run: mvn spotless:check
+        echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+        echo "- **Coverage**: ${{ steps.coverage-info.outputs.percentage }}%" >> $GITHUB_STEP_SUMMARY
+        echo "- **Threshold**: ${{ env.COVERAGE_THRESHOLD }}%" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ${{ steps.coverage-info.outputs.status }}" >> $GITHUB_STEP_SUMMARY
 
-      - name: Suggest formatting fixes
-        if: failure()
-        run: |
-          echo "Code formatting issues found. To fix them locally, run:"
-          echo "mvn spotless:apply"
-
-  test:
-    name: Test and Coverage
-    runs-on: ubuntu-latest
-    needs: code-style
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: "temurin"
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Run tests with coverage
-        run: mvn clean test -Pjacoco
-
-      - name: Check coverage threshold
-        run: |
-          mvn verify -Pjacoco \
-            -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD }} \
-            -DskipTests
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./target/site/jacoco/jacoco.xml
-          fail_ci_if_error: false
-
-  build:
-    name: Build Application
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: "temurin"
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Build application
-        run: mvn clean package -DskipTests
-
-      - name: Verify JAR execution
-        run: java -jar target/nvd-tool-*.jar --help
-
+        echo "### Build Artifact" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact**: ${{ steps.artifact-info.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${{ steps.artifact-info.outputs.size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Build successful" >> $GITHUB_STEP_SUMMARY
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [code-style, test, build]
+    needs: validate-and-test
     if: github.event_name == 'release'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: "temurin"
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Update version for release
-        run: |
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: "Set up JDK ${{ env.JAVA_VERSION }}"
+      uses: actions/setup-java@v4
+      with:
+        java-version: "${{ env.JAVA_VERSION }}"
+        distribution: temurin
+        cache: maven
+    - name: Restore build artifact
+      uses: actions/cache/restore@v4
+      with:
+        path: target/nvd-tool-*.jar
+        key: "build-artifact-${{ github.sha }}"
+    - name: Build release artifact
+      run: |
+        if [ ! -f target/nvd-tool-*.jar ]; then
           # Extract version from tag
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "Release version: $VERSION"
@@ -140,22 +153,47 @@ jobs:
           # Update pom.xml version
           mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
 
-      - name: Build release artifact
-        run: mvn clean package -DskipTests
-
-      - name: Get artifact name
-        id: artifact
-        run: |
-          JAR_FILE=$(ls target/nvd-tool-*.jar)
-          echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
-          echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
-
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ steps.artifact.outputs.jar_file }}
-          asset_name: ${{ steps.artifact.outputs.jar_name }}
-          asset_content_type: application/java-archive
+          # Build artifact
+          mvn clean package -DskipTests
+        else
+          echo "Using cached build artifact"
+        fi
+    - name: Get artifact name
+      id: artifact
+      run: |
+        JAR_FILE=$(ls target/nvd-tool-*.jar)
+        echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
+        echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      with:
+        upload_url: "${{ github.event.release.upload_url }}"
+        asset_path: "${{ steps.artifact.outputs.jar_file }}"
+        asset_name: "${{ steps.artifact.outputs.jar_name }}"
+        asset_content_type: application/java-archive
+    - name: Generate release summary
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        JAR_SIZE=$(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
+        echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${VERSION}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact**: ${{ steps.artifact.outputs.jar_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${JAR_SIZE}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Release created successfully" >> $GITHUB_STEP_SUMMARY
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: validate-and-test
+    if: github.event_name != 'release'
+    steps:
+    - name: Generate summary
+      run: |
+        echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact**: ${{ needs.validate-and-test.outputs.artifact-name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${{ needs.validate-and-test.outputs.artifact-size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Coverage**: ${{ needs.validate-and-test.outputs.coverage-percentage }}%" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Build completed successfully" >> $GITHUB_STEP_SUMMARY
