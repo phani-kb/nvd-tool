@@ -50,12 +50,10 @@ jobs:
     - name: Extract coverage information
       id: coverage-info
       run: |
-        if [ -f target/site/jacoco/jacoco.xml ]; then
-          COVERAGE=$(grep -o 'covered="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | grep -o '[0-9]*')
-          MISSED=$(grep -o 'missed="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | grep -o '[0-9]*')
-          if [ -n "$COVERAGE" ] && [ -n "$MISSED" ]; then
-            TOTAL=$((COVERAGE + MISSED))
-            PERCENTAGE=$((COVERAGE * 100 / TOTAL))
+        if [ -f target/site/jacoco/index.html ]; then
+          PERCENTAGE_RAW=$(grep -o '<tfoot>.*</tfoot>' target/site/jacoco/index.html | grep -o '[0-9]\+%' | head -1)
+          if [ -n "$PERCENTAGE_RAW" ]; then
+            PERCENTAGE=$(echo "$PERCENTAGE_RAW" | grep -o '[0-9]\+')
             echo "percentage=${PERCENTAGE}" >> $GITHUB_OUTPUT
             if [ $PERCENTAGE -ge ${{ env.COVERAGE_THRESHOLD }} ]; then
               echo "status=✅ Coverage threshold met" >> $GITHUB_OUTPUT
@@ -79,7 +77,7 @@ jobs:
       if: github.event_name == 'release'
       uses: actions/cache/save@v4
       with:
-        path: target/nvd-tool-*.jar
+        path: target/
         key: "build-artifact-${{ github.sha }}"
     - name: Generate build summary
       if: always()
@@ -141,7 +139,7 @@ jobs:
     - name: Restore build artifact
       uses: actions/cache/restore@v4
       with:
-        path: target/nvd-tool-*.jar
+        path: target/
         key: "build-artifact-${{ github.sha }}"
     - name: Build release artifact
       run: |
