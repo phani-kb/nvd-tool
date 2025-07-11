@@ -36,7 +36,8 @@ jobs:
     - name: Check code formatting
       run: mvn spotless:check
     - name: Run tests with coverage
-      run: mvn clean verify -Pjacoco
+      run: "mvn clean verify -Pjacoco -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD\
+        \ }}"
     - name: Verify JAR execution
       run: java -jar target/nvd-tool-*.jar --help
     - name: Extract artifact information
@@ -73,12 +74,6 @@ jobs:
       with:
         file: ./target/site/jacoco/jacoco.xml
         fail_ci_if_error: false
-    - name: Cache build artifact
-      if: github.event_name == 'release'
-      uses: actions/cache/save@v4
-      with:
-        path: target/
-        key: "build-artifact-${{ github.sha }}"
     - name: Generate build summary
       if: always()
       run: |
@@ -136,26 +131,17 @@ jobs:
         java-version: "${{ env.JAVA_VERSION }}"
         distribution: temurin
         cache: maven
-    - name: Restore build artifact
-      uses: actions/cache/restore@v4
-      with:
-        path: target/
-        key: "build-artifact-${{ github.sha }}"
     - name: Build release artifact
       run: |
-        if [ ! -f target/nvd-tool-*.jar ]; then
-          # Extract version from tag
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Release version: $VERSION"
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Release version: $VERSION"
 
-          # Update pom.xml version
-          mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+        # Update pom.xml version
+        mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
 
-          # Build artifact
-          mvn clean package -DskipTests
-        else
-          echo "Using cached build artifact"
-        fi
+        # Build artifact
+        mvn clean package -DskipTests
     - name: Get artifact name
       id: artifact
       run: |
