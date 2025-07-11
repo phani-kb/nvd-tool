@@ -3,6 +3,7 @@ package com.github.phanikb.nvd.cli;
 import java.io.File;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import picocli.CommandLine;
 
@@ -11,6 +12,7 @@ import picocli.CommandLine;
  * and file.
  */
 @Getter
+@Setter
 @ToString
 public class BaseCommonOptions {
     @CommandLine.Option(

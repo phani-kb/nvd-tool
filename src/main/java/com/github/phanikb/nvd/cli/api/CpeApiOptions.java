@@ -3,6 +3,7 @@ package com.github.phanikb.nvd.cli.api;
 import java.util.UUID;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import picocli.CommandLine;
 
@@ -46,6 +47,7 @@ public class CpeApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class KeywordSearch {
         @CommandLine.Option(

@@ -1,6 +1,7 @@
 package com.github.phanikb.nvd.cli;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import picocli.CommandLine;
 
@@ -52,5 +53,35 @@ class DownloadCommandTest {
         assertTrue(DownloadCommand.class.isAnnotationPresent(CommandLine.Command.class));
         CommandLine.Command annotation = DownloadCommand.class.getAnnotation(CommandLine.Command.class);
         assertEquals("download", annotation.name());
+    }
+
+    @Test
+    void testMissingSubcommand() {
+        DownloadCommand command = new DownloadCommand();
+        CommandLine cli = new CommandLine(command);
+        int exitCode = cli.execute();
+        assertEquals(2, exitCode);
+    }
+
+    @Test
+    void testValidateOptions(@TempDir java.nio.file.Path tempDir) throws Exception {
+        DownloadCommand command = new DownloadCommand();
+
+        // Set up baseCommonOptions using reflection (similar to BaseCommandTest)
+        BaseCommonOptions options = new BaseCommonOptions();
+        options.setOutDir(tempDir.toFile());
+
+        // Use reflection to set the baseCommonOptions field
+        java.lang.reflect.Field baseCommonOptionsField = BaseCommand.class.getDeclaredField("baseCommonOptions");
+        baseCommonOptionsField.setAccessible(true);
+        baseCommonOptionsField.set(command, options);
+
+        // Also set up the spec field to avoid NPE
+        CommandLine.Model.CommandSpec spec = CommandLine.Model.CommandSpec.create();
+        java.lang.reflect.Field specField = BaseCommand.class.getDeclaredField("spec");
+        specField.setAccessible(true);
+        specField.set(command, spec);
+
+        assertDoesNotThrow(() -> command.validateOptions());
     }
 }

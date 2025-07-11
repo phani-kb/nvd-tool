@@ -3,6 +3,7 @@ package com.github.phanikb.nvd.cli.api;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import picocli.CommandLine;
 
@@ -168,6 +169,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class PubDateRange {
         @CommandLine.Option(
@@ -193,6 +195,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class CpeVulnerable {
         @CommandLine.Option(
@@ -213,6 +216,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class VersionEnd {
         @CommandLine.Option(
@@ -231,6 +235,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class VersionStart {
         @CommandLine.Option(
@@ -249,6 +254,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class KeywordSearch {
         @CommandLine.Option(
@@ -268,6 +274,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class CvssSeverity {
         @CommandLine.Option(
@@ -294,6 +301,7 @@ public class CveApiOptions extends LastModApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class CvssMetrics {
         @CommandLine.Option(

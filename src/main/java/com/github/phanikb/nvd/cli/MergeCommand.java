@@ -109,7 +109,7 @@ public class MergeCommand extends BaseCommand implements INvdMergeCommand {
         if (super.getOutFilename() != null) {
             return super.getOutFilename();
         }
-        return Constants.OUT_FILE_PREFIX + type.getFeedType().getName() + "-"
+        return Constants.OUT_FILE_PREFIX + "-" + type.getFeedType().getName() + "-"
                 + type.getFeedType().getCollectionNodeName() + ".json";
     }
 }

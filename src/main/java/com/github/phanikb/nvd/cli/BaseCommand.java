@@ -20,7 +20,7 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
     private CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Mixin
-    private BaseCommonOptions baseCommonOptions;
+    protected BaseCommonOptions baseCommonOptions;
 
     @Override
     public Integer call() {
