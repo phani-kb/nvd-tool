@@ -27,14 +27,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Ensure target directories exist
-      run: mkdir -p target/classes target/test-classes
     - name: "Set up JDK ${{ env.JAVA_VERSION }}"
       uses: actions/setup-java@v4
       with:
         java-version: "${{ env.JAVA_VERSION }}"
         distribution: temurin
-        cache: maven
     - name: Check code formatting
       run: mvn spotless:check
     - name: Run tests with coverage
@@ -132,7 +129,6 @@ jobs:
       with:
         java-version: "${{ env.JAVA_VERSION }}"
         distribution: temurin
-        cache: maven
     - name: Build release artifact
       run: |
         # Extract version from tag
@@ -175,7 +171,7 @@ jobs:
     if: github.event_name != 'release'
     steps:
     - name: Generate summary
-      run: |
+      run: |-
         echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
