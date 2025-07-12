@@ -3,14 +3,14 @@ name: NVD Tool Build
 "on":
   push:
     branches:
-      - main
-      - develop
+    - main
+    - develop
   pull_request:
     branches:
-      - main
+    - main
   release:
     types:
-      - created
+    - created
 env:
   JAVA_VERSION: 21
   COVERAGE_THRESHOLD: 60
@@ -25,160 +25,160 @@ jobs:
       coverage-percentage: "${{ steps.coverage-info.outputs.percentage }}"
       coverage-status: "${{ steps.coverage-info.outputs.status }}"
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: "Set up JDK ${{ env.JAVA_VERSION }}"
-        uses: actions/setup-java@v4
-        with:
-          java-version: "${{ env.JAVA_VERSION }}"
-          distribution: temurin
-          cache: maven
-          cache-dependency-path: "**/pom.xml"
-      - name: Check code formatting
-        run: mvn spotless:check
-      - name: Run tests with coverage
-        run: "mvn clean verify -Pjacoco -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD}}"
-      - name: Verify JAR execution
-        run: java -jar target/nvd-tool-*.jar --help
-      - name: Extract artifact information
-        id: artifact-info
-        run: |
-          JAR_FILE=$(ls target/nvd-tool-*.jar)
-          JAR_SIZE=$(du -h "$JAR_FILE" | cut -f1)
-          echo "name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
-          echo "size=${JAR_SIZE}" >> $GITHUB_OUTPUT
-          echo "path=${JAR_FILE}" >> $GITHUB_OUTPUT
-      - name: Extract coverage information
-        id: coverage-info
-        run: |
-          if [ -f target/site/jacoco/index.html ]; then
-            PERCENTAGE_RAW=$(grep -o '<tfoot>.*</tfoot>' target/site/jacoco/index.html | grep -o '[0-9]\+%' | head -1)
-            if [ -n "$PERCENTAGE_RAW" ]; then
-              PERCENTAGE=$(echo "$PERCENTAGE_RAW" | grep -o '[0-9]\+')
-              echo "percentage=${PERCENTAGE}" >> $GITHUB_OUTPUT
-              if [ $PERCENTAGE -ge ${{ env.COVERAGE_THRESHOLD }} ]; then
-                echo "status=✅ Coverage threshold met" >> $GITHUB_OUTPUT
-              else
-                echo "status=❌ Coverage below threshold" >> $GITHUB_OUTPUT
-              fi
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: "Set up JDK ${{ env.JAVA_VERSION }}"
+      uses: actions/setup-java@v4
+      with:
+        java-version: "${{ env.JAVA_VERSION }}"
+        distribution: temurin
+        cache: maven
+        cache-dependency-path: '**/pom.xml'
+    - name: Check code formatting
+      run: mvn spotless:check
+    - name: Run tests with coverage
+      run: "mvn clean verify -Pjacoco -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD}}"
+    - name: Verify JAR execution
+      run: java -jar target/nvd-tool-*.jar --help
+    - name: Extract artifact information
+      id: artifact-info
+      run: |
+        JAR_FILE=$(ls target/nvd-tool-*.jar)
+        JAR_SIZE=$(du -h "$JAR_FILE" | cut -f1)
+        echo "name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+        echo "size=${JAR_SIZE}" >> $GITHUB_OUTPUT
+        echo "path=${JAR_FILE}" >> $GITHUB_OUTPUT
+    - name: Extract coverage information
+      id: coverage-info
+      run: |
+        if [ -f target/site/jacoco/index.html ]; then
+          PERCENTAGE_RAW=$(grep -o '<tfoot>.*</tfoot>' target/site/jacoco/index.html | grep -o '[0-9]\+%' | head -1)
+          if [ -n "$PERCENTAGE_RAW" ]; then
+            PERCENTAGE=$(echo "$PERCENTAGE_RAW" | grep -o '[0-9]\+')
+            echo "percentage=${PERCENTAGE}" >> $GITHUB_OUTPUT
+            if [ $PERCENTAGE -ge ${{ env.COVERAGE_THRESHOLD }} ]; then
+              echo "status=✅ Coverage threshold met" >> $GITHUB_OUTPUT
             else
-              echo "percentage=unknown" >> $GITHUB_OUTPUT
-              echo "status=⚠️ Could not parse coverage data" >> $GITHUB_OUTPUT
+              echo "status=❌ Coverage below threshold" >> $GITHUB_OUTPUT
             fi
           else
             echo "percentage=unknown" >> $GITHUB_OUTPUT
-            echo "status=⚠️ Coverage report not found" >> $GITHUB_OUTPUT
+            echo "status=⚠️ Could not parse coverage data" >> $GITHUB_OUTPUT
           fi
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./target/site/jacoco/jacoco.xml
-          fail_ci_if_error: false
-      - name: Generate build summary
-        if: always()
-        run: |
-          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "percentage=unknown" >> $GITHUB_OUTPUT
+          echo "status=⚠️ Coverage report not found" >> $GITHUB_OUTPUT
+        fi
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./target/site/jacoco/jacoco.xml
+        fail_ci_if_error: false
+    - name: Generate build summary
+      if: always()
+      run: |
+        echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
 
-          # Code Style Section
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "### Code Style ✅" >> $GITHUB_STEP_SUMMARY
-            echo "- **Status**: Code formatting is correct" >> $GITHUB_STEP_SUMMARY
+        # Code Style Section
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "### Code Style ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Code formatting is correct" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### Code Style ❌" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Code formatting issues found" >> $GITHUB_STEP_SUMMARY
+          echo "- **Fix**: Run \`mvn spotless:apply\` to fix formatting" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        # Test Results Section
+        echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+        if [ -d target/surefire-reports ]; then
+          TOTAL_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -l "testcase" {} \; | wc -l)
+          if [ $TOTAL_TESTS -gt 0 ]; then
+            PASSED_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*>" {} \; | awk '{sum += $1} END {print sum}')
+            FAILED_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*failure" {} \; | awk '{sum += $1} END {print sum}')
+            ERROR_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*error" {} \; | awk '{sum += $1} END {print sum}')
+            echo "- **Total Tests**: ${PASSED_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Passed**: $((${PASSED_TESTS:-0} - ${FAILED_TESTS:-0} - ${ERROR_TESTS:-0}))" >> $GITHUB_STEP_SUMMARY
+            echo "- **Failed**: ${FAILED_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Errors**: ${ERROR_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
           else
-            echo "### Code Style ❌" >> $GITHUB_STEP_SUMMARY
-            echo "- **Status**: Code formatting issues found" >> $GITHUB_STEP_SUMMARY
-            echo "- **Fix**: Run \`mvn spotless:apply\` to fix formatting" >> $GITHUB_STEP_SUMMARY
+            echo "- **Status**: ⚠️ No test results found" >> $GITHUB_STEP_SUMMARY
           fi
+        else
+          echo "- **Status**: ⚠️ Test reports directory not found" >> $GITHUB_STEP_SUMMARY
+        fi
 
-          # Test Results Section
-          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
-          if [ -d target/surefire-reports ]; then
-            TOTAL_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -l "testcase" {} \; | wc -l)
-            if [ $TOTAL_TESTS -gt 0 ]; then
-              PASSED_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*>" {} \; | awk '{sum += $1} END {print sum}')
-              FAILED_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*failure" {} \; | awk '{sum += $1} END {print sum}')
-              ERROR_TESTS=$(find target/surefire-reports -name "*.xml" -exec grep -c "testcase.*error" {} \; | awk '{sum += $1} END {print sum}')
-              echo "- **Total Tests**: ${PASSED_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
-              echo "- **Passed**: $((${PASSED_TESTS:-0} - ${FAILED_TESTS:-0} - ${ERROR_TESTS:-0}))" >> $GITHUB_STEP_SUMMARY
-              echo "- **Failed**: ${FAILED_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
-              echo "- **Errors**: ${ERROR_TESTS:-0}" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "- **Status**: ⚠️ No test results found" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "- **Status**: ⚠️ Test reports directory not found" >> $GITHUB_STEP_SUMMARY
-          fi
+        echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+        echo "- **Coverage**: ${{ steps.coverage-info.outputs.percentage }}%" >> $GITHUB_STEP_SUMMARY
+        echo "- **Threshold**: ${{ env.COVERAGE_THRESHOLD }}%" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ${{ steps.coverage-info.outputs.status }}" >> $GITHUB_STEP_SUMMARY
 
-          echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
-          echo "- **Coverage**: ${{ steps.coverage-info.outputs.percentage }}%" >> $GITHUB_STEP_SUMMARY
-          echo "- **Threshold**: ${{ env.COVERAGE_THRESHOLD }}%" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ steps.coverage-info.outputs.status }}" >> $GITHUB_STEP_SUMMARY
-
-          echo "### Build Artifact" >> $GITHUB_STEP_SUMMARY
-          echo "- **Artifact**: ${{ steps.artifact-info.outputs.name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Size**: ${{ steps.artifact-info.outputs.size }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Build successful" >> $GITHUB_STEP_SUMMARY
+        echo "### Build Artifact" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact**: ${{ steps.artifact-info.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${{ steps.artifact-info.outputs.size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Build successful" >> $GITHUB_STEP_SUMMARY
   release:
     name: Create Release
     runs-on: ubuntu-latest
     needs: validate-and-test
     if: github.event_name == 'release'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: "Set up JDK ${{ env.JAVA_VERSION }}"
-        uses: actions/setup-java@v4
-        with:
-          java-version: "${{ env.JAVA_VERSION }}"
-          distribution: temurin
-          cache: maven
-          cache-dependency-path: "**/pom.xml"
-      - name: Build release artifact
-        run: |
-          # Extract version from tag
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Release version: $VERSION"
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: "Set up JDK ${{ env.JAVA_VERSION }}"
+      uses: actions/setup-java@v4
+      with:
+        java-version: "${{ env.JAVA_VERSION }}"
+        distribution: temurin
+        cache: maven
+        cache-dependency-path: '**/pom.xml'
+    - name: Build release artifact
+      run: |
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Release version: $VERSION"
 
-          # Update pom.xml version
-          mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+        # Update pom.xml version
+        mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
 
-          # Build artifact
-          mvn clean package -DskipTests
-      - name: Get artifact name
-        id: artifact
-        run: |
-          JAR_FILE=$(ls target/nvd-tool-*.jar)
-          echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
-          echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-          upload_url: "${{ github.event.release.upload_url }}"
-          asset_path: "${{ steps.artifact.outputs.jar_file }}"
-          asset_name: "${{ steps.artifact.outputs.jar_name }}"
-          asset_content_type: application/java-archive
-      - name: Generate release summary
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          JAR_SIZE=$(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
-          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: ${VERSION}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Artifact**: ${{ steps.artifact.outputs.jar_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Size**: ${JAR_SIZE}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Release created successfully" >> $GITHUB_STEP_SUMMARY
+        # Build artifact
+        mvn clean package -DskipTests
+    - name: Get artifact name
+      id: artifact
+      run: |
+        JAR_FILE=$(ls target/nvd-tool-*.jar)
+        echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
+        echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      with:
+        upload_url: "${{ github.event.release.upload_url }}"
+        asset_path: "${{ steps.artifact.outputs.jar_file }}"
+        asset_name: "${{ steps.artifact.outputs.jar_name }}"
+        asset_content_type: application/java-archive
+    - name: Generate release summary
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        JAR_SIZE=$(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
+        echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${VERSION}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact**: ${{ steps.artifact.outputs.jar_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${JAR_SIZE}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Release created successfully" >> $GITHUB_STEP_SUMMARY
   summary:
     name: Build Summary
     runs-on: ubuntu-latest
     needs: validate-and-test
     if: github.event_name != 'release'
     steps:
-      - name: Generate summary
-        run: |
-          echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Artifact**: ${{ needs.validate-and-test.outputs.artifact-name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Size**: ${{ needs.validate-and-test.outputs.artifact-size }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Coverage**: ${{ needs.validate-and-test.outputs.coverage-percentage }}%" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Build completed successfully" >> $GITHUB_STEP_SUMMARY
+    - name: Generate summary
+      run: |
+        echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact**: ${{ needs.validate-and-test.outputs.artifact-name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${{ needs.validate-and-test.outputs.artifact-size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Coverage**: ${{ needs.validate-and-test.outputs.coverage-percentage }}%" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Build completed successfully" >> $GITHUB_STEP_SUMMARY
