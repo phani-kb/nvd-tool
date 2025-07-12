@@ -46,7 +46,45 @@ public final class NvdProperties {
 
     private static NvdProperties loadNvdProperties() {
         Optional<InputStream> optionalInputStream = Util.loadFileFromClasspath(Constants.NVD_PROPERTIES_FILE);
-        return optionalInputStream.map(NvdProperties::getProperties).orElse(null);
+        return optionalInputStream.map(NvdProperties::getProperties).orElseGet(NvdProperties::createDefaultProperties);
+    }
+
+    private static NvdProperties createDefaultProperties() {
+        // Create default properties when nvd.yml is not found
+        NvdProperties defaultProps = new NvdProperties();
+        Nvd nvd = new Nvd();
+
+        Api api = new Api();
+        api.setVersion(ApiEndpointVersion.V2);
+        api.setKeyUrl("https://nvd.nist.gov/developers/request-an-api-key");
+        nvd.setApi(api);
+
+        Download download = new Download();
+        UsingApi usingApi = new UsingApi();
+        usingApi.setMaxDownloadAttempts(10);
+        usingApi.setMaxRetries(3);
+        usingApi.setRetryIntervalInSecs(30);
+        usingApi.setDelayBetweenRequestsInMs(6000);
+
+        Processor processor = new Processor();
+        processor.setMaxThreads(4);
+        processor.setRateLimitWithKey(50);
+        processor.setRateLimitWithoutKey(5);
+        processor.setRollingWindowInSecs(30);
+        processor.setLogEveryNProcessedElements(20);
+        processor.setProducerWaitTimeToFinishInMinutes(30);
+        processor.setConsumerWaitTimeToFinishInMinutes(180);
+        usingApi.setProcessor(processor);
+
+        download.setUsingApi(usingApi);
+        nvd.setDownload(download);
+
+        Merge merge = new Merge();
+        merge.setSkipInvalidCollection(true);
+        nvd.setMerge(merge);
+
+        defaultProps.setNvd(nvd);
+        return defaultProps;
     }
 
     private static NvdProperties getProperties(InputStream inputStream) {

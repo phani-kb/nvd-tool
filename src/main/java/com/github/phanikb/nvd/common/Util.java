@@ -43,10 +43,21 @@ import static com.github.phanikb.nvd.common.Constants.OUT_FILE_PREFIX;
 
 public final class Util {
     private static final Logger logger = LogManager.getLogger(Util.class);
-    private static final NvdProperties properties = NvdProperties.getInstance();
+    private static volatile NvdProperties properties;
 
     private Util() {
         // prevent instantiation
+    }
+
+    private static NvdProperties getProperties() {
+        if (properties == null) {
+            synchronized (Util.class) {
+                if (properties == null) {
+                    properties = NvdProperties.getInstance();
+                }
+            }
+        }
+        return properties;
     }
 
     public static boolean isNullOrEmpty(String str) {
@@ -157,7 +168,7 @@ public final class Util {
     }
 
     public static int getMaxDownloadAttempts() {
-        return properties.getNvd().getDownload().getUsingApi().getMaxDownloadAttempts();
+        return getProperties().getNvd().getDownload().getUsingApi().getMaxDownloadAttempts();
     }
 
     public static void waitToFinish(ExecutorService executor, int timeout, TimeUnit timeUnit) throws NvdException {
@@ -174,11 +185,16 @@ public final class Util {
     }
 
     public static int getMaxThreads() {
-        return properties.getNvd().getDownload().getUsingApi().getProcessor().getMaxThreads();
+        return getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getMaxThreads();
     }
 
     public static String getOutFilePrefix(FeedType feedType) {
-        String apiVersion = properties.getNvd().getApi().getVersion().name();
+        String apiVersion = getProperties().getNvd().getApi().getVersion().name();
         return OUT_FILE_PREFIX + feedType.getName() + "-" + apiVersion;
     }
 
@@ -259,7 +275,7 @@ public final class Util {
     }
 
     public static boolean skipInvalidCollection() {
-        return properties.getNvd().getMerge().isSkipInvalidCollection();
+        return getProperties().getNvd().getMerge().isSkipInvalidCollection();
     }
 
     public static int mergeFiles(File[] files, File outFile, String collectionNodeName) throws NvdException {
@@ -363,15 +379,30 @@ public final class Util {
     }
 
     public static int getLogEveryNProcessedElements() {
-        return properties.getNvd().getDownload().getUsingApi().getProcessor().getLogEveryNProcessedElements();
+        return getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getLogEveryNProcessedElements();
     }
 
     public static int getProducerWaitTimeToFinishInMinutes() {
-        return properties.getNvd().getDownload().getUsingApi().getProcessor().getProducerWaitTimeToFinishInMinutes();
+        return getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getProducerWaitTimeToFinishInMinutes();
     }
 
     public static int getConsumerWaitTimeToFinishInMinutes() {
-        return properties.getNvd().getDownload().getUsingApi().getProcessor().getConsumerWaitTimeToFinishInMinutes();
+        return getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getConsumerWaitTimeToFinishInMinutes();
     }
 
     public static String getDefaultUserAgent() {
