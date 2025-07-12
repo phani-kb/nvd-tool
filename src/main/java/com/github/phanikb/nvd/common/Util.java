@@ -60,8 +60,7 @@ public final class Util {
      * @return an InputStream of the file, or an empty Optional if the file is not found
      */
     public static Optional<InputStream> loadFileFromClasspath(final String fileName) {
-        return Optional.ofNullable(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName));
+        return Optional.ofNullable(Util.class.getClassLoader().getResourceAsStream(fileName));
     }
 
     /**
@@ -75,7 +74,7 @@ public final class Util {
             logger.error("File name cannot be null or empty");
             return Optional.empty();
         }
-        URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
+        URL url = Util.class.getClassLoader().getResource(fileName);
         return Optional.ofNullable(url).map(u -> new File(u.getFile())).or(() -> {
             logger.error("File {} does not exist", fileName);
             return Optional.empty();
