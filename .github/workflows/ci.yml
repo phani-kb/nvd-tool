@@ -37,7 +37,8 @@ jobs:
     - name: Check code formatting
       run: mvn spotless:check
     - name: Run tests with coverage
-      run: "mvn clean verify -Pjacoco -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD}}"
+      run: |
+        mvn clean verify -Pjacoco -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD}} -B -q
     - name: Verify JAR execution
       run: java -jar target/nvd-tool-*.jar --help
     - name: Extract artifact information
