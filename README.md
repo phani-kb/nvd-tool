@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/phani-kb/nvd-tool/actions/workflows/ci.yml/badge.svg)](https://github.com/phani-kb/nvd-tool/actions/workflows/ci.yml)
 [![Security Scan](https://github.com/phani-kb/nvd-tool/actions/workflows/security.yml/badge.svg)](https://github.com/phani-kb/nvd-tool/actions/workflows/security.yml)
-[![codecov](https://codecov.io/gh/phani-kb/nvd-tool/branch/main/graph/badge.svg)](https://codecov.io/gh/phani-kb/nvd-tool)
+[![codecov](https://codecov.io/gh/phani-kb/nvd-tool/graph/badge.svg)](https://codecov.io/gh/phani-kb/nvd-tool)
 [![Release](https://img.shields.io/github/v/release/phani-kb/nvd-tool.svg)](https://github.com/phani-kb/nvd-tool/releases)
 [![Top Language](https://img.shields.io/github/languages/top/phani-kb/nvd-tool.svg)](https://github.com/phani-kb/nvd-tool)
 [![Code Size](https://img.shields.io/github/languages/code-size/phani-kb/nvd-tool.svg)](https://github.com/phani-kb/nvd-tool)
