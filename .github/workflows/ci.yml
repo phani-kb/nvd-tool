@@ -44,6 +44,20 @@ jobs:
     - name: Run tests with coverage
       run: |
         mvn clean verify -Pjacoco -Djacoco.minimum.coverage=0.${{ env.COVERAGE_THRESHOLD}} -B -q
+    - name: Verify coverage files
+      run: |
+        echo "Checking for JaCoCo coverage files..."
+        find target -name "*.xml" -path "*/jacoco*" || echo "No JaCoCo XML files found"
+        find target -name "*.exec" || echo "No JaCoCo exec files found"
+        if [ -f target/site/jacoco/jacoco.xml ]; then
+          echo "JaCoCo XML file found: target/site/jacoco/jacoco.xml"
+          ls -la target/site/jacoco/jacoco.xml
+          echo "File size: $(wc -c < target/site/jacoco/jacoco.xml) bytes"
+        else
+          echo "ERROR: JaCoCo XML file not found at target/site/jacoco/jacoco.xml"
+          echo "Contents of target/site/:"
+          ls -la target/site/ || echo "target/site/ does not exist"
+        fi
     - name: Verify JAR execution
       run: java -jar target/nvd-tool-*.jar --help
     - name: Extract artifact information
@@ -79,7 +93,13 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         file: ./target/site/jacoco/jacoco.xml
-        fail_ci_if_error: false
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
+        override_branch: main
+        override_build: ${{ github.run_number }}
+        override_commit: ${{ github.sha }}
     - name: Generate build summary
       if: always()
       run: |
