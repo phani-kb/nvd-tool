@@ -36,7 +36,7 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
         checkFreeSpace(outDir);
     }
 
-    protected void validateDirectory(File dir) {
+    public void validateDirectory(File dir) {
         if (dir != null) {
             if (!dir.exists()) {
                 throw new CommandLine.ParameterException(
@@ -49,7 +49,7 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
         }
     }
 
-    private void validateOutDirectory(File outDir) {
+    public void validateOutDirectory(File outDir) {
         validateDirectory(outDir);
         if (!outDir.canWrite()) {
             throw new CommandLine.ParameterException(
@@ -58,7 +58,7 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
         logger.info("output directory: {}", outDir);
     }
 
-    private void validateOutputFile(String filename) {
+    public void validateOutputFile(String filename) {
         if (filename != null) {
             if (filename.contains(File.separator)) {
                 throw new CommandLine.ParameterException(
@@ -68,7 +68,7 @@ public abstract class BaseCommand implements Callable<Integer>, INvdBaseCommand 
         }
     }
 
-    private void checkFreeSpace(File outDir) {
+    public void checkFreeSpace(File outDir) {
         int freeSpace = Util.getUsableSpace(outDir);
         if (freeSpace < Constants.MIN_FREE_SPACE_IN_GB) {
             logger.warn("low disk space detected. Free space: {} GB", freeSpace);

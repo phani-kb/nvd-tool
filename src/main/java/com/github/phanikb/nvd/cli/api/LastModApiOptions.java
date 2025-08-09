@@ -2,7 +2,10 @@ package com.github.phanikb.nvd.cli.api;
 
 import java.time.LocalDateTime;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import picocli.CommandLine;
 
@@ -10,6 +13,7 @@ import com.github.phanikb.nvd.common.Constants;
 import com.github.phanikb.nvd.common.DateFormats;
 
 @Getter
+@Setter
 @ToString
 public abstract class LastModApiOptions extends BaseApiOptions {
     @CommandLine.ArgGroup(exclusive = false)
@@ -24,7 +28,10 @@ public abstract class LastModApiOptions extends BaseApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class LastModDateRange {
         @CommandLine.Option(
                 names = {"--lmsd", "--last-mod-start-date"},

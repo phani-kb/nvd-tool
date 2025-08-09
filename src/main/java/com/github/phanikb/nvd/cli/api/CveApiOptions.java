@@ -2,6 +2,7 @@ package com.github.phanikb.nvd.cli.api;
 
 import java.time.LocalDateTime;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,6 +20,7 @@ import com.github.phanikb.nvd.enums.Cvssv4Severity;
 import com.github.phanikb.nvd.enums.VersionType;
 
 @Getter
+@Setter
 @ToString
 public class CveApiOptions extends LastModApiOptions {
     @CommandLine.ArgGroup(exclusive = false)
@@ -171,6 +173,7 @@ public class CveApiOptions extends LastModApiOptions {
     @Getter
     @Setter
     @ToString
+    @AllArgsConstructor
     public static class PubDateRange {
         @CommandLine.Option(
                 names = {"--psd", "--pub-start-date"},
@@ -218,6 +221,7 @@ public class CveApiOptions extends LastModApiOptions {
     @Getter
     @Setter
     @ToString
+    @AllArgsConstructor
     public static class VersionEnd {
         @CommandLine.Option(
                 names = {"--vet", "--ve-type"},
@@ -237,6 +241,7 @@ public class CveApiOptions extends LastModApiOptions {
     @Getter
     @Setter
     @ToString
+    @AllArgsConstructor
     public static class VersionStart {
         @CommandLine.Option(
                 names = {"--vst", "--vs-type"},
@@ -276,6 +281,7 @@ public class CveApiOptions extends LastModApiOptions {
     @Getter
     @Setter
     @ToString
+    @AllArgsConstructor
     public static class CvssSeverity {
         @CommandLine.Option(
                 names = {"--cvssv2-severity"},
@@ -303,6 +309,7 @@ public class CveApiOptions extends LastModApiOptions {
     @Getter
     @Setter
     @ToString
+    @AllArgsConstructor
     public static class CvssMetrics {
         @CommandLine.Option(
                 names = {"--cvssv2-metrics"},

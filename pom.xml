@@ -447,6 +447,10 @@
           <includeEngines>
             <includeEngine>junit-jupiter</includeEngine>
           </includeEngines>
+          <reuseForks>true</reuseForks>
+          <useSystemClassLoader>false</useSystemClassLoader>
+          <forkCount>2</forkCount>
+          <excludedGroups>flaky</excludedGroups>
         </configuration>
         <dependencies>
           <dependency>

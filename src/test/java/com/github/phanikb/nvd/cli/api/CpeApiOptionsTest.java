@@ -2,7 +2,13 @@ package com.github.phanikb.nvd.cli.api;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.github.phanikb.nvd.common.CpeName;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CpeApiOptionsTest {
 
@@ -31,5 +37,26 @@ class CpeApiOptionsTest {
         keywordSearch.setKeywordExactMatch(true);
         keywordSearch.setKeywordSearch("test");
         assertFalse(keywordSearch.isInvalid());
+    }
+
+    @Test
+    void testThrowsIfKeywordSearchInvalid() {
+        CpeApiOptions options = new CpeApiOptions();
+        CpeApiOptions.KeywordSearch keywordSearch = new CpeApiOptions.KeywordSearch();
+        keywordSearch.setKeywordExactMatch(true);
+        options.setKeywordSearch(keywordSearch);
+        assertThrows(IllegalArgumentException.class, options::validateOptions);
+    }
+
+    @Test
+    void testCpeMatchNameValid() {
+        CpeApiOptions options = new CpeApiOptions();
+        CpeApiOptions.KeywordSearch keywordSearch = new CpeApiOptions.KeywordSearch();
+        keywordSearch.setKeywordExactMatch(true);
+        keywordSearch.setKeywordSearch("test");
+        options.setKeywordSearch(keywordSearch);
+        CpeName cpeName = new CpeName("cpe:2.3:o:linux:linux_kernel:2.6.0:*:*:*:*:*:*:*");
+        options.setCpeMatchString(cpeName);
+        assertDoesNotThrow(options::validateOptions);
     }
 }

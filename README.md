@@ -48,11 +48,11 @@ mvn clean post-clean package
 mvn resources:copy-resources@generate-buildconfig
 ```
 
-## Automated CI/CD
+## Build
 
 This project uses GitHub Actions for automated:
 
-- **Continuous Integration**: Automated testing with coverage validation (80% threshold)
+- **CI**: Automated testing with coverage validation (70% threshold)
 - **Code Quality**: Formatting checks, SpotBugs security analysis, and PMD analysis  
 - **Automated Releases**: When a tag like `v0.1.0` is created, the workflow automatically builds and attaches the executable JAR to the GitHub release
 

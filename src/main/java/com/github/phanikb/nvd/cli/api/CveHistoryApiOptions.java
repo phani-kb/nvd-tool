@@ -3,6 +3,7 @@ package com.github.phanikb.nvd.cli.api;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import picocli.CommandLine;
 
@@ -10,6 +11,7 @@ import com.github.phanikb.nvd.common.DateFormats;
 import com.github.phanikb.nvd.enums.CveHistoryEventName;
 
 @Getter
+@Setter
 @ToString
 public class CveHistoryApiOptions extends BaseApiOptions {
     @CommandLine.ArgGroup(exclusive = false)
@@ -39,8 +41,16 @@ public class CveHistoryApiOptions extends BaseApiOptions {
     }
 
     @Getter
+    @Setter
     @ToString
     public static class ChangeDateRange {
+        public ChangeDateRange() {}
+
+        public ChangeDateRange(LocalDateTime changeStartDate, LocalDateTime changeEndDate) {
+            this.changeStartDate = changeStartDate;
+            this.changeEndDate = changeEndDate;
+        }
+
         @CommandLine.Option(
                 names = {"--csd", "--change-start-date"},
                 paramLabel = "DATE",

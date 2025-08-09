@@ -2,7 +2,9 @@ package com.github.phanikb.nvd.cli.api;
 
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import picocli.CommandLine;
@@ -10,7 +12,10 @@ import picocli.CommandLine;
 import com.github.phanikb.nvd.common.CpeName;
 
 @Getter
+@Setter
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class CpeApiOptions extends LastModApiOptions {
     @CommandLine.ArgGroup(exclusive = false)
     private KeywordSearch keywordSearch;
@@ -49,6 +54,8 @@ public class CpeApiOptions extends LastModApiOptions {
     @Getter
     @Setter
     @ToString
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class KeywordSearch {
         @CommandLine.Option(
                 names = {"--kw-em"},

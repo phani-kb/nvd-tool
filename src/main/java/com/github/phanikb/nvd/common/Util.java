@@ -219,11 +219,11 @@ public final class Util {
         sleepQuietly(getExponentialBackoff(attempts));
     }
 
-    private static TimeValue getExponentialBackoff(int attempts) {
+    public static TimeValue getExponentialBackoff(int attempts) {
         return getExponentialBackoff(attempts, TimeValue.of(DEFAULT_REQUEST_TIMEOUT_SECS, TimeUnit.SECONDS));
     }
 
-    private static TimeValue getExponentialBackoff(int attempts, TimeValue retryInterval) {
+    public static TimeValue getExponentialBackoff(int attempts, TimeValue retryInterval) {
         long millis = (long) Math.pow(2, attempts) * retryInterval.toMilliseconds();
         return TimeValue.of(millis, TimeUnit.MILLISECONDS);
     }

@@ -1,5 +1,5 @@
 ---
-name: NVD Tool Build
+name: NVD Tool CI
 "on":
   push:
     branches:
@@ -13,7 +13,7 @@ name: NVD Tool Build
     - created
 env:
   JAVA_VERSION: 21
-  COVERAGE_THRESHOLD: 60
+  COVERAGE_THRESHOLD: 70
   MAVEN_OPTS: -Dmaven.repo.local=.m2/repository -Xmx1024m -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
 jobs:
   validate-and-test:

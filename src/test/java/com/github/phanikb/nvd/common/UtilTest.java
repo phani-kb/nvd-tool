@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.hc.core5.util.TimeValue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -176,6 +177,15 @@ public class UtilTest {
     }
 
     @Test
+    public void testValidateDateRangeFormatCheck() {
+        LocalDateTime start = LocalDateTime.of(2023, 1, 1, 12, 34, 56, 789000000);
+        LocalDateTime end = LocalDateTime.of(2023, 1, 2, 23, 45, 59, 123000000);
+        Util.validateDateRange(start, end, true);
+        assertThrows(NullPointerException.class, () -> Util.validateDateRange(null, end, true));
+        assertThrows(NullPointerException.class, () -> Util.validateDateRange(start, null, true));
+    }
+
+    @Test
     public void testGetFiles() throws IOException {
         Path tempDir = Files.createTempDirectory("util-test");
         File dir = tempDir.toFile();
@@ -249,5 +259,45 @@ public class UtilTest {
 
         // Should handle null gracefully
         Util.createDir(null);
+    }
+
+    @Test
+    public void testDeleteDirRemovesDirectory(@TempDir Path tempDir) throws IOException {
+        File dir = tempDir.toFile();
+        File file1 = new File(dir, "file1.txt");
+        File file2 = new File(dir, "file2.txt");
+        Files.createFile(file1.toPath());
+        Files.createFile(file2.toPath());
+        assertTrue(file1.exists() && file2.exists(), "Files should exist before deleteDir");
+        Util.deleteDir(dir);
+        assertFalse(dir.exists(), "Directory should not exist after deleteDir");
+    }
+
+    @Test
+    public void testGetExponentialBackoffIncreases() {
+        TimeValue t1 = Util.getExponentialBackoff(1);
+        TimeValue t2 = Util.getExponentialBackoff(2);
+        TimeValue t3 = Util.getExponentialBackoff(3);
+        assertTrue(t2.toMilliseconds() > t1.toMilliseconds(), "Backoff should increase with attempts");
+        assertTrue(t3.toMilliseconds() > t2.toMilliseconds(), "Backoff should increase with attempts");
+    }
+
+    @Test
+    public void testSleepQuietlyDoesNotThrow() {
+        long start = System.currentTimeMillis();
+        Util.sleepQuietly(1); // should sleep for a short time
+        long elapsed = System.currentTimeMillis() - start;
+        assertTrue(elapsed >= Util.getExponentialBackoff(1).toMilliseconds(), "Should sleep at least backoff time");
+    }
+
+    @Test
+    public void testSleepDoesSleep() throws InterruptedException {
+        TimeValue retryInterval = TimeValue.of(100, TimeUnit.MILLISECONDS);
+        long start = System.currentTimeMillis();
+        Util.sleep(1, retryInterval);
+        long elapsed = System.currentTimeMillis() - start;
+        assertTrue(
+                elapsed >= Util.getExponentialBackoff(1, retryInterval).toMilliseconds(),
+                "Should sleep at least backoff time");
     }
 }

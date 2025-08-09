@@ -12,6 +12,7 @@ import picocli.CommandLine;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BaseCommandTest {
@@ -45,10 +46,10 @@ class BaseCommandTest {
         baseCommonOptionsField.setAccessible(true);
         baseCommonOptionsField.set(command, options);
 
-        CommandLine.Model.CommandSpec spec = CommandLine.Model.CommandSpec.create();
+        CommandLine cmdLine = new CommandLine(command);
         Field specField = BaseCommand.class.getDeclaredField("spec");
         specField.setAccessible(true);
-        specField.set(command, spec);
+        specField.set(command, cmdLine.getCommandSpec());
     }
 
     @Test
@@ -131,5 +132,48 @@ class BaseCommandTest {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    @Test
+    void testValidateDirectoryThrowsIfNotExists() throws Exception {
+        TestCommand command = new TestCommand();
+        File nonExistentDir = new File(tempDir.toFile(), "doesnotexist");
+        setUpCommand(command, nonExistentDir, null);
+        CommandLine.ParameterException ex =
+                assertThrows(CommandLine.ParameterException.class, () -> command.validateDirectory(nonExistentDir));
+        assertTrue(ex.getMessage().contains("directory does not exist"));
+    }
+
+    @Test
+    void testValidateDirectoryThrowsIfNotDirectory() throws Exception {
+        TestCommand command = new TestCommand();
+        File file = new File(tempDir.toFile(), "notadir.txt");
+        file.createNewFile();
+        setUpCommand(command, file, null);
+        CommandLine.ParameterException ex =
+                assertThrows(CommandLine.ParameterException.class, () -> command.validateDirectory(file));
+        assertTrue(ex.getMessage().contains("is not a directory"));
+    }
+
+    @Test
+    void testValidateOutDirectoryThrowsIfNotWritable() throws Exception {
+        TestCommand command = new TestCommand();
+        File dir = tempDir.toFile();
+        dir.setWritable(false);
+        setUpCommand(command, dir, null);
+        CommandLine.ParameterException ex =
+                assertThrows(CommandLine.ParameterException.class, () -> command.validateOutDirectory(dir));
+        assertTrue(ex.getMessage().contains("is not writable"));
+        dir.setWritable(true);
+    }
+
+    @Test
+    void testValidateOutputFileThrowsIfContainsSeparator() throws Exception {
+        TestCommand command = new TestCommand();
+        setUpCommand(command, tempDir.toFile(), "invalid/path.txt");
+        CommandLine.ParameterException ex = assertThrows(
+                CommandLine.ParameterException.class,
+                () -> command.validateOutputFile("invalid" + File.separator + "path.txt"));
+        assertTrue(ex.getMessage().contains("contains path separator"));
     }
 }

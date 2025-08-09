@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 
+import lombok.Getter;
+import lombok.Setter;
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.cli.api.CveApiOptions;
@@ -18,6 +20,8 @@ import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.FeedType;
 import com.github.phanikb.nvd.enums.NvdApiDateType;
 
+@Getter
+@Setter
 @CommandLine.Command(
         name = "cve",
         mixinStandardHelpOptions = true,
@@ -64,7 +68,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         return execute(apiDownloader);
     }
 
-    private List<NvdApiDate> getDatesIfOnlyOneDateRangeIsOutsideAllowableRange() {
+    public List<NvdApiDate> getDatesIfOnlyOneDateRangeIsOutsideAllowableRange() {
         List<NvdApiDate> dates = new ArrayList<>();
         if (isLMDRWithAllowableRange() && !isPDRWithAllowableRange()) {
             dates.add(new NvdApiDate(
@@ -88,7 +92,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         return dates;
     }
 
-    private boolean isPDRWithAllowableRange() {
+    public boolean isPDRWithAllowableRange() {
         return cveApiOptions.getPubDateRange() != null
                 && cveApiOptions
                         .getPubDateRange()
@@ -99,7 +103,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
                                 .plusDays(Constants.DEFAULT_MAX_RANGE_IN_DAYS));
     }
 
-    private boolean isLMDRWithAllowableRange() {
+    public boolean isLMDRWithAllowableRange() {
         return cveApiOptions.getLastModDateRange() != null
                 && cveApiOptions
                         .getLastModDateRange()
@@ -128,7 +132,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         return true;
     }
 
-    private List<NvdApiDate> getDatesIfSingleDateRangeGiven() {
+    public List<NvdApiDate> getDatesIfSingleDateRangeGiven() {
         List<NvdApiDate> dates = new ArrayList<>();
         if (cveApiOptions.getLastModDateRange() != null && cveApiOptions.getPubDateRange() == null) {
             dates.add(new NvdApiDate(
@@ -230,7 +234,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         return queryParams;
     }
 
-    private void addMetricParams(List<NameValuePair> queryParams) {
+    public void addMetricParams(List<NameValuePair> queryParams) {
         CveApiOptions.CvssMetrics cvssMetrics = cveApiOptions.getCvssMetrics();
         if (cvssMetrics != null) {
             if (cvssMetrics.getCvssV2Metrics() != null) {

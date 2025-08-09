@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hc.core5.http.NameValuePair;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import picocli.CommandLine;
@@ -21,6 +23,7 @@ import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
 import com.github.phanikb.nvd.common.Constants;
 import com.github.phanikb.nvd.common.CveId;
 import com.github.phanikb.nvd.common.CweId;
+import com.github.phanikb.nvd.common.NvdApiDate;
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.CveTagType;
@@ -498,5 +501,92 @@ class CveApiDownloadCommandTest {
     void testGetLatch() {
         assertNotNull(command.getLatch());
         assertEquals(1, command.getLatch().getCount()); // DEFAULT_NUMBER_OF_PRODUCERS is 1
+    }
+
+    @Test
+    void testGetDatesIfSingleDateRangeGiven_lastModOnly() {
+        CveApiOptions.LastModDateRange lastMod = Mockito.mock(CveApiOptions.LastModDateRange.class);
+        Mockito.when(mockCveApiOptions.getLastModDateRange()).thenReturn(lastMod);
+        Mockito.when(mockCveApiOptions.getPubDateRange()).thenReturn(null);
+        Mockito.when(lastMod.getLastModStartDate()).thenReturn(LocalDateTime.of(2025, 8, 1, 0, 0));
+        Mockito.when(lastMod.getLastModEndDate()).thenReturn(LocalDateTime.of(2025, 8, 10, 0, 0));
+        List<NvdApiDate> dates = command.getDatesIfSingleDateRangeGiven();
+        assertEquals(2, dates.size());
+        assertEquals(
+                ApiQueryParams.LAST_MODIFIED_START_DATE.getName(), dates.get(0).name());
+        assertEquals(
+                ApiQueryParams.LAST_MODIFIED_END_DATE.getName(), dates.get(1).name());
+    }
+
+    @Test
+    void testGetDatesIfSingleDateRangeGiven_pubOnly() {
+        CveApiOptions.PubDateRange pub = Mockito.mock(CveApiOptions.PubDateRange.class);
+        Mockito.when(mockCveApiOptions.getLastModDateRange()).thenReturn(null);
+        Mockito.when(mockCveApiOptions.getPubDateRange()).thenReturn(pub);
+        Mockito.when(pub.getPubStartDate()).thenReturn(LocalDateTime.of(2025, 8, 1, 0, 0));
+        Mockito.when(pub.getPubEndDate()).thenReturn(LocalDateTime.of(2025, 8, 10, 0, 0));
+        List<NvdApiDate> dates = command.getDatesIfSingleDateRangeGiven();
+        assertEquals(2, dates.size());
+        assertEquals(ApiQueryParams.PUB_START_DATE.getName(), dates.get(0).name());
+        assertEquals(ApiQueryParams.PUB_END_DATE.getName(), dates.get(1).name());
+    }
+
+    @Test
+    void testAddMetricParams() {
+        List<NameValuePair> params = new ArrayList<>();
+        CveApiOptions.CvssMetrics metrics = Mockito.mock(CveApiOptions.CvssMetrics.class);
+        Mockito.when(mockCveApiOptions.getCvssMetrics()).thenReturn(metrics);
+        Mockito.when(metrics.getCvssV2Metrics()).thenReturn("v2");
+        Mockito.when(metrics.getCvssV3Metrics()).thenReturn(null);
+        Mockito.when(metrics.getCvssV4Metrics()).thenReturn(null);
+        command.setCveApiOptions(mockCveApiOptions);
+        command.addMetricParams(params);
+        assertTrue(params.stream().anyMatch(p -> p.getName().equals(ApiQueryParams.CVSS_V2_METRICS.getName())));
+    }
+
+    @Test
+    void testGetDatesIfOnlyOneDateRangeIsOutsideAllowableRange_lastModValid_pubInvalid() {
+        CveApiOptions.LastModDateRange lastMod = Mockito.mock(CveApiOptions.LastModDateRange.class);
+        CveApiOptions.PubDateRange pub = Mockito.mock(CveApiOptions.PubDateRange.class);
+        Mockito.when(mockCveApiOptions.getLastModDateRange()).thenReturn(lastMod);
+        Mockito.when(mockCveApiOptions.getPubDateRange()).thenReturn(pub);
+        Mockito.when(lastMod.getLastModStartDate()).thenReturn(LocalDateTime.of(2025, 8, 1, 0, 0));
+        Mockito.when(lastMod.getLastModEndDate()).thenReturn(LocalDateTime.of(2025, 8, 10, 0, 0));
+        Mockito.when(pub.getPubStartDate()).thenReturn(LocalDateTime.of(2025, 1, 1, 0, 0));
+        Mockito.when(pub.getPubEndDate()).thenReturn(LocalDateTime.of(2025, 12, 31, 0, 0));
+        Mockito.when(mockCveApiOptions.getLastModDateRange().getLastModEndDate())
+                .thenReturn(LocalDateTime.of(2025, 8, 10, 0, 0));
+        Mockito.when(mockCveApiOptions.getLastModDateRange().getLastModStartDate())
+                .thenReturn(LocalDateTime.of(2025, 8, 1, 0, 0));
+        Mockito.when(mockCveApiOptions.getPubDateRange().getPubEndDate())
+                .thenReturn(LocalDateTime.of(2025, 12, 31, 0, 0));
+        Mockito.when(mockCveApiOptions.getPubDateRange().getPubStartDate())
+                .thenReturn(LocalDateTime.of(2025, 1, 1, 0, 0));
+        List<NvdApiDate> dates = command.getDatesIfOnlyOneDateRangeIsOutsideAllowableRange();
+        assertEquals(2, dates.size());
+        assertEquals(ApiQueryParams.PUB_START_DATE.getName(), dates.get(0).name());
+        assertEquals(ApiQueryParams.PUB_END_DATE.getName(), dates.get(1).name());
+    }
+
+    @Test
+    void testIsPDRWithAllowableRange_true_false() {
+        CveApiOptions.PubDateRange pub = Mockito.mock(CveApiOptions.PubDateRange.class);
+        Mockito.when(mockCveApiOptions.getPubDateRange()).thenReturn(pub);
+        Mockito.when(pub.getPubStartDate()).thenReturn(LocalDateTime.of(2025, 8, 1, 0, 0));
+        Mockito.when(pub.getPubEndDate()).thenReturn(LocalDateTime.of(2025, 8, 10, 0, 0));
+        assertTrue(command.isPDRWithAllowableRange());
+        Mockito.when(pub.getPubEndDate()).thenReturn(LocalDateTime.of(2025, 12, 31, 0, 0));
+        assertFalse(command.isPDRWithAllowableRange());
+    }
+
+    @Test
+    void testIsLMDRWithAllowableRange_true_false() {
+        CveApiOptions.LastModDateRange lastMod = Mockito.mock(CveApiOptions.LastModDateRange.class);
+        Mockito.when(mockCveApiOptions.getLastModDateRange()).thenReturn(lastMod);
+        Mockito.when(lastMod.getLastModStartDate()).thenReturn(LocalDateTime.of(2025, 8, 1, 0, 0));
+        Mockito.when(lastMod.getLastModEndDate()).thenReturn(LocalDateTime.of(2025, 8, 10, 0, 0));
+        assertTrue(command.isLMDRWithAllowableRange());
+        Mockito.when(lastMod.getLastModEndDate()).thenReturn(LocalDateTime.of(2025, 12, 31, 0, 0));
+        assertFalse(command.isLMDRWithAllowableRange());
     }
 }
