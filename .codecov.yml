@@ -1,0 +1,24 @@
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  ignore:
+    - "src/main/java/com/github/phanikb/nvd/api2/**"
+    - "src/main/java/com/github/phanikb/nvd/enums/CommandApiEndpointType.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/Cve*.java" 
+    - "src/main/java/com/github/phanikb/nvd/enums/Cvss*.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/DownloadMode*.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/FeedType*.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/NvdApiDateType*.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/OutputFileFormat*.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/TransferMethod*.java"
+    - "src/main/java/com/github/phanikb/nvd/enums/VersionType*.java"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false

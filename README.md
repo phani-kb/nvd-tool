@@ -249,3 +249,7 @@ This project is licensed under the terms specified in the [LICENSE](LICENSE) fil
 ## Notice
 
 **This tool uses data from the NVD API but is not endorsed or certified by the NVD.**
+
+---
+
+*Happy vulnerability hunting! 🔍*
