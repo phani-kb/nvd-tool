@@ -100,7 +100,7 @@ jobs:
         override_branch: main
         override_build: "${{ github.run_number }}"
         override_commit: "${{ github.sha }}"
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: "${{ secrets.CODECOV_TOKEN }}"
     - name: Generate build summary
       if: always()
       run: |
