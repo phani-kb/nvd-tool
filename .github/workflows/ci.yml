@@ -4,13 +4,20 @@ name: NVD Tool CI
   push:
     branches:
     - main
-    - develop
-  pull_request:
-    branches:
-    - main
   release:
     types:
-    - created
+    - published
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: Create a new release
+        required: false
+        default: false
+        type: boolean
+      release_version:
+        description: "Release version (e.g., 1.0.0)"
+        required: false
+        type: string
 env:
   JAVA_VERSION: 21
   COVERAGE_THRESHOLD: 70
@@ -120,7 +127,10 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     needs: validate-and-test
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch'
+      && inputs.create_release == true)
+    permissions:
+      contents: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -129,14 +139,25 @@ jobs:
       with:
         java-version: "${{ env.JAVA_VERSION }}"
         distribution: temurin
+    - name: Determine release version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "release" ]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ inputs.release_version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+          fi
+        else
+          VERSION="dev-$(git rev-parse --short HEAD)"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Release version: $VERSION"
     - name: Build release artifact
       run: |
-        # Extract version from tag
-        VERSION=${GITHUB_REF#refs/tags/v}
-        echo "Release version: $VERSION"
-
         # Update pom.xml version
-        mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+        mvn versions:set -DnewVersion=${{ steps.version.outputs.version }} -DgenerateBackupPoms=false
 
         # Build artifact
         mvn clean package -DskipTests
@@ -146,29 +167,44 @@ jobs:
         JAR_FILE=$(ls target/nvd-tool-*.jar)
         echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
         echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+    - name: Create GitHub Release (for manual trigger)
+      if: github.event_name == 'workflow_dispatch' && inputs.create_release == true
+      uses: softprops/action-gh-release@v2
       with:
-        upload_url: "${{ github.event.release.upload_url }}"
-        asset_path: "${{ steps.artifact.outputs.jar_file }}"
-        asset_name: "${{ steps.artifact.outputs.jar_name }}"
-        asset_content_type: application/java-archive
+        tag_name: "v${{ steps.version.outputs.version }}"
+        name: "Release v${{ steps.version.outputs.version }}"
+        body: |
+          Release v${{ steps.version.outputs.version }}
+
+          **Artifact**: ${{ steps.artifact.outputs.jar_name }}
+          **Size**: $(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
+          **Created**: $(date)
+        files: |
+          ${{ steps.artifact.outputs.jar_file }}
+        draft: false
+        prerelease: false
+    - name: Upload release asset (for release event)
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          ${{ steps.artifact.outputs.jar_file }}
     - name: Generate release summary
       run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
+        VERSION=${{ steps.version.outputs.version }}
         JAR_SIZE=$(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
         echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Version**: ${VERSION}" >> $GITHUB_STEP_SUMMARY
         echo "- **Artifact**: ${{ steps.artifact.outputs.jar_name }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Size**: ${JAR_SIZE}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Status**: ✅ Release created successfully" >> $GITHUB_STEP_SUMMARY
   summary:
     name: Build Summary
     runs-on: ubuntu-latest
     needs: validate-and-test
-    if: github.event_name != 'release'
+    if: github.event_name != 'release' && !(github.event_name == 'workflow_dispatch'
+      && inputs.create_release == true)
     steps:
     - name: Generate summary
       run: |-
