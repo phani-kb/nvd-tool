@@ -98,8 +98,8 @@ jobs:
         fail_ci_if_error: true
         verbose: true
         override_branch: main
-        override_build: ${{ github.run_number }}
-        override_commit: ${{ github.sha }}
+        override_build: "${{ github.run_number }}"
+        override_commit: "${{ github.sha }}"
     - name: Generate build summary
       if: always()
       run: |
