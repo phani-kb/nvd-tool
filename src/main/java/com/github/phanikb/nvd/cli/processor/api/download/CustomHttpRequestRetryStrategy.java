@@ -1,6 +1,7 @@
 package com.github.phanikb.nvd.cli.processor.api.download;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
@@ -35,8 +36,15 @@ public class CustomHttpRequestRetryStrategy extends DefaultHttpRequestRetryStrat
         if (exception instanceof HttpResponseException
                 && ((HttpResponseException) exception).getStatusCode() == HttpStatus.SC_FORBIDDEN) {
             try {
-                logger.info("retrying request after {} seconds", retryInterval.toSeconds());
-                Util.sleep(execCount, retryInterval);
+                boolean isTestMode = Boolean.parseBoolean(System.getProperty("nvd.test.mode", "false"));
+                if (isTestMode) {
+                    TimeValue testDelay = TimeValue.of(Math.min(100, execCount * 10), TimeUnit.MILLISECONDS);
+                    logger.info("retrying request (test mode) after {} ms", testDelay.toMilliseconds());
+                    Thread.sleep(testDelay.toMilliseconds());
+                } else {
+                    logger.info("retrying request after {} seconds", retryInterval.toSeconds());
+                    Util.sleep(execCount, retryInterval);
+                }
                 return true;
             } catch (InterruptedException e) {
                 logger.error("sleep interrupted", e);

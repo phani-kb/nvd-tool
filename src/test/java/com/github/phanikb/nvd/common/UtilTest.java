@@ -294,7 +294,7 @@ public class UtilTest {
     public void testSleepDoesSleep() throws InterruptedException {
         TimeValue retryInterval = TimeValue.of(100, TimeUnit.MILLISECONDS);
         long start = System.currentTimeMillis();
-        Util.sleep(1, retryInterval);
+        Util.sleepWithFullBackoff(1, retryInterval);
         long elapsed = System.currentTimeMillis() - start;
         assertTrue(
                 elapsed >= Util.getExponentialBackoff(1, retryInterval).toMilliseconds(),

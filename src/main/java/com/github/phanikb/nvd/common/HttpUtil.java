@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -20,6 +21,7 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -150,9 +152,20 @@ public final class HttpUtil {
     public static <T> void downloadHttpGetRequest(URI uri, File outFile, HttpClientResponseHandler<T> responseHandler)
             throws NvdException {
         // replaceUriHeader("User-Agent", getUserAgent());
+
+        boolean isTestMode = Boolean.parseBoolean(System.getProperty("nvd.test.mode", "false"));
+        RequestConfig.Builder configBuilder = RequestConfig.custom();
+        if (isTestMode) {
+            configBuilder
+                    .setConnectionRequestTimeout(Timeout.ofMilliseconds(1000))
+                    .setResponseTimeout(Timeout.ofMilliseconds(1000));
+        }
+
         try (CloseableHttpClient httpclient = HttpClients.custom()
                 .setRetryStrategy(new DefaultHttpRequestRetryStrategy(
-                        HttpUtil.getMaxRetries(), TimeValue.ofSeconds(HttpUtil.getRetryIntervalInSecs())))
+                        isTestMode ? 1 : HttpUtil.getMaxRetries(),
+                        TimeValue.ofSeconds(isTestMode ? 1 : HttpUtil.getRetryIntervalInSecs())))
+                .setDefaultRequestConfig(configBuilder.build())
                 .setDefaultHeaders(HttpUtil.getNvdDefaultHeaders())
                 .build()) {
             T apiJson = getApiJson(uri, httpclient, responseHandler);

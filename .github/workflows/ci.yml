@@ -165,8 +165,12 @@ jobs:
       id: artifact
       run: |
         JAR_FILE=$(ls target/nvd-tool-*.jar)
+        JAR_SIZE=$(du -h "$JAR_FILE" | cut -f1)
+        CURRENT_DATE=$(date)
         echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
         echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+        echo "jar_size=$JAR_SIZE" >> $GITHUB_OUTPUT
+        echo "created_date=$CURRENT_DATE" >> $GITHUB_OUTPUT
     - name: Create GitHub Release (for manual trigger)
       if: github.event_name == 'workflow_dispatch' && inputs.create_release == true
       uses: softprops/action-gh-release@v2
@@ -177,8 +181,8 @@ jobs:
           Release v${{ steps.version.outputs.version }}
 
           **Artifact**: ${{ steps.artifact.outputs.jar_name }}
-          **Size**: $(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
-          **Created**: $(date)
+          **Size**: ${{ steps.artifact.outputs.jar_size }}
+          **Created**: ${{ steps.artifact.outputs.created_date }}
         files: |
           ${{ steps.artifact.outputs.jar_file }}
         draft: false
@@ -192,11 +196,11 @@ jobs:
     - name: Generate release summary
       run: |
         VERSION=${{ steps.version.outputs.version }}
-        JAR_SIZE=$(du -h "${{ steps.artifact.outputs.jar_file }}" | cut -f1)
         echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Version**: ${VERSION}" >> $GITHUB_STEP_SUMMARY
         echo "- **Artifact**: ${{ steps.artifact.outputs.jar_name }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Size**: ${JAR_SIZE}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Size**: ${{ steps.artifact.outputs.jar_size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Created**: ${{ steps.artifact.outputs.created_date }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Status**: ✅ Release created successfully" >> $GITHUB_STEP_SUMMARY
   summary:

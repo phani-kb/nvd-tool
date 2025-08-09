@@ -17,6 +17,13 @@ public final class Constants {
     public static final int DEFAULT_MAX_RETRIES = 3;
     public static final int DEFAULT_MAX_DOWNLOAD_ATTEMPTS = 10;
     public static final int DEFAULT_RETRY_INTERVAL_SECS = 30;
+
+    // Test mode constants
+    public static final int TEST_REQUEST_TIMEOUT_SECS = 1;
+    public static final long TEST_DELAY_BETWEEN_REQUESTS_IN_MS = 10;
+    public static final int TEST_MAX_RETRIES = 1;
+    public static final int TEST_MAX_DOWNLOAD_ATTEMPTS = 2;
+    public static final int TEST_RETRY_INTERVAL_SECS = 1;
     public static final String OUT_FILE_PREFIX = "nvd";
     public static final int DEFAULT_PRODUCER_TIMEOUT_IN_MINUTES = 5;
     public static final int DEFAULT_CONSUMER_TIMEOUT_IN_MINUTES = 60;

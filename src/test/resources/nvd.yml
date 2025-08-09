@@ -31,9 +31,9 @@ nvd:
     usingUri:
       maxConcurrentDownloads: 1
     usingApi:
-      maxRetries: 3
-      maxDownloadAttempts: 10
-      retryIntervalInSecs: 30
+      maxRetries: 1
+      maxDownloadAttempts: 2
+      retryIntervalInSecs: 3
       delayBetweenRequestsInMs: 6000
       lastModifiedDates:
         maxRangeInDays: 120

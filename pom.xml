@@ -451,6 +451,9 @@
           <useSystemClassLoader>false</useSystemClassLoader>
           <forkCount>2</forkCount>
           <excludedGroups>flaky</excludedGroups>
+          <systemPropertyVariables>
+            <nvd.test.mode>true</nvd.test.mode>
+          </systemPropertyVariables>
         </configuration>
         <dependencies>
           <dependency>

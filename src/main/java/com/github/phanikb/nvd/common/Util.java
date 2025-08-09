@@ -44,6 +44,7 @@ import static com.github.phanikb.nvd.common.Constants.OUT_FILE_PREFIX;
 public final class Util {
     private static final Logger logger = LogManager.getLogger(Util.class);
     private static volatile NvdProperties properties;
+    private static final boolean IS_TEST_MODE = Boolean.parseBoolean(System.getProperty("nvd.test.mode", "false"));
 
     private Util() {
         // prevent instantiation
@@ -238,7 +239,20 @@ public final class Util {
     }
 
     public static void sleep(int attempts, TimeValue retryInterval) throws InterruptedException {
+        if (IS_TEST_MODE) {
+            fastSleep(attempts, retryInterval);
+        } else {
+            Thread.sleep(getExponentialBackoff(attempts, retryInterval).toMilliseconds());
+        }
+    }
+
+    public static void sleepWithFullBackoff(int attempts, TimeValue retryInterval) throws InterruptedException {
         Thread.sleep(getExponentialBackoff(attempts, retryInterval).toMilliseconds());
+    }
+
+    public static void fastSleep(int attempts, TimeValue retryInterval) throws InterruptedException {
+        long fastDelay = Math.min(50, 10 + (attempts * 5));
+        Thread.sleep(fastDelay);
     }
 
     public static void validateDateRange(LocalDateTime startDate, LocalDateTime endDate, boolean checkFormat) {
