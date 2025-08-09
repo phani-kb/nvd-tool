@@ -232,6 +232,9 @@
             <includes>
               <include>.github/workflows/*.yml</include>
             </includes>
+            <excludes>
+              <exclude>.github/workflows/delete-old-runs.yml</exclude>
+            </excludes>
             <jackson>
               <version>${jackson.version}</version>
               <yamlFeatures>
