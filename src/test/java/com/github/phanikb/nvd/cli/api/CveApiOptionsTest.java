@@ -95,7 +95,7 @@ class CveApiOptionsTest {
     void testValidateOptionsThrowsForInvalidPubDateRange() {
         CveApiOptions options = new CveApiOptions();
         LocalDateTime start = LocalDateTime.of(2025, 8, 1, 0, 0, 0);
-        LocalDateTime end = LocalDateTime.of(2025, 8, 10, 0, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 7, 10, 0, 0, 0);
         CveApiOptions.PubDateRange range = new CveApiOptions.PubDateRange(start, end);
         options.setPubDateRange(range);
         assertThrows(IllegalArgumentException.class, options::validateOptions);

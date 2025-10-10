@@ -158,6 +158,111 @@ java -jar nvd-tool-1.0-SNAPSHOT.jar merge \
   --output-file merged-cve-data.json
 ```
 
+## Architecture
+
+### Producer-Consumer Pattern
+
+The tool uses a producer-consumer pattern for concurrent downloads with the following components:
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Coordinator
+    participant Producer
+    participant Queue as BlockingDeque
+    participant Consumer as ConsumerHelper
+    participant Tracker as RequestTracker
+    participant HttpUtil
+
+    Coordinator->>Producer: submit() (ExecutorService)
+    Producer->>Queue: put(QueueElement)
+    Note right of Producer: in finally -> addPoisonElements()<br/>-> put(poison QE)
+
+    alt Consumer threads running
+        Consumer->>Queue: take()
+        Queue-->>Consumer: QueueElement
+        Consumer->>Consumer: isPoisonPill(element)?
+        alt if poison
+            Consumer->>Consumer: log & break -> thread ends
+        else not poison
+            Consumer->>Tracker: addRequest(key) [may block]
+            alt Tracker full
+                Consumer->>Consumer: sleepQuietly(delay) and retry addRequest
+            end
+            Consumer->>HttpUtil: downloadHttpGetRequest(uri, outFile)
+            alt success
+                Consumer->>Consumer: success processing
+            else failure (e.g. 403)
+                Consumer->>Queue: offerFirst(element) [retry]
+                Consumer->>Consumer: incrementAttempts(), maybe sleepBackoff
+            end
+        end
+    end
+```
+
+#### Class Diagram
+
+```mermaid
+classDiagram
+    class QueueElement {
+        -URI uri
+        -File outFile
+        -AtomicInteger attempts
+        +incrementAttempts()
+        +getAttempts()
+        +getKey()
+    }
+
+    class BaseProcessor {
+        -BlockingDeque~QueueElement~ downloadQueue
+        -FeedType feedType
+        -T poison
+        +createOutDir()
+        +getResults(URI, handler)
+    }
+
+    class ProducerHelper {
+    }
+
+    class ConsumerHelper {
+        -RequestTracker requestTracker
+        -IsPoisonPillFunction isPoisonPillFunction
+        +processQueue()
+        +consumeElement(QueueElement)
+        +addRequestToTracker(QueueElement)
+    }
+
+    class RequestTracker {
+        -Map~String, Long~ requestTimes
+        +addRequest(String) boolean
+    }
+
+    class IsPoisonPillFunction {
+        <<interface>>
+        +isPoisonPill(QueueElement) boolean
+    }
+
+    class StartIndexProducer
+    class DatesProducer
+    class StartIndexConsumer
+    class DatesConsumer
+
+    BaseProcessor <|-- StartIndexProducer
+    BaseProcessor <|-- DatesProducer
+    BaseProcessor <|-- StartIndexConsumer
+    BaseProcessor <|-- DatesConsumer
+
+    StartIndexProducer --> ProducerHelper : uses
+    DatesProducer --> ProducerHelper : uses
+    StartIndexConsumer --> ConsumerHelper : uses
+    DatesConsumer --> ConsumerHelper : uses
+
+    ConsumerHelper --> RequestTracker : uses
+    ConsumerHelper --> IsPoisonPillFunction : uses
+    ConsumerHelper --> QueueElement : processes
+```
+
 ## Project Structure
 
 ```text

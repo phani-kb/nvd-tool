@@ -46,7 +46,7 @@
     <mockito.version>5.18.0</mockito.version>
     <palantir.version>2.50.0</palantir.version>
     <picocli.version>4.7.5</picocli.version>
-    <pmd.version>7.10.0</pmd.version>
+    <pmd.version>7.17.0</pmd.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spotbugs.maven.version>4.8.6.6</spotbugs.maven.version>
