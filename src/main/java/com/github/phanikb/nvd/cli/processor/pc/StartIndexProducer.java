@@ -21,7 +21,22 @@ import static com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientRes
 public class StartIndexProducer extends StartIndexProcessor<Integer> implements IApiDownloadUriProducer {
     private final ProducerHelper producerHelper;
 
-    public StartIndexProducer(
+    private StartIndexProducer(
+            FeedType type,
+            int poison,
+            int poisonPerCreator,
+            int maxResultsPerPage,
+            String endpoint,
+            Path outDir,
+            String outFilePrefix,
+            List<NameValuePair> queryParams,
+            BlockingDeque<QueueElement> downloadQueue,
+            ProducerHelper producerHelper) {
+        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
+        this.producerHelper = producerHelper;
+    }
+
+    public static StartIndexProducer create(
             FeedType type,
             int poison,
             int poisonPerCreator,
@@ -31,8 +46,20 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
             String outFilePrefix,
             List<NameValuePair> queryParams,
             BlockingDeque<QueueElement> downloadQueue) {
-        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
-        this.producerHelper = new ProducerHelper(type, this::calculateTotalResults, queryParams);
+        StartIndexProducer[] ref = new StartIndexProducer[1];
+        ProducerHelper helper = new ProducerHelper(type, () -> ref[0].calculateTotalResults(), queryParams);
+        ref[0] = new StartIndexProducer(
+                type,
+                poison,
+                poisonPerCreator,
+                maxResultsPerPage,
+                endpoint,
+                outDir,
+                outFilePrefix,
+                queryParams,
+                downloadQueue,
+                helper);
+        return ref[0];
     }
 
     public StartIndexProducer(

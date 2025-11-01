@@ -23,9 +23,15 @@ import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.QueueElement;
 import com.github.phanikb.nvd.enums.FeedType;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class StartIndexProducerTest {
 
@@ -53,7 +59,7 @@ class StartIndexProducerTest {
 
     @Test
     void testConstructorWithQueryParams() {
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -197,7 +203,7 @@ class StartIndexProducerTest {
 
     @Test
     void testGetDownloadUri() throws Exception {
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -225,7 +231,7 @@ class StartIndexProducerTest {
 
     @Test
     void testGetDownloadUriWithInvalidEndpoint() {
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -339,7 +345,7 @@ class StartIndexProducerTest {
 
     @Test
     void testGenerateTotalResultsUri() throws Exception {
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -362,7 +368,7 @@ class StartIndexProducerTest {
 
     @Test
     void testGenerateTotalResultsUriWithInvalidEndpoint() {
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -382,7 +388,7 @@ class StartIndexProducerTest {
 
     @Test
     void testCalculateTotalResults() {
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -474,7 +480,7 @@ class StartIndexProducerTest {
     @Test
     void testDifferentFeedTypes() {
         FeedType feedType = FeedType.CVE;
-        producer = new StartIndexProducer(
+        producer = StartIndexProducer.create(
                 feedType,
                 poison,
                 1,

@@ -94,7 +94,14 @@ public class ProducerHelper {
                 .filter(p -> p.getName().equals(ApiQueryParams.START_INDEX.getName()))
                 .findFirst()
                 .map(NameValuePair::getValue)
-                .map(Integer::parseInt)
+                .map(val -> {
+                    try {
+                        return Integer.parseInt(val);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException(
+                                ApiQueryParams.START_INDEX.getName() + " parameter is not a valid integer: " + val, e);
+                    }
+                })
                 .orElseThrow(() ->
                         new IllegalArgumentException(ApiQueryParams.START_INDEX.getName() + " parameter is missing"));
     }

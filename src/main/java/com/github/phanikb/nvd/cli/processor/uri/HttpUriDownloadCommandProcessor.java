@@ -29,11 +29,16 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
     private final HttpClient httpClient;
     private final ExecutorService executor;
 
-    public HttpUriDownloadCommandProcessor(
+    private HttpUriDownloadCommandProcessor(
             FeedType feedType, File outDir, ArchiveType archiveType, boolean extract, Set<URI> uris) {
         super(feedType, outDir, archiveType, extract, uris);
         this.httpClient = buildHttpClient();
         this.executor = Executors.newFixedThreadPool(getMaxConcurrentDownloads());
+    }
+
+    public static HttpUriDownloadCommandProcessor create(
+            FeedType feedType, File outDir, ArchiveType archiveType, boolean extract, Set<URI> uris) {
+        return new HttpUriDownloadCommandProcessor(feedType, outDir, archiveType, extract, uris);
     }
 
     @Override
@@ -42,10 +47,12 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
         List<CompletableFuture<HttpUriDownloadStatus>> futures = getUris().stream()
                 .map(uri -> CompletableFuture.supplyAsync(() -> downloadUri(uri, outDir), executor))
                 .toList();
-        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
         allOf.join(); // wait for all futures to complete
 
-        return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
     }
 
     private HttpUriDownloadStatus downloadUri(URI uri, File outDir) {

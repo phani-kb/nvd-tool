@@ -15,18 +15,7 @@ import com.github.phanikb.nvd.enums.FeedType;
 public class DatesConsumer extends DatesProcessor<LocalDateTime> implements IApiDownloadUriConsumer {
     private final ConsumerHelper consumerHelper;
 
-    public DatesConsumer(
-            FeedType feedType,
-            LocalDateTime poison,
-            Path outDir,
-            String outFilePrefix,
-            BlockingDeque<QueueElement> downloadQueue) {
-        super(feedType, poison, outDir, outFilePrefix, downloadQueue);
-        this.consumerHelper = new ConsumerHelper(feedType, downloadQueue);
-        this.consumerHelper.setIsPoisonPillFunction(this::isPoisonPill);
-    }
-
-    public DatesConsumer(
+    private DatesConsumer(
             FeedType feedType,
             LocalDateTime poison,
             Path outDir,
@@ -35,6 +24,18 @@ public class DatesConsumer extends DatesProcessor<LocalDateTime> implements IApi
             ConsumerHelper consumerHelper) {
         super(feedType, poison, outDir, outFilePrefix, downloadQueue);
         this.consumerHelper = consumerHelper;
+    }
+
+    public static DatesConsumer create(
+            FeedType feedType,
+            LocalDateTime poison,
+            Path outDir,
+            String outFilePrefix,
+            BlockingDeque<QueueElement> downloadQueue) {
+        ConsumerHelper helper = new ConsumerHelper(feedType, downloadQueue);
+        DatesConsumer consumer = new DatesConsumer(feedType, poison, outDir, outFilePrefix, downloadQueue, helper);
+        helper.setIsPoisonPillFunction(consumer::isPoisonPill);
+        return consumer;
     }
 
     @Override

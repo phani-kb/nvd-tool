@@ -46,7 +46,7 @@ class HttpUriDownloadCommandProcessorTest {
 
     @Test
     void testConstructorAndGetters() {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, true, uris);
+        processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, true, uris);
 
         assertEquals(FeedType.CVE, processor.getFeedType());
         assertEquals(outDir, processor.getOutDir());
@@ -57,7 +57,7 @@ class HttpUriDownloadCommandProcessorTest {
 
     @Test
     void testConstructorWithNullUris() {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, true, null);
+        processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, true, null);
 
         assertEquals(FeedType.CVE, processor.getFeedType());
         assertEquals(outDir, processor.getOutDir());
@@ -73,8 +73,8 @@ class HttpUriDownloadCommandProcessorTest {
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent");
             mockedHttpUtil.when(HttpUtil::getProxy).thenReturn(null);
 
-            processor =
-                    new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+            processor = HttpUriDownloadCommandProcessor.create(
+                    FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
             List<HttpUriDownloadStatus> results = processor.download();
 
@@ -95,7 +95,7 @@ class HttpUriDownloadCommandProcessorTest {
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent");
             mockedHttpUtil.when(HttpUtil::getProxy).thenReturn(null);
 
-            processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, uris);
+            processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, uris);
 
             List<HttpUriDownloadStatus> results = processor.download();
 
@@ -108,7 +108,7 @@ class HttpUriDownloadCommandProcessorTest {
     void testDownloadWithNullFilename() throws Exception {
         URI uriWithoutPath = URI.create("https://example.com");
 
-        processor = new HttpUriDownloadCommandProcessor(
+        processor = HttpUriDownloadCommandProcessor.create(
                 FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(uriWithoutPath));
 
         List<HttpUriDownloadStatus> results = processor.download();
@@ -125,7 +125,7 @@ class HttpUriDownloadCommandProcessorTest {
     void testDownloadWithEmptyPath() throws Exception {
         URI uriWithEmptyPath = URI.create("https://example.com/");
 
-        processor = new HttpUriDownloadCommandProcessor(
+        processor = HttpUriDownloadCommandProcessor.create(
                 FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(uriWithEmptyPath));
 
         List<HttpUriDownloadStatus> results = processor.download();
@@ -141,7 +141,8 @@ class HttpUriDownloadCommandProcessorTest {
 
     @Test
     void testDownloadWithNullUri() throws Exception {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+        processor =
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
         assertThrows(NvdDownloadException.class, () -> {
             processor.download(null, outDir, new File("test.json"));
@@ -150,7 +151,8 @@ class HttpUriDownloadCommandProcessorTest {
 
     @Test
     void testDownloadWithNullFilenameParameter() throws Exception {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+        processor =
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
         assertThrows(NvdDownloadException.class, () -> {
             processor.download(testUri, outDir, null);
@@ -162,7 +164,8 @@ class HttpUriDownloadCommandProcessorTest {
         File directory = new File(outDir, "test-dir");
         directory.mkdirs();
 
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+        processor =
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
         assertThrows(NvdDownloadException.class, () -> {
             processor.download(testUri, outDir, directory);
@@ -174,7 +177,8 @@ class HttpUriDownloadCommandProcessorTest {
         File existingFile = new File(outDir, "existing.json");
         existingFile.createNewFile();
 
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+        processor =
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
         try {
             processor.download(testUri, outDir, existingFile);
@@ -192,8 +196,8 @@ class HttpUriDownloadCommandProcessorTest {
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent");
             mockedHttpUtil.when(HttpUtil::getProxy).thenReturn(proxy);
 
-            processor =
-                    new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+            processor = HttpUriDownloadCommandProcessor.create(
+                    FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
             assertNotNull(processor);
         }
@@ -206,8 +210,8 @@ class HttpUriDownloadCommandProcessorTest {
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent");
             mockedHttpUtil.when(HttpUtil::getProxy).thenReturn(null);
 
-            processor =
-                    new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+            processor = HttpUriDownloadCommandProcessor.create(
+                    FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
             processor.process();
 
@@ -218,14 +222,16 @@ class HttpUriDownloadCommandProcessorTest {
 
     @Test
     void testCloseExecutorService() throws Exception {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+        processor =
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
         processor.close();
     }
 
     @Test
     void testGetMaxConcurrentDownloads() {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+        processor =
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
         int maxDownloads = processor.getMaxConcurrentDownloads();
         assertTrue(maxDownloads > 0);
@@ -237,8 +243,8 @@ class HttpUriDownloadCommandProcessorTest {
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent/1.0");
             mockedHttpUtil.when(HttpUtil::getProxy).thenReturn(null);
 
-            processor =
-                    new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
+            processor = HttpUriDownloadCommandProcessor.create(
+                    FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
             assertNotNull(processor);
         }
@@ -246,7 +252,7 @@ class HttpUriDownloadCommandProcessorTest {
 
     @Test
     void testEmptyUriSet() throws Exception {
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of());
+        processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of());
 
         List<HttpUriDownloadStatus> results = processor.download();
 
@@ -257,7 +263,7 @@ class HttpUriDownloadCommandProcessorTest {
     @Test
     void testUriWithNullInSet() throws Exception {
         Set<URI> urisWithNull = Set.of(testUri); // Can't add null to a Set.of()
-        processor = new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, urisWithNull);
+        processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, urisWithNull);
 
         assertNotNull(processor.getUris());
         assertEquals(1, processor.getUris().size());
@@ -266,33 +272,33 @@ class HttpUriDownloadCommandProcessorTest {
     @Test
     void testDifferentArchiveTypes() {
         HttpUriDownloadCommandProcessor zipProcessor =
-                new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, true, uris);
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, true, uris);
         assertEquals(ArchiveType.ZIP, zipProcessor.getArchiveType());
 
         HttpUriDownloadCommandProcessor gzProcessor =
-                new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.GZ, true, uris);
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.GZ, true, uris);
         assertEquals(ArchiveType.GZ, gzProcessor.getArchiveType());
     }
 
     @Test
     void testDifferentFeedTypes() {
         HttpUriDownloadCommandProcessor cveProcessor =
-                new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, uris);
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, uris);
         assertEquals(FeedType.CVE, cveProcessor.getFeedType());
 
         HttpUriDownloadCommandProcessor cpeProcessor =
-                new HttpUriDownloadCommandProcessor(FeedType.CPE, outDir, ArchiveType.ZIP, false, uris);
+                HttpUriDownloadCommandProcessor.create(FeedType.CPE, outDir, ArchiveType.ZIP, false, uris);
         assertEquals(FeedType.CPE, cpeProcessor.getFeedType());
     }
 
     @Test
     void testExtractOption() {
         HttpUriDownloadCommandProcessor extractProcessor =
-                new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, true, uris);
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, true, uris);
         assertTrue(extractProcessor.isExtract());
 
         HttpUriDownloadCommandProcessor noExtractProcessor =
-                new HttpUriDownloadCommandProcessor(FeedType.CVE, outDir, ArchiveType.ZIP, false, uris);
+                HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, uris);
         assertFalse(noExtractProcessor.isExtract());
     }
 }

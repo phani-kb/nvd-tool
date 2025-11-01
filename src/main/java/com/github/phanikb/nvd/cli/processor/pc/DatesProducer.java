@@ -34,7 +34,23 @@ import static com.github.phanikb.nvd.common.Util.getRangeDates;
 public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApiDownloadUriProducer {
     private final ProducerHelper producerHelper;
 
-    public DatesProducer(
+    private DatesProducer(
+            FeedType type,
+            LocalDateTime poison,
+            int poisonPerCreator,
+            int maxResultsPerPage,
+            String endpoint,
+            Path outDir,
+            String outFilePrefix,
+            List<NameValuePair> queryParams,
+            List<NvdApiDate> dates,
+            BlockingDeque<QueueElement> downloadQueue,
+            ProducerHelper producerHelper) {
+        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, dates, downloadQueue);
+        this.producerHelper = producerHelper;
+    }
+
+    public static DatesProducer create(
             FeedType type,
             LocalDateTime poison,
             int poisonPerCreator,
@@ -45,8 +61,21 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
             List<NameValuePair> queryParams,
             List<NvdApiDate> dates,
             BlockingDeque<QueueElement> downloadQueue) {
-        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, dates, downloadQueue);
-        this.producerHelper = new ProducerHelper(type, this::calculateTotalResults, queryParams);
+        DatesProducer[] ref = new DatesProducer[1];
+        ProducerHelper helper = new ProducerHelper(type, () -> ref[0].calculateTotalResults(), queryParams);
+        ref[0] = new DatesProducer(
+                type,
+                poison,
+                poisonPerCreator,
+                maxResultsPerPage,
+                endpoint,
+                outDir,
+                outFilePrefix,
+                queryParams,
+                dates,
+                downloadQueue,
+                helper);
+        return ref[0];
     }
 
     public DatesProducer(

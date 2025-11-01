@@ -15,6 +15,7 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -346,8 +347,10 @@ public final class Util {
                 }
             }
 
-            actualResultsCount =
-                    actualResults.stream().mapToInt(Integer::intValue).sum();
+            actualResultsCount = actualResults.stream()
+                    .filter(Objects::nonNull)
+                    .mapToInt(Integer::intValue)
+                    .sum();
 
             generator.writeEndArray();
             generator.writeObjectField("timestamp", timestamp);

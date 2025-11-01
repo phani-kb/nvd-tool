@@ -66,13 +66,13 @@ public abstract class BaseProcessor<T> implements Runnable {
         this.outFilePrefix = outFilePrefix;
         this.downloadQueue = downloadQueue;
         try {
-            createOutDir();
+            this.createOutDir();
         } catch (NvdException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected <T> int getResults(URI uri, HttpClientResponseHandler<T> responseHandler) throws NvdException {
+    protected <R> int getResults(URI uri, HttpClientResponseHandler<R> responseHandler) throws NvdException {
         if (uri == null || uri.getHost() == null) {
             throw new NvdException("invalid URI: " + uri);
         }
@@ -85,7 +85,7 @@ public abstract class BaseProcessor<T> implements Runnable {
                 .setRetryStrategy(new CustomHttpRequestRetryStrategy(maxRetries, TimeValue.ofSeconds(retryInterval)))
                 .setDefaultHeaders(HttpUtil.getNvdDefaultHeaders())
                 .build()) {
-            T apiJson = HttpUtil.getApiJson(uri, httpclient, responseHandler);
+            R apiJson = HttpUtil.getApiJson(uri, httpclient, responseHandler);
             return switch (type) {
                 case CVE -> ((CveApiJson20Schema) apiJson).getTotalResults();
                 case CVE_HISTORY -> ((CveHistoryApiJson20Schema) apiJson).getTotalResults();
@@ -98,7 +98,7 @@ public abstract class BaseProcessor<T> implements Runnable {
         }
     }
 
-    protected void createOutDir() throws NvdException {
+    private void createOutDir() throws NvdException {
         if (outDir != null) {
             Util.createDir(outDir);
         }

@@ -14,18 +14,7 @@ import com.github.phanikb.nvd.enums.FeedType;
 public class StartIndexConsumer extends StartIndexProcessor<Integer> implements IApiDownloadUriConsumer {
     private final ConsumerHelper consumerHelper;
 
-    public StartIndexConsumer(
-            FeedType feedType,
-            int poison,
-            Path outDir,
-            String outFilePrefix,
-            BlockingDeque<QueueElement> downloadQueue) {
-        super(feedType, poison, outDir, outFilePrefix, downloadQueue);
-        this.consumerHelper = new ConsumerHelper(feedType, downloadQueue);
-        consumerHelper.setIsPoisonPillFunction(this::isPoisonPill);
-    }
-
-    public StartIndexConsumer(
+    private StartIndexConsumer(
             FeedType feedType,
             int poison,
             Path outDir,
@@ -34,6 +23,19 @@ public class StartIndexConsumer extends StartIndexProcessor<Integer> implements 
             ConsumerHelper consumerHelper) {
         super(feedType, poison, outDir, outFilePrefix, downloadQueue);
         this.consumerHelper = consumerHelper;
+    }
+
+    public static StartIndexConsumer create(
+            FeedType feedType,
+            int poison,
+            Path outDir,
+            String outFilePrefix,
+            BlockingDeque<QueueElement> downloadQueue) {
+        ConsumerHelper helper = new ConsumerHelper(feedType, downloadQueue);
+        StartIndexConsumer consumer =
+                new StartIndexConsumer(feedType, poison, outDir, outFilePrefix, downloadQueue, helper);
+        helper.setIsPoisonPillFunction(consumer::isPoisonPill);
+        return consumer;
     }
 
     @Override

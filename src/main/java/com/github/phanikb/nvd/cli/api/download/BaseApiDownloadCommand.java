@@ -199,7 +199,7 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
         BlockingDeque<QueueElement> downloadQueue = new LinkedBlockingDeque<>();
         List<NameValuePair> queryParams = getQueryParams();
         if (dates != null && dates.size() == 2) {
-            producer = new DatesProducer(
+            producer = DatesProducer.create(
                     feedType,
                     DEFAULT_DATETIME_POISON,
                     poisonPerCreator,
@@ -210,10 +210,10 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
                     queryParams,
                     dates,
                     downloadQueue);
-            consumer = new DatesConsumer(
+            consumer = DatesConsumer.create(
                     feedType, DEFAULT_DATETIME_POISON, getOutDir().toPath(), prefix, downloadQueue);
         } else {
-            producer = new StartIndexProducer(
+            producer = StartIndexProducer.create(
                     feedType,
                     DEFAULT_POISON,
                     poisonPerCreator,
@@ -223,8 +223,8 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
                     prefix,
                     queryParams,
                     downloadQueue);
-            consumer =
-                    new StartIndexConsumer(feedType, DEFAULT_POISON, getOutDir().toPath(), prefix, downloadQueue);
+            consumer = StartIndexConsumer.create(
+                    feedType, DEFAULT_POISON, getOutDir().toPath(), prefix, downloadQueue);
         }
         return new ApiDownloader(
                 feedType, getOutDir(), this.getOutFilename(), isDeleteTempDir(), isCompress(), rpp, consumer, producer);

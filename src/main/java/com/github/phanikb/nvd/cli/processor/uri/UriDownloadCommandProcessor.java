@@ -5,7 +5,6 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import lombok.Getter;
@@ -36,11 +35,9 @@ public abstract class UriDownloadCommandProcessor extends CommandProcessor imple
     public UriDownloadCommandProcessor(
             FeedType feedType, File outDir, ArchiveType archiveType, boolean extract, Set<URI> uris) {
         this(feedType, outDir, archiveType, extract);
-        Optional.ofNullable(uris).orElse(new HashSet<>()).forEach(uri -> {
-            if (uri != null) {
-                this.uris.add(uri);
-            }
-        });
+        if (uris != null) {
+            this.uris.addAll(uris);
+        }
     }
 
     public static IUriDownloadCommandProcessor getProcessor(
@@ -51,7 +48,7 @@ public abstract class UriDownloadCommandProcessor extends CommandProcessor imple
             boolean extract,
             Set<URI> uris) {
         if (transferMethod == TransferMethod.HTTP) {
-            return new HttpUriDownloadCommandProcessor(feedType, outDir, archiveType, extract, uris);
+            return HttpUriDownloadCommandProcessor.create(feedType, outDir, archiveType, extract, uris);
         } else {
             throw new IllegalArgumentException("Unsupported transfer method: " + transferMethod);
         }

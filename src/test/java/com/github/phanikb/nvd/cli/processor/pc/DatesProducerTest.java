@@ -26,10 +26,17 @@ import com.github.phanikb.nvd.common.QueueElement;
 import com.github.phanikb.nvd.enums.FeedType;
 import com.github.phanikb.nvd.enums.NvdApiDateType;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class DatesProducerTest {
 
@@ -65,7 +72,7 @@ class DatesProducerTest {
 
     @Test
     void testConstructorWithQueryParams() {
-        producer = new DatesProducer(
+        producer = DatesProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -114,7 +121,7 @@ class DatesProducerTest {
                 Arrays.asList(new NvdApiDate("lastModStartDate", LocalDateTime.now(), NvdApiDateType.START_DATE));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new DatesProducer(
+            DatesProducer.create(
                     FeedType.CVE,
                     poison,
                     1,
@@ -460,7 +467,7 @@ class DatesProducerTest {
     void testEmptyQueryParams() {
         List<NameValuePair> emptyParams = new ArrayList<>();
 
-        producer = new DatesProducer(
+        producer = DatesProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
@@ -479,7 +486,7 @@ class DatesProducerTest {
     @Test
     void testDifferentFeedTypes() {
         FeedType feedType = FeedType.CVE;
-        producer = new DatesProducer(
+        producer = DatesProducer.create(
                 feedType,
                 poison,
                 1,
@@ -496,7 +503,7 @@ class DatesProducerTest {
 
     @Test
     void testCalculateTotalResults() throws Exception {
-        producer = new DatesProducer(
+        producer = DatesProducer.create(
                 FeedType.CVE,
                 poison,
                 1,
