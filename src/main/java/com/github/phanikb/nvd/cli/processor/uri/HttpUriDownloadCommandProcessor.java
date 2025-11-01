@@ -50,9 +50,7 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
         allOf.join(); // wait for all futures to complete
 
-        return futures.stream()
-                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
+        return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 
     private HttpUriDownloadStatus downloadUri(URI uri, File outDir) {

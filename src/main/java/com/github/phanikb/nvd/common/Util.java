@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hc.core5.util.TimeValue;
@@ -142,7 +141,7 @@ public final class Util {
         File downloadedFile = new File(outputDir, filename);
         try {
             archiveType.extract(downloadedFile, outputDir);
-        } catch (IOException | ArchiveException | CompressorException e) {
+        } catch (IOException e) {
             throw new NvdException(e.getMessage(), e);
         }
     }
@@ -379,7 +378,9 @@ public final class Util {
 
         try {
             format.archive(outFile, outFile.getParentFile());
-        } catch (IOException | ArchiveException e) {
+        } catch (ArchiveException e) {
+            logger.error("failed to compress file: {}, error: {}", outFile.getAbsolutePath(), e.getMessage());
+        } catch (IOException e) {
             logger.error("failed to compress file: {}, error: {}", outFile.getAbsolutePath(), e.getMessage());
         }
     }
