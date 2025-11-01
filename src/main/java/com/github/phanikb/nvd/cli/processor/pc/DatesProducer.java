@@ -34,22 +34,6 @@ import static com.github.phanikb.nvd.common.Util.getRangeDates;
 public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApiDownloadUriProducer {
     private final ProducerHelper producerHelper;
 
-    private DatesProducer(
-            FeedType type,
-            LocalDateTime poison,
-            int poisonPerCreator,
-            int maxResultsPerPage,
-            String endpoint,
-            Path outDir,
-            String outFilePrefix,
-            List<NameValuePair> queryParams,
-            List<NvdApiDate> dates,
-            BlockingDeque<QueueElement> downloadQueue,
-            ProducerHelper producerHelper) {
-        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, dates, downloadQueue);
-        this.producerHelper = producerHelper;
-    }
-
     public static DatesProducer create(
             FeedType type,
             LocalDateTime poison,
@@ -71,7 +55,6 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
                 endpoint,
                 outDir,
                 outFilePrefix,
-                queryParams,
                 dates,
                 downloadQueue,
                 helper);

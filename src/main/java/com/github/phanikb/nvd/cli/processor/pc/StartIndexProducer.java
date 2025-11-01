@@ -21,7 +21,7 @@ import static com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientRes
 public class StartIndexProducer extends StartIndexProcessor<Integer> implements IApiDownloadUriProducer {
     private final ProducerHelper producerHelper;
 
-    private StartIndexProducer(
+    public StartIndexProducer(
             FeedType type,
             int poison,
             int poisonPerCreator,
@@ -29,7 +29,6 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
             String endpoint,
             Path outDir,
             String outFilePrefix,
-            List<NameValuePair> queryParams,
             BlockingDeque<QueueElement> downloadQueue,
             ProducerHelper producerHelper) {
         super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
@@ -56,24 +55,9 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
                 endpoint,
                 outDir,
                 outFilePrefix,
-                queryParams,
                 downloadQueue,
                 helper);
         return ref[0];
-    }
-
-    public StartIndexProducer(
-            FeedType type,
-            int poison,
-            int poisonPerCreator,
-            int maxResultsPerPage,
-            String endpoint,
-            Path outDir,
-            String outFilePrefix,
-            BlockingDeque<QueueElement> downloadQueue,
-            ProducerHelper producerHelper) {
-        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
-        this.producerHelper = producerHelper;
     }
 
     @Override
