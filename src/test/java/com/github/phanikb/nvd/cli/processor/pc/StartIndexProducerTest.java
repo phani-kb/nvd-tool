@@ -65,18 +65,15 @@ class StartIndexProducerTest {
                 FeedType.CVE,
                 poison,
                 1,
-                100,
                 "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
-                queryParams,
                 downloadQueue);
 
         assertNotNull(producer);
         assertEquals(FeedType.CVE, producer.getFeedType());
         assertEquals(poison, producer.getPoison());
         assertEquals(1, producer.getPoisonPerCreator());
-        assertEquals(100, producer.getMaxResultsPerPage());
         assertEquals("https://services.nvd.nist.gov/rest/json/cves/2.0", producer.getEndpoint());
         assertEquals(tempDir, producer.getOutDir());
         assertEquals("test-prefix", producer.getOutFilePrefix());
@@ -85,16 +82,16 @@ class StartIndexProducerTest {
 
     @Test
     void testConstructorWithProducerHelper() {
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         assertNotNull(producer);
     }
@@ -105,16 +102,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.getStartIndex()).thenReturn(50);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 
@@ -143,16 +140,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.getTotalPages(100)).thenReturn(3);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 
@@ -183,16 +180,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.hasStartIndex()).thenReturn(false);
         when(mockProducerHelper.getTotalPages(anyInt())).thenThrow(new NvdException("Test exception"));
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 
@@ -209,11 +206,9 @@ class StartIndexProducerTest {
                 FeedType.CVE,
                 poison,
                 1,
-                100,
                 "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
-                queryParams,
                 downloadQueue);
 
         List<NameValuePair> testParams = Arrays.asList(
@@ -237,11 +232,9 @@ class StartIndexProducerTest {
                 FeedType.CVE,
                 poison,
                 1,
-                100,
                 "ht<>tp://invalid URL with spaces",
                 tempDir,
                 "test-prefix",
-                queryParams,
                 downloadQueue);
 
         List<NameValuePair> testParams = List.of(new BasicNameValuePair("resultsPerPage", "50"));
@@ -253,16 +246,16 @@ class StartIndexProducerTest {
 
     @Test
     void testGenerateUris() {
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
@@ -287,16 +280,16 @@ class StartIndexProducerTest {
     void testGetTotalPages() throws NvdException {
         when(mockProducerHelper.getTotalPages(100)).thenReturn(5);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         int totalPages = producer.getTotalPages();
         assertEquals(5, totalPages);
@@ -307,16 +300,16 @@ class StartIndexProducerTest {
     void testGetTotalResults() throws NvdException {
         when(mockProducerHelper.getTotalResults()).thenReturn(500);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         int totalResults = producer.getTotalResults();
         assertEquals(500, totalResults);
@@ -327,16 +320,16 @@ class StartIndexProducerTest {
     void testGetTotalFiles() throws NvdException {
         when(mockProducerHelper.getTotalPages(100)).thenReturn(10);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 1,
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         int totalFiles = producer.getTotalFiles();
         assertEquals(10, totalFiles);
@@ -349,11 +342,9 @@ class StartIndexProducerTest {
                 FeedType.CVE,
                 poison,
                 1,
-                100,
                 "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
-                queryParams,
                 downloadQueue);
 
         URI totalResultsUri = producer.generateTotalResultsUri();
@@ -372,11 +363,9 @@ class StartIndexProducerTest {
                 FeedType.CVE,
                 poison,
                 1,
-                100,
                 "ht<>tp://invalid URL",
                 tempDir,
                 "test-prefix",
-                queryParams,
                 downloadQueue);
 
         NvdException exception = assertThrows(NvdException.class, () -> producer.generateTotalResultsUri());
@@ -390,11 +379,9 @@ class StartIndexProducerTest {
                 FeedType.CVE,
                 poison,
                 1,
-                100,
                 "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
-                queryParams,
                 downloadQueue);
 
         assertDoesNotThrow(() -> {
@@ -409,16 +396,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.getStartIndex()).thenReturn(200);
         when(mockProducerHelper.getQueryParams()).thenReturn(List.of(new BasicNameValuePair("resultsPerPage", "25")));
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 0, // No poison elements for this test
-                25,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "nvd-test",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 
@@ -445,16 +432,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.getStartIndex()).thenReturn(0);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 3, // Multiple poison elements
-                100,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "test-prefix",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 
@@ -479,11 +466,9 @@ class StartIndexProducerTest {
                 feedType,
                 poison,
                 1,
-                100,
                 "https://services.nvd.nist.gov/rest/json/" + feedType.name().toLowerCase() + "/2.0",
                 tempDir,
                 feedType.name().toLowerCase(),
-                queryParams,
                 downloadQueue);
 
         assertEquals(feedType, producer.getFeedType());
@@ -495,16 +480,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.getStartIndex()).thenReturn(0);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 0,
-                50,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "zero-test",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 
@@ -528,16 +513,16 @@ class StartIndexProducerTest {
         when(mockProducerHelper.getStartIndex()).thenReturn(999999);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
 
-        producer = new StartIndexProducer(
+        StartIndexProducer.Config config = new StartIndexProducer.Config(
                 FeedType.CVE,
                 poison,
                 0,
-                1,
-                "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 tempDir,
                 "large-test",
                 downloadQueue,
-                mockProducerHelper);
+                "https://services.nvd.nist.gov/rest/json/cves/2.0");
+        config.setProducerHelper(mockProducerHelper);
+        producer = new StartIndexProducer(config);
 
         producer.run();
 

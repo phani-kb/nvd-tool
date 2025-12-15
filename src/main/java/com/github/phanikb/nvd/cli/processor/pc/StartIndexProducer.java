@@ -16,53 +16,65 @@ import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.QueueElement;
 import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.FeedType;
+import lombok.Getter;
+import lombok.Setter;
 
 import static com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientResponseHandler.getResponseHandler;
 
 public class StartIndexProducer extends StartIndexProcessor<Integer> implements IApiDownloadUriProducer {
     private ProducerHelper producerHelper;
 
-    public StartIndexProducer(
-            FeedType type,
-            int poison,
-            int poisonPerCreator,
-            int maxResultsPerPage,
-            String endpoint,
-            Path outDir,
-            String outFilePrefix,
-            BlockingDeque<QueueElement> downloadQueue) {
-        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
-        this.producerHelper = null;
+    public static class Config {
+        public final FeedType type;
+        public final int poison;
+        public final int poisonPerCreator;
+        public final Path outDir;
+        public final String outFilePrefix;
+        public final BlockingDeque<QueueElement> downloadQueue;
+        @Getter
+        public final String endpoint;
+        @Setter
+        @Getter
+        private ProducerHelper producerHelper;
+
+        public Config(
+                FeedType type,
+                int poison,
+                int poisonPerCreator,
+                Path outDir,
+                String outFilePrefix,
+                BlockingDeque<QueueElement> downloadQueue,
+                String endpoint) {
+            this.type = type;
+            this.poison = poison;
+            this.poisonPerCreator = poisonPerCreator;
+            this.outDir = outDir;
+            this.outFilePrefix = outFilePrefix;
+            this.downloadQueue = downloadQueue;
+            this.endpoint = endpoint;
+            this.producerHelper = null;
+        }
+
     }
 
-    public StartIndexProducer(
-            FeedType type,
-            int poison,
-            int poisonPerCreator,
-            int maxResultsPerPage,
-            String endpoint,
-            Path outDir,
-            String outFilePrefix,
-            BlockingDeque<QueueElement> downloadQueue,
-            ProducerHelper producerHelper) {
-        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
-        this.producerHelper = producerHelper;
+    public StartIndexProducer(Config config) {
+        super(config.type, config.poison, config.outDir, config.outFilePrefix, config.downloadQueue);
+        this.producerHelper = config.getProducerHelper();
     }
 
     public static StartIndexProducer create(
             FeedType type,
             int poison,
             int poisonPerCreator,
-            int maxResultsPerPage,
             String endpoint,
             Path outDir,
             String outFilePrefix,
-            List<NameValuePair> queryParams,
             BlockingDeque<QueueElement> downloadQueue) {
-        StartIndexProducer producer = new StartIndexProducer(
-                type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
-        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, queryParams);
+        Config config = new Config(type, poison, poisonPerCreator, outDir, outFilePrefix, downloadQueue, endpoint);
+        StartIndexProducer producer = new StartIndexProducer(config);
+        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, null);
         producer.producerHelper = helper;
+        config.setProducerHelper(helper);
         return producer;
     }
 
@@ -126,16 +138,10 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
     @Override
     public void generateUris(ExecutorService executorService, int numberOfProducers) {
         for (int i = 0; i < numberOfProducers; i++) {
-            executorService.submit(new StartIndexProducer(
-                    feedType,
-                    poison,
-                    poisonPerCreator,
-                    maxResultsPerPage,
-                    endpoint,
-                    outDir,
-                    outFilePrefix,
-                    downloadQueue,
-                    producerHelper));
+            Config config = new Config(
+                    feedType, poison, poisonPerCreator, outDir, outFilePrefix, downloadQueue, endpoint);
+            config.setProducerHelper(producerHelper);
+            executorService.submit(new StartIndexProducer(config));
         }
     }
 
@@ -155,13 +161,13 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
     }
 
     @Override
-    public int calculateTotalResults() {
+    public int calculateTotalResults() throws NvdException {
         try {
             URI uri = generateTotalResultsUri();
             return getResults(uri, getResponseHandler(feedType));
         } catch (NvdException e) {
             logger.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 

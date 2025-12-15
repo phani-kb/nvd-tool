@@ -10,11 +10,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CalculateTotalResultsFunctionTest {
 
     @Test
-    void testFunctionalInterfaceBasicUsage() throws NvdException {
-        CalculateTotalResultsFunction calculateTotal = () -> 100;
+    void testFunctionalInterfaceWithVariousFixedResults() throws NvdException {
+        CalculateTotalResultsFunction calculateTotal1 = () -> 100;
+        assertEquals(100, calculateTotal1.calculateTotalResults());
 
-        int result = calculateTotal.calculateTotalResults();
-        assertEquals(100, result);
+        CalculateTotalResultsFunction calculateTotal2 = () -> 1000;
+        assertEquals(1000, calculateTotal2.calculateTotalResults());
+
+        CalculateTotalResultsFunction calculateTotal3 = () -> 0;
+        assertEquals(0, calculateTotal3.calculateTotalResults());
+
+        CalculateTotalResultsFunction calculateTotal4 = () -> -50;
+        assertEquals(-50, calculateTotal4.calculateTotalResults());
     }
 
     @Test
@@ -49,14 +56,6 @@ class CalculateTotalResultsFunctionTest {
     }
 
     @Test
-    void testFunctionalInterfaceWithConditionalLogic() throws NvdException {
-        CalculateTotalResultsFunction calculateTotal = () -> 1000;
-
-        int result = calculateTotal.calculateTotalResults();
-        assertEquals(1000, result);
-    }
-
-    @Test
     void testFunctionalInterfaceWithExternalData() throws NvdException {
         int[] data = {10, 20, 30, 40, 50};
         CalculateTotalResultsFunction calculateTotal = () -> {
@@ -69,22 +68,6 @@ class CalculateTotalResultsFunctionTest {
 
         int result = calculateTotal.calculateTotalResults();
         assertEquals(150, result); // 10 + 20 + 30 + 40 + 50 = 150
-    }
-
-    @Test
-    void testFunctionalInterfaceWithZeroResult() throws NvdException {
-        CalculateTotalResultsFunction calculateTotal = () -> 0;
-
-        int result = calculateTotal.calculateTotalResults();
-        assertEquals(0, result);
-    }
-
-    @Test
-    void testFunctionalInterfaceWithNegativeResult() throws NvdException {
-        CalculateTotalResultsFunction calculateTotal = () -> -50;
-
-        int result = calculateTotal.calculateTotalResults();
-        assertEquals(-50, result);
     }
 
     @Test
