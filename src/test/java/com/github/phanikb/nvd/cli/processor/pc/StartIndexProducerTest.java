@@ -229,13 +229,7 @@ class StartIndexProducerTest {
     @Test
     void testGetDownloadUriWithInvalidEndpoint() {
         producer = StartIndexProducer.create(
-                FeedType.CVE,
-                poison,
-                1,
-                "ht<>tp://invalid URL with spaces",
-                tempDir,
-                "test-prefix",
-                downloadQueue);
+                FeedType.CVE, poison, 1, "ht<>tp://invalid URL with spaces", tempDir, "test-prefix", downloadQueue);
 
         List<NameValuePair> testParams = List.of(new BasicNameValuePair("resultsPerPage", "50"));
 
@@ -360,13 +354,7 @@ class StartIndexProducerTest {
     @Test
     void testGenerateTotalResultsUriWithInvalidEndpoint() {
         producer = StartIndexProducer.create(
-                FeedType.CVE,
-                poison,
-                1,
-                "ht<>tp://invalid URL",
-                tempDir,
-                "test-prefix",
-                downloadQueue);
+                FeedType.CVE, poison, 1, "ht<>tp://invalid URL", tempDir, "test-prefix", downloadQueue);
 
         NvdException exception = assertThrows(NvdException.class, () -> producer.generateTotalResultsUri());
 

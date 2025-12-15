@@ -11,13 +11,14 @@ import java.util.concurrent.ExecutorService;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriProducer;
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.QueueElement;
 import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.FeedType;
-import lombok.Getter;
-import lombok.Setter;
 
 import static com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientResponseHandler.getResponseHandler;
 
@@ -31,8 +32,10 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
         public final Path outDir;
         public final String outFilePrefix;
         public final BlockingDeque<QueueElement> downloadQueue;
+
         @Getter
         public final String endpoint;
+
         @Setter
         @Getter
         private ProducerHelper producerHelper;
@@ -54,7 +57,6 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
             this.endpoint = endpoint;
             this.producerHelper = null;
         }
-
     }
 
     public StartIndexProducer(Config config) {
@@ -138,8 +140,8 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
     @Override
     public void generateUris(ExecutorService executorService, int numberOfProducers) {
         for (int i = 0; i < numberOfProducers; i++) {
-            Config config = new Config(
-                    feedType, poison, poisonPerCreator, outDir, outFilePrefix, downloadQueue, endpoint);
+            Config config =
+                    new Config(feedType, poison, poisonPerCreator, outDir, outFilePrefix, downloadQueue, endpoint);
             config.setProducerHelper(producerHelper);
             executorService.submit(new StartIndexProducer(config));
         }
