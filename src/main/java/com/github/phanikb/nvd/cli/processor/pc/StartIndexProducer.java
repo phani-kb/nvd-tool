@@ -101,6 +101,7 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
         return maxResultsPerPageOverride != 0 ? maxResultsPerPageOverride : super.getMaxResultsPerPage();
     }
 
+    @Override
     public void setMaxResultsPerPage(int maxResultsPerPage) {
         this.maxResultsPerPageOverride = maxResultsPerPage;
     }
