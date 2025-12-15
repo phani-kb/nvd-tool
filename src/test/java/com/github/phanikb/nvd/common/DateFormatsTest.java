@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DateFormatsTest {
+class DateFormatsTest {
 
     @Test
-    public void testConstants() {
+    void testConstants() {
         assertNotNull(DateFormats.TODAY, "TODAY should not be null");
         assertNotNull(DateFormats.TODAY_DATETIME, "TODAY_DATETIME should not be null");
         assertTrue(DateFormats.CURRENT_YEAR >= 2002, "CURRENT_YEAR should be at least 2002");
@@ -23,7 +23,7 @@ public class DateFormatsTest {
     }
 
     @Test
-    public void testDateFormatDefault() {
+    void testDateFormatDefault() {
         DateFormats.DateFormat format = DateFormats.DateFormat.DEFAULT;
         assertEquals("yyyy-MM-dd", format.getPattern(), "DEFAULT pattern should be yyyy-MM-dd");
 
@@ -33,7 +33,7 @@ public class DateFormatsTest {
     }
 
     @Test
-    public void testDateFormatOutputFileNameSuffix() {
+    void testDateFormatOutputFileNameSuffix() {
         DateFormats.DateFormat format = DateFormats.DateFormat.OUTPUT_FILE_NAME_SUFFIX;
         assertEquals("yyyyMMdd", format.getPattern(), "OUTPUT_FILE_NAME_SUFFIX pattern should be yyyyMMdd");
 
@@ -43,7 +43,7 @@ public class DateFormatsTest {
     }
 
     @Test
-    public void testDateFormatIsoDateTimeExt() {
+    void testDateFormatIsoDateTimeExt() {
         DateFormats.DateFormat format = DateFormats.DateFormat.ISO_DATE_TIME_EXT;
         assertEquals(
                 "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
@@ -56,7 +56,7 @@ public class DateFormatsTest {
     }
 
     @Test
-    public void testDateFormatWithEndOfDay() {
+    void testDateFormatWithEndOfDay() {
         DateFormats.DateFormat format = DateFormats.DateFormat.DEFAULT;
 
         LocalDateTime testDateTime = LocalDateTime.of(2023, 5, 15, 10, 30);
@@ -72,7 +72,7 @@ public class DateFormatsTest {
     }
 
     @Test
-    public void testDateTimeFormatter() {
+    void testDateTimeFormatter() {
         DateFormats.DateFormat format = DateFormats.DateFormat.DEFAULT;
         DateTimeFormatter formatter = format.getFormatter();
         assertNotNull(formatter, "Formatter should not be null");

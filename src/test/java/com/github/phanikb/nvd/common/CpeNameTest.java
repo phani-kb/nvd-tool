@@ -10,25 +10,25 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CpeNameTest {
+class CpeNameTest {
 
     private CpeName cpeName;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         cpeName = new CpeName();
         assertNotNull(cpeName, "CpeName instance should be created successfully");
     }
 
     @Test
-    public void testParameterizedConstructor() {
+    void testParameterizedConstructor() {
         String testName = "cpe:2.3:a:vendor:product:1.0";
         cpeName = new CpeName(testName);
         assertEquals(testName, cpeName.getName(), "Name should match the value passed to constructor");
     }
 
     @Test
-    public void testConvertMethod() {
+    void testConvertMethod() {
         String testName = "cpe:2.3:a:vendor:product:1.0";
         CpeName converted = cpeName.convert(testName);
 
@@ -38,7 +38,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testValidateNameWithValidNames() {
+    void testValidateNameWithValidNames() {
         String[] validNames = {
             "cpe:2.3:a:vendor:product:1.0", "cpe:2.3:o:microsoft:windows:10", "cpe:2.3:a:apache:tomcat:9.0.0.M1"
         };
@@ -50,7 +50,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testValidateNameWithNullName() {
+    void testValidateNameWithNullName() {
         cpeName = new CpeName(null);
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -60,7 +60,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testValidateNameWithEmptyName() {
+    void testValidateNameWithEmptyName() {
         cpeName = new CpeName("");
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -70,7 +70,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testValidateNameWithInvalidPrefix() {
+    void testValidateNameWithInvalidPrefix() {
         String[] invalidPrefixNames = {
             "cpe:3.0:a:vendor:product:1.0", "cpe2.3:a:vendor:product:1.0", "wrongprefix:2.3:a:vendor:product:1.0"
         };
@@ -88,7 +88,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testValidateNameWithTooFewComponents() {
+    void testValidateNameWithTooFewComponents() {
         String tooFewComponents = "cpe:2.3";
         cpeName = new CpeName(tooFewComponents);
         IllegalArgumentException exception = assertThrows(
@@ -99,7 +99,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testValidateNameWithTooManyComponents() {
+    void testValidateNameWithTooManyComponents() {
         StringBuilder tooManyComponentsBuilder = new StringBuilder("cpe:2.3");
         for (int i = 0; i < 20; i++) {
             tooManyComponentsBuilder.append(":component").append(i);
@@ -115,7 +115,7 @@ public class CpeNameTest {
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         String testName = "cpe:2.3:a:vendor:product:1.0";
         cpeName = new CpeName(testName);
         String toString = cpeName.toString();

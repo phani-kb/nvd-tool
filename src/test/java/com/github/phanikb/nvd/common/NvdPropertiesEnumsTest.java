@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class NvdPropertiesEnumsTest {
+class NvdPropertiesEnumsTest {
 
     @Test
-    public void testApiEndpointVersion() {
+    void testApiEndpointVersion() {
         NvdProperties.ApiEndpointVersion[] values = NvdProperties.ApiEndpointVersion.values();
         assertNotNull(values, "ApiEndpointVersion values should not be null");
         assertEquals(1, values.length, "Should have exactly 1 ApiEndpointVersion value");
@@ -17,7 +17,7 @@ public class NvdPropertiesEnumsTest {
     }
 
     @Test
-    public void testApiEndpointType() {
+    void testApiEndpointType() {
         NvdProperties.ApiEndpointType[] values = NvdProperties.ApiEndpointType.values();
         assertNotNull(values, "ApiEndpointType values should not be null");
         assertEquals(4, values.length, "Should have exactly 4 ApiEndpointType values");
@@ -30,12 +30,12 @@ public class NvdPropertiesEnumsTest {
     }
 
     @Test
-    public void testApiEndpointVersionValueOf() {
+    void testApiEndpointVersionValueOf() {
         assertEquals(NvdProperties.ApiEndpointVersion.V2, NvdProperties.ApiEndpointVersion.valueOf("V2"));
     }
 
     @Test
-    public void testApiEndpointTypeNames() {
+    void testApiEndpointTypeNames() {
         assertEquals("CVE", NvdProperties.ApiEndpointType.CVE.name());
         assertEquals("CPE", NvdProperties.ApiEndpointType.CPE.name());
         assertEquals("CPE_MATCH", NvdProperties.ApiEndpointType.CPE_MATCH.name());
@@ -43,7 +43,7 @@ public class NvdPropertiesEnumsTest {
     }
 
     @Test
-    public void testEnumToString() {
+    void testEnumToString() {
         assertEquals("V2", NvdProperties.ApiEndpointVersion.V2.toString());
         assertEquals("CVE", NvdProperties.ApiEndpointType.CVE.toString());
         assertEquals("CPE", NvdProperties.ApiEndpointType.CPE.toString());

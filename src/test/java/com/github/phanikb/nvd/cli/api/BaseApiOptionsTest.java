@@ -4,7 +4,11 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BaseApiOptionsTest {
 
@@ -13,7 +17,7 @@ class BaseApiOptionsTest {
     @Test
     void testValidateOptionsDoesNotThrow() {
         TestableBaseApiOptions options = new TestableBaseApiOptions();
-        assertDoesNotThrow(() -> options.validateOptions());
+        assertDoesNotThrow(options::validateOptions);
     }
 
     @Test

@@ -14,7 +14,7 @@ class CveHistoryApiOptionsTest {
     @Test
     void testValidateOptionsDoesNotThrow() {
         CveHistoryApiOptions options = new CveHistoryApiOptions();
-        assertDoesNotThrow(() -> options.validateOptions());
+        assertDoesNotThrow(options::validateOptions);
     }
 
     @Test

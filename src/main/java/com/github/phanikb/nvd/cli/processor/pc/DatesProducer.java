@@ -32,7 +32,7 @@ import static com.github.phanikb.nvd.common.Util.getRangeDates;
 
 @Getter
 public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApiDownloadUriProducer {
-    private final ProducerHelper producerHelper;
+    private ProducerHelper producerHelper;
 
     public static DatesProducer create(
             FeedType type,
@@ -45,9 +45,7 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
             List<NameValuePair> queryParams,
             List<NvdApiDate> dates,
             BlockingDeque<QueueElement> downloadQueue) {
-        DatesProducer[] ref = new DatesProducer[1];
-        ProducerHelper helper = new ProducerHelper(type, () -> ref[0].calculateTotalResults(), queryParams);
-        ref[0] = new DatesProducer(
+        DatesProducer producer = new DatesProducer(
                 type,
                 poison,
                 poisonPerCreator,
@@ -56,9 +54,24 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
                 outDir,
                 outFilePrefix,
                 dates,
-                downloadQueue,
-                helper);
-        return ref[0];
+                downloadQueue);
+        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, queryParams);
+        producer.producerHelper = helper;
+        return producer;
+    }
+
+    public DatesProducer(
+            FeedType type,
+            LocalDateTime poison,
+            int poisonPerCreator,
+            int maxResultsPerPage,
+            String endpoint,
+            Path outDir,
+            String outFilePrefix,
+            List<NvdApiDate> dates,
+            BlockingDeque<QueueElement> downloadQueue) {
+        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, dates, downloadQueue);
+        this.producerHelper = null;
     }
 
     public DatesProducer(
@@ -209,8 +222,8 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
             builder.removeParameter(getNvdApiEndDate().name());
             builder.removeParameter(ApiQueryParams.START_INDEX.getName());
             builder.removeParameter(ApiQueryParams.RESULTS_PER_PAGE.getName());
-            builder.addParameter("startIndex", "0");
-            builder.addParameter("resultsPerPage", "1");
+            builder.addParameter(ApiQueryParams.START_INDEX.getName(), "0");
+            builder.addParameter(ApiQueryParams.RESULTS_PER_PAGE.getName(), "1");
         } catch (URISyntaxException e) {
             throw new NvdException("failed to build URI", e);
         }

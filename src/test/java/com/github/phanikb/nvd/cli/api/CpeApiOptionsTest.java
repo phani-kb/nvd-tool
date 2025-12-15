@@ -15,7 +15,7 @@ class CpeApiOptionsTest {
     @Test
     void testValidateOptionsDoesNotThrow() {
         CpeApiOptions options = new CpeApiOptions();
-        assertDoesNotThrow(() -> options.validateOptions());
+        assertDoesNotThrow(options::validateOptions);
     }
 
     @Test
@@ -35,7 +35,7 @@ class CpeApiOptionsTest {
     void testKeywordSearchValid() {
         CpeApiOptions.KeywordSearch keywordSearch = new CpeApiOptions.KeywordSearch();
         keywordSearch.setKeywordExactMatch(true);
-        keywordSearch.setKeywordSearch("test");
+        keywordSearch.setKws("test");
         assertFalse(keywordSearch.isInvalid());
     }
 
@@ -53,7 +53,7 @@ class CpeApiOptionsTest {
         CpeApiOptions options = new CpeApiOptions();
         CpeApiOptions.KeywordSearch keywordSearch = new CpeApiOptions.KeywordSearch();
         keywordSearch.setKeywordExactMatch(true);
-        keywordSearch.setKeywordSearch("test");
+        keywordSearch.setKws("test");
         options.setKeywordSearch(keywordSearch);
         CpeName cpeName = new CpeName("cpe:2.3:o:linux:linux_kernel:2.6.0:*:*:*:*:*:*:*");
         options.setCpeMatchString(cpeName);

@@ -55,7 +55,7 @@ public abstract class BaseProcessor<T> implements Runnable {
         this.downloadQueue = downloadQueue;
     }
 
-    public BaseProcessor(
+    protected BaseProcessor(
             FeedType feedType, T poison, Path outDir, String outFilePrefix, BlockingDeque<QueueElement> downloadQueue) {
         this.feedType = feedType;
         this.poison = poison;

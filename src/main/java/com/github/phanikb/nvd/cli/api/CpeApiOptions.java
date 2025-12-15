@@ -67,10 +67,10 @@ public class CpeApiOptions extends LastModApiOptions {
                 paramLabel = "STRING",
                 description =
                         "Returns any CPE record where a word or phrase is found in the metadata title or reference links.")
-        private String keywordSearch;
+        private String kws;
 
         public boolean isInvalid() {
-            return keywordExactMatch && keywordSearch == null;
+            return keywordExactMatch && kws == null;
         }
     }
 }

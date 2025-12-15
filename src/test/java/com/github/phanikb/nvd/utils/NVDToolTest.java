@@ -1,11 +1,14 @@
 package com.github.phanikb.nvd.utils;
 
+import java.util.concurrent.Callable;
+
 import org.junit.jupiter.api.Test;
 
 import picocli.CommandLine;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,17 +55,16 @@ class NVDToolTest {
     @Test
     void testImplementsCallable() {
         NVDTool tool = new NVDTool();
-        assertTrue(tool instanceof java.util.concurrent.Callable);
+        assertInstanceOf(Callable.class, tool);
     }
 
     @Test
     void testExecutionStrategyMethod() {
-        NVDTool tool = new NVDTool();
         assertDoesNotThrow(() -> {
             java.lang.reflect.Method method =
-                    tool.getClass().getDeclaredMethod("executionStrategy", CommandLine.ParseResult.class);
+                    NVDTool.class.getDeclaredMethod("executionStrategy", CommandLine.ParseResult.class);
             assertNotNull(method);
-            assertTrue(method.getReturnType().equals(int.class));
+            assertEquals(int.class, method.getReturnType());
         });
     }
 

@@ -14,7 +14,7 @@ public abstract class DatesQE extends QueueElement {
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
 
-    public DatesQE(
+    protected DatesQE(
             URI uri, LocalDateTime startDate, LocalDateTime endDate, int startIndex, int endIndex, File outFile) {
         super(uri, outFile, startIndex, endIndex);
         this.startDate = startDate;

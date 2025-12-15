@@ -1,6 +1,7 @@
 package com.github.phanikb.nvd.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 
@@ -11,6 +12,7 @@ import picocli.CommandLine;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +29,8 @@ class BaseCommandTest {
         }
     }
 
-    private void setUpCommand(TestCommand command, File outputDir, String filename) throws Exception {
+    private void setUpCommand(TestCommand command, File outputDir, String filename)
+            throws IllegalAccessException, NoSuchFieldException {
         BaseCommonOptions options = new BaseCommonOptions();
 
         if (outputDir != null) {
@@ -59,7 +62,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testCallWithValidSetup() throws Exception {
+    void testCallWithValidSetup() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         setUpCommand(command, tempDir.toFile(), null);
 
@@ -68,7 +71,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testGetOutDir() throws Exception {
+    void testGetOutDir() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         File testDir = tempDir.toFile();
         setUpCommand(command, testDir, null);
@@ -77,7 +80,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testGetOutFilename() throws Exception {
+    void testGetOutFilename() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         String filename = "test-output.json";
         setUpCommand(command, tempDir.toFile(), filename);
@@ -86,30 +89,30 @@ class BaseCommandTest {
     }
 
     @Test
-    void testValidateOptions() throws Exception {
+    void testValidateOptions() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         setUpCommand(command, tempDir.toFile(), null);
 
-        assertDoesNotThrow(() -> command.validateOptions());
+        assertDoesNotThrow(command::validateOptions);
     }
 
     @Test
-    void testValidateOptionsWithFilename() throws Exception {
+    void testValidateOptionsWithFilename() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         setUpCommand(command, tempDir.toFile(), "valid-file.json");
 
-        assertDoesNotThrow(() -> command.validateOptions());
+        assertDoesNotThrow(command::validateOptions);
     }
 
     @Test
     void testBaseCommandInheritance() {
         TestCommand command = new TestCommand();
-        assertTrue(command instanceof BaseCommand);
-        assertTrue(command instanceof INvdBaseCommand);
+        assertInstanceOf(BaseCommand.class, command);
+        assertInstanceOf(INvdBaseCommand.class, command);
     }
 
     @Test
-    void testValidateDirectoryMethod() throws Exception {
+    void testValidateDirectoryMethod() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         setUpCommand(command, tempDir.toFile(), null);
 
@@ -135,7 +138,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testValidateDirectoryThrowsIfNotExists() throws Exception {
+    void testValidateDirectoryThrowsIfNotExists() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         File nonExistentDir = new File(tempDir.toFile(), "doesnotexist");
         setUpCommand(command, nonExistentDir, null);
@@ -145,7 +148,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testValidateDirectoryThrowsIfNotDirectory() throws Exception {
+    void testValidateDirectoryThrowsIfNotDirectory() throws IOException, IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         File file = new File(tempDir.toFile(), "notadir.txt");
         file.createNewFile();
@@ -156,7 +159,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testValidateOutDirectoryThrowsIfNotWritable() throws Exception {
+    void testValidateOutDirectoryThrowsIfNotWritable() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         File dir = tempDir.toFile();
         dir.setWritable(false);
@@ -168,7 +171,7 @@ class BaseCommandTest {
     }
 
     @Test
-    void testValidateOutputFileThrowsIfContainsSeparator() throws Exception {
+    void testValidateOutputFileThrowsIfContainsSeparator() throws IllegalAccessException, NoSuchFieldException {
         TestCommand command = new TestCommand();
         setUpCommand(command, tempDir.toFile(), "invalid/path.txt");
         CommandLine.ParameterException ex = assertThrows(

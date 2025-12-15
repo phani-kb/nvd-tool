@@ -5,22 +5,22 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class BuildConfigTest {
+class BuildConfigTest {
 
     @Test
-    public void testArtifactId() {
+    void testArtifactId() {
         assertNotNull(BuildConfig.ARTIFACT_ID, "ARTIFACT_ID should not be null");
         assertEquals("nvd-tool", BuildConfig.ARTIFACT_ID, "ARTIFACT_ID should be 'nvd-tool'");
     }
 
     @Test
-    public void testVersion() {
+    void testVersion() {
         assertNotNull(BuildConfig.VERSION, "VERSION should not be null");
         assertEquals("0.1.0-SNAPSHOT", BuildConfig.VERSION, "VERSION should be '0.1.0-SNAPSHOT'");
     }
 
     @Test
-    public void testConstantsAreNotEmpty() {
+    void testConstantsAreNotEmpty() {
         assertNotNull(BuildConfig.ARTIFACT_ID, "ARTIFACT_ID should not be null");
         assertNotNull(BuildConfig.VERSION, "VERSION should not be null");
         assertEquals("nvd-tool", BuildConfig.ARTIFACT_ID);

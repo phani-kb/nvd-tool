@@ -9,31 +9,31 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CweIdTest {
+class CweIdTest {
 
     private CweId cweId;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         cweId = new CweId();
         assertNotNull(cweId, "CweId instance should be created successfully");
     }
 
     @Test
-    public void testParameterizedConstructor() {
+    void testParameterizedConstructor() {
         String testId = "CWE-79";
         cweId = new CweId(testId);
         assertEquals(testId, cweId.getId(), "ID should match the value passed to constructor");
     }
 
     @Test
-    public void testGetPattern() {
+    void testGetPattern() {
         assertEquals("CWE-\\d+", cweId.getPattern(), "Pattern should match expected regex format");
         assertEquals("CWE-\\d+", CweId.ID_PATTERN, "Class constant should match the pattern");
     }
 
     @Test
-    public void testConvertMethod() {
+    void testConvertMethod() {
         String testId = "CWE-79";
         CweId converted = cweId.convert(testId);
 
@@ -42,7 +42,7 @@ public class CweIdTest {
     }
 
     @Test
-    public void testValidateIdWithValidIds() {
+    void testValidateIdWithValidIds() {
         String[] validIds = {"CWE-1", "CWE-79", "CWE-1000"};
 
         for (String validId : validIds) {
@@ -52,7 +52,7 @@ public class CweIdTest {
     }
 
     @Test
-    public void testValidateIdWithNullId() {
+    void testValidateIdWithNullId() {
         cweId.setId(null);
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -62,7 +62,7 @@ public class CweIdTest {
     }
 
     @Test
-    public void testValidateIdWithEmptyId() {
+    void testValidateIdWithEmptyId() {
         cweId.setId("");
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -72,7 +72,7 @@ public class CweIdTest {
     }
 
     @Test
-    public void testValidateIdWithInvalidIds() {
+    void testValidateIdWithInvalidIds() {
         String[] invalidIds = {"cwe-79", "CWE79", "CWE-", "CWE-ABC"};
 
         for (String invalidId : invalidIds) {
@@ -86,7 +86,7 @@ public class CweIdTest {
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         String testId = "CWE-79";
         cweId.setId(testId);
         String toString = cweId.toString();
@@ -94,7 +94,7 @@ public class CweIdTest {
     }
 
     @Test
-    public void testGetterAndSetter() {
+    void testGetterAndSetter() {
         String testId = "CWE-123";
         cweId.setId(testId);
         assertEquals(testId, cweId.getId(), "Getter should return the value set by setter");

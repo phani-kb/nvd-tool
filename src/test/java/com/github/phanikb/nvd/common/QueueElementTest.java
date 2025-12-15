@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class QueueElementTest {
+class QueueElementTest {
 
     private static class TestQueueElement extends QueueElement {
         private final String key;
 
-        public TestQueueElement(URI uri, File outFile, int startIndex, int endIndex, String key) {
+        TestQueueElement(URI uri, File outFile, int startIndex, int endIndex, String key) {
             super(uri, outFile, startIndex, endIndex);
             this.key = key;
         }
@@ -24,7 +24,7 @@ public class QueueElementTest {
     }
 
     @Test
-    public void testConstructorAndGetters() {
+    void testConstructorAndGetters() {
         URI uri = URI.create("https://example.com/test");
         File outFile = new File("test.json");
         int startIndex = 1;
@@ -41,7 +41,7 @@ public class QueueElementTest {
     }
 
     @Test
-    public void testAttemptsTracking() {
+    void testAttemptsTracking() {
         URI uri = URI.create("https://example.com/test");
         File outFile = new File("test.json");
         TestQueueElement element = new TestQueueElement(uri, outFile, 1, 10, "test-key");

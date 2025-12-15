@@ -9,22 +9,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ConstantsTest {
+class ConstantsTest {
 
     @Test
-    public void testFileNameConstants() {
+    void testFileNameConstants() {
         assertEquals("nvd.yml", Constants.NVD_PROPERTIES_FILE, "NVD properties filename should match");
         assertEquals("cli.defaults.properties", Constants.CLI_PROPERTIES_FILE, "CLI properties filename should match");
     }
 
     @Test
-    public void testUrlPlaceholderConstants() {
+    void testUrlPlaceholderConstants() {
         assertEquals("{download-type}", Constants.CVE_URL_DOWNLOAD_TYPE, "Download type placeholder should match");
         assertEquals("{archive-type}", Constants.CVE_URL_ARCHIVE_TYPE, "Archive type placeholder should match");
     }
 
     @Test
-    public void testDefaultDatetimePoison() {
+    void testDefaultDatetimePoison() {
         assertEquals(
                 LocalDateTime.MAX,
                 Constants.DEFAULT_DATETIME_POISON,
@@ -32,27 +32,27 @@ public class ConstantsTest {
     }
 
     @Test
-    public void testDefaultPoison() {
+    void testDefaultPoison() {
         assertEquals(Integer.MAX_VALUE, Constants.DEFAULT_POISON, "Default poison should be Integer.MAX_VALUE");
     }
 
     @Test
-    public void testThreadingConstants() {
+    void testThreadingConstants() {
         assertEquals(1, Constants.DEFAULT_NUMBER_OF_PRODUCERS, "Default number of producers should be 1");
         assertTrue(Constants.NUMBER_OF_PROCESSORS > 0, "Number of processors should be positive");
         assertEquals(
-                Runtime.getRuntime().availableProcessors(),
                 Constants.NUMBER_OF_PROCESSORS,
+                Runtime.getRuntime().availableProcessors(),
                 "Number of processors should match Runtime.availableProcessors");
     }
 
     @Test
-    public void testRangeDaysConstant() {
+    void testRangeDaysConstant() {
         assertEquals(120, Constants.DEFAULT_MAX_RANGE_IN_DAYS, "Default max range in days should be 120");
     }
 
     @Test
-    public void testRequestConstants() {
+    void testRequestConstants() {
         assertEquals(6, Constants.DEFAULT_REQUEST_TIMEOUT_SECS, "Default request timeout should be 6 seconds");
         assertEquals(
                 6000,
@@ -64,40 +64,40 @@ public class ConstantsTest {
     }
 
     @Test
-    public void testOutputFilePrefix() {
+    void testOutputFilePrefix() {
         assertEquals("nvd", Constants.OUT_FILE_PREFIX, "Output file prefix should be 'nvd'");
     }
 
     @Test
-    public void testTimeoutConstants() {
+    void testTimeoutConstants() {
         assertEquals(5, Constants.DEFAULT_PRODUCER_TIMEOUT_IN_MINUTES, "Default producer timeout should be 5 minutes");
         assertEquals(
                 60, Constants.DEFAULT_CONSUMER_TIMEOUT_IN_MINUTES, "Default consumer timeout should be 60 minutes");
     }
 
     @Test
-    public void testPaginationConstants() {
+    void testPaginationConstants() {
         assertEquals(10, Constants.DEFAULT_MIN_RESULTS_PER_PAGE, "Default min results per page should be 10");
     }
 
     @Test
-    public void testRateLimitConstant() {
+    void testRateLimitConstant() {
         assertEquals(5, Constants.DEFAULT_RATE_LIMIT, "Default rate limit should be 5");
     }
 
     @Test
-    public void testStorageConstants() {
+    void testStorageConstants() {
         assertEquals(2, Constants.MIN_FREE_SPACE_IN_GB, "Min free space should be 2 GB");
     }
 
     @Test
-    public void testLoggingConstants() {
+    void testLoggingConstants() {
         assertEquals(
                 10, Constants.LOG_EVERY_N_PROCESSED_ELEMENTS, "Log frequency should be every 10 processed elements");
     }
 
     @Test
-    public void testPrivateConstructor() {
+    void testPrivateConstructor() {
         try {
             Class<?> clazz = Constants.class;
             java.lang.reflect.Constructor<?> constructor = clazz.getDeclaredConstructor();

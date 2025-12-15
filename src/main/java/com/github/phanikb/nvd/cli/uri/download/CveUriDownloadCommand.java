@@ -52,7 +52,7 @@ public class CveUriDownloadCommand extends BaseUriDownloadCommand {
         }
         validateYearsOption();
         logger.info("download type = {}", downloadType);
-        logger.info("years to download = {}", Arrays.toString(years));
+        logger.info("years to download = {}", years == null ? "all years" : Arrays.toString(years));
     }
 
     private void validateYearsOption() {
@@ -78,7 +78,7 @@ public class CveUriDownloadCommand extends BaseUriDownloadCommand {
     @Override
     public String[] getUrls() {
         NvdProperties nvdProperties = NvdProperties.getInstance();
-        String url = nvdProperties.getNvd().getCve().getUrl();
+        String url = nvdProperties.getNvd().getCve().getMainUrl();
         url = url.replace(
                 Constants.CVE_URL_ARCHIVE_TYPE,
                 parent.getArchiveType().toString().toLowerCase());

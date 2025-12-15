@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class NvdExceptionTest {
+class NvdExceptionTest {
 
     @Test
-    public void testConstructorWithMessage() {
+    void testConstructorWithMessage() {
         String errorMessage = "Test error message";
         NvdException exception = new NvdException(errorMessage);
 
@@ -18,7 +18,7 @@ public class NvdExceptionTest {
     }
 
     @Test
-    public void testConstructorWithMessageAndCause() {
+    void testConstructorWithMessageAndCause() {
         String errorMessage = "Test error message";
         Throwable cause = new RuntimeException("Original cause");
         NvdException exception = new NvdException(errorMessage, cause);

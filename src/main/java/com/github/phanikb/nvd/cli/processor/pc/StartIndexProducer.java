@@ -14,12 +14,26 @@ import org.apache.hc.core5.net.URIBuilder;
 import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriProducer;
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.QueueElement;
+import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.FeedType;
 
 import static com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientResponseHandler.getResponseHandler;
 
 public class StartIndexProducer extends StartIndexProcessor<Integer> implements IApiDownloadUriProducer {
-    private final ProducerHelper producerHelper;
+    private ProducerHelper producerHelper;
+
+    public StartIndexProducer(
+            FeedType type,
+            int poison,
+            int poisonPerCreator,
+            int maxResultsPerPage,
+            String endpoint,
+            Path outDir,
+            String outFilePrefix,
+            BlockingDeque<QueueElement> downloadQueue) {
+        super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
+        this.producerHelper = null;
+    }
 
     public StartIndexProducer(
             FeedType type,
@@ -45,19 +59,11 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
             String outFilePrefix,
             List<NameValuePair> queryParams,
             BlockingDeque<QueueElement> downloadQueue) {
-        StartIndexProducer[] ref = new StartIndexProducer[1];
-        ProducerHelper helper = new ProducerHelper(type, () -> ref[0].calculateTotalResults(), queryParams);
-        ref[0] = new StartIndexProducer(
-                type,
-                poison,
-                poisonPerCreator,
-                maxResultsPerPage,
-                endpoint,
-                outDir,
-                outFilePrefix,
-                downloadQueue,
-                helper);
-        return ref[0];
+        StartIndexProducer producer = new StartIndexProducer(
+                type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, downloadQueue);
+        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, queryParams);
+        producer.producerHelper = helper;
+        return producer;
     }
 
     @Override
@@ -109,8 +115,8 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
         try {
             URIBuilder builder = new URIBuilder(endpoint);
             builder.addParameters(queryParams);
-            builder.removeParameter("startIndex");
-            builder.addParameter("startIndex", String.valueOf(startIndex));
+            builder.removeParameter(ApiQueryParams.START_INDEX.getName());
+            builder.addParameter(ApiQueryParams.START_INDEX.getName(), String.valueOf(startIndex));
             return builder.build();
         } catch (URISyntaxException e) {
             throw new NvdException("failed to build URI", e);
@@ -163,10 +169,10 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
         try {
             URIBuilder builder = new URIBuilder(endpoint);
             builder.addParameters(producerHelper.getQueryParams());
-            builder.removeParameter("startIndex");
-            builder.addParameter("startIndex", "0");
-            builder.removeParameter("resultsPerPage");
-            builder.addParameter("resultsPerPage", "1");
+            builder.removeParameter(ApiQueryParams.START_INDEX.getName());
+            builder.addParameter(ApiQueryParams.START_INDEX.getName(), "0");
+            builder.removeParameter(ApiQueryParams.RESULTS_PER_PAGE.getName());
+            builder.addParameter(ApiQueryParams.RESULTS_PER_PAGE.getName(), "1");
             return builder.build();
         } catch (URISyntaxException e) {
             throw new NvdException("failed to build URI", e);

@@ -30,7 +30,7 @@ public class ApiDownloader extends NvdDownloader {
     protected static final Logger logger = LogManager.getLogger(ApiDownloader.class);
     private final IApiDownloadUriConsumer consumer;
     private final IApiDownloadUriProducer producer;
-    private final int numberOfProducers = Constants.DEFAULT_NUMBER_OF_PRODUCERS;
+    private static final int NUM_OF_PRODUCERS = Constants.DEFAULT_NUMBER_OF_PRODUCERS;
     private final int numberOfConsumers = Math.min(Constants.NUMBER_OF_PROCESSORS, Util.getMaxThreads());
     private final int rollingWindowInSecs = HttpUtil.getRollingWindowSizeInSecs();
     private ExecutorService producerExecutor;
@@ -57,12 +57,12 @@ public class ApiDownloader extends NvdDownloader {
     public void download(CountDownLatch latch) throws NvdException {
         logger.info(
                 "starting download processor with {} producers and {} consumers, max requests/rate limit {}, rolling window size {} secs",
-                numberOfProducers,
+                NUM_OF_PRODUCERS,
                 numberOfConsumers,
                 HttpUtil.getRateLimit(),
                 rollingWindowInSecs);
 
-        producerExecutor = Executors.newFixedThreadPool(numberOfProducers);
+        producerExecutor = Executors.newFixedThreadPool(NUM_OF_PRODUCERS);
         startProducers(producerExecutor);
         logger.info("download creator finished");
 
@@ -120,5 +120,9 @@ public class ApiDownloader extends NvdDownloader {
         logger.info("waiting for consumer tasks to finish...");
         consumer.downloadUris(executorService, maxThreads, Constants.DEFAULT_DELAY_BETWEEN_REQUESTS_IN_MS);
         Util.waitToFinish(executorService, Util.getConsumerWaitTimeToFinishInMinutes(), TimeUnit.MINUTES);
+    }
+
+    public int getNumberOfProducers() {
+        return NUM_OF_PRODUCERS;
     }
 }

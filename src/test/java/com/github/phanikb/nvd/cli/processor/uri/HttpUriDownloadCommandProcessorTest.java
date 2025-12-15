@@ -19,6 +19,7 @@ import com.github.phanikb.nvd.common.NvdDownloadException;
 import com.github.phanikb.nvd.enums.ArchiveType;
 import com.github.phanikb.nvd.enums.FeedType;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,7 +38,7 @@ class HttpUriDownloadCommandProcessorTest {
     private Set<URI> uris;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         outDir = tempDir.toFile();
         testUri = URI.create("https://example.com/test-file.json");
         testUri2 = URI.create("https://example.com/test-file2.json");
@@ -67,7 +68,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testDownloadSuccessfulSingleUri() throws Exception {
+    void testDownloadSuccessfulSingleUri() {
         try (MockedStatic<HttpUtil> mockedHttpUtil = Mockito.mockStatic(HttpUtil.class)) {
             mockedHttpUtil.when(() -> HttpUtil.getFilename(testUri)).thenReturn("test-file.json");
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent");
@@ -81,14 +82,14 @@ class HttpUriDownloadCommandProcessorTest {
             assertNotNull(results);
             assertEquals(1, results.size());
 
-            HttpUriDownloadStatus status = results.get(0);
+            HttpUriDownloadStatus status = results.getFirst();
             assertEquals(testUri, status.getUri());
             assertEquals("test-file.json", status.getFilename());
         }
     }
 
     @Test
-    void testDownloadMultipleUris() throws Exception {
+    void testDownloadMultipleUris() {
         try (MockedStatic<HttpUtil> mockedHttpUtil = Mockito.mockStatic(HttpUtil.class)) {
             mockedHttpUtil.when(() -> HttpUtil.getFilename(testUri)).thenReturn("test-file.json");
             mockedHttpUtil.when(() -> HttpUtil.getFilename(testUri2)).thenReturn("test-file2.json");
@@ -105,7 +106,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testDownloadWithNullFilename() throws Exception {
+    void testDownloadWithNullFilename() {
         URI uriWithoutPath = URI.create("https://example.com");
 
         processor = HttpUriDownloadCommandProcessor.create(
@@ -116,13 +117,13 @@ class HttpUriDownloadCommandProcessorTest {
         assertNotNull(results);
         assertEquals(1, results.size());
 
-        HttpUriDownloadStatus status = results.get(0);
+        HttpUriDownloadStatus status = results.getFirst();
         assertFalse(status.isSuccess());
         assertTrue(status.getMessage().contains("cannot get filename from uri"));
     }
 
     @Test
-    void testDownloadWithEmptyPath() throws Exception {
+    void testDownloadWithEmptyPath() {
         URI uriWithEmptyPath = URI.create("https://example.com/");
 
         processor = HttpUriDownloadCommandProcessor.create(
@@ -133,47 +134,41 @@ class HttpUriDownloadCommandProcessorTest {
         assertNotNull(results);
         assertEquals(1, results.size());
 
-        HttpUriDownloadStatus status = results.get(0);
+        HttpUriDownloadStatus status = results.getFirst();
         assertFalse(status.isSuccess());
         assertTrue(status.getMessage().contains("cannot get filename from uri")
                 || status.getMessage().contains("is a directory"));
     }
 
     @Test
-    void testDownloadWithNullUri() throws Exception {
+    void testDownloadWithNullUri() {
         processor =
                 HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
-        assertThrows(NvdDownloadException.class, () -> {
-            processor.download(null, outDir, new File("test.json"));
-        });
+        assertThrows(NvdDownloadException.class, () -> processor.download(null, outDir, new File("test.json")));
     }
 
     @Test
-    void testDownloadWithNullFilenameParameter() throws Exception {
+    void testDownloadWithNullFilenameParameter() {
         processor =
                 HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
-        assertThrows(NvdDownloadException.class, () -> {
-            processor.download(testUri, outDir, null);
-        });
+        assertThrows(NvdDownloadException.class, () -> processor.download(testUri, outDir, null));
     }
 
     @Test
-    void testDownloadWithDirectoryAsFilename() throws Exception {
+    void testDownloadWithDirectoryAsFilename() {
         File directory = new File(outDir, "test-dir");
         directory.mkdirs();
 
         processor =
                 HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
-        assertThrows(NvdDownloadException.class, () -> {
-            processor.download(testUri, outDir, directory);
-        });
+        assertThrows(NvdDownloadException.class, () -> processor.download(testUri, outDir, directory));
     }
 
     @Test
-    void testValidationWithExistingFile() throws Exception {
+    void testValidationWithExistingFile() throws java.io.IOException {
         File existingFile = new File(outDir, "existing.json");
         existingFile.createNewFile();
 
@@ -189,7 +184,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testDownloadWithProxy() throws Exception {
+    void testDownloadWithProxy() {
         InetSocketAddress proxy = new InetSocketAddress("proxy.example.com", 8080);
 
         try (MockedStatic<HttpUtil> mockedHttpUtil = Mockito.mockStatic(HttpUtil.class)) {
@@ -204,7 +199,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testProcess() throws Exception {
+    void testProcess() {
         try (MockedStatic<HttpUtil> mockedHttpUtil = Mockito.mockStatic(HttpUtil.class)) {
             mockedHttpUtil.when(() -> HttpUtil.getFilename(testUri)).thenReturn("test-file.json");
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent");
@@ -221,11 +216,11 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testCloseExecutorService() throws Exception {
+    void testCloseExecutorService() {
         processor =
                 HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of(testUri));
 
-        processor.close();
+        assertDoesNotThrow(() -> processor.close());
     }
 
     @Test
@@ -238,7 +233,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testHttpRequestBuilding() throws Exception {
+    void testHttpRequestBuilding() {
         try (MockedStatic<HttpUtil> mockedHttpUtil = Mockito.mockStatic(HttpUtil.class)) {
             mockedHttpUtil.when(HttpUtil::getUserAgent).thenReturn("Test-Agent/1.0");
             mockedHttpUtil.when(HttpUtil::getProxy).thenReturn(null);
@@ -251,7 +246,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testEmptyUriSet() throws Exception {
+    void testEmptyUriSet() {
         processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, Set.of());
 
         List<HttpUriDownloadStatus> results = processor.download();
@@ -261,7 +256,7 @@ class HttpUriDownloadCommandProcessorTest {
     }
 
     @Test
-    void testUriWithNullInSet() throws Exception {
+    void testUriWithNullInSet() {
         Set<URI> urisWithNull = Set.of(testUri); // Can't add null to a Set.of()
         processor = HttpUriDownloadCommandProcessor.create(FeedType.CVE, outDir, ArchiveType.ZIP, false, urisWithNull);
 

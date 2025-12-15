@@ -17,7 +17,7 @@ public class CpeUriDownloadCommand extends BaseUriDownloadCommand {
     public String[] getUrls() {
         NvdProperties nvdProperties = NvdProperties.getInstance();
         String[] urls = new String[1];
-        urls[0] = nvdProperties.getNvd().getCpe().getUrl();
+        urls[0] = nvdProperties.getNvd().getCpe().getMainUrl();
         urls[0] = urls[0].replace(
                 Constants.CVE_URL_ARCHIVE_TYPE, getArchiveType().toString().toLowerCase());
         return urls;

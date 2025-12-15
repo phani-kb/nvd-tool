@@ -29,7 +29,6 @@ public class NVDToolDefaultsProvider implements CommandLine.IDefaultValueProvide
             keyBuilder.insert(0, command.name() + PROPERTY_SEPARATOR);
         }
         key = keyBuilder.toString();
-        // logger.debug("Resolved key '{}'", key);
         return defaultProperties.getProperty(key);
     }
 

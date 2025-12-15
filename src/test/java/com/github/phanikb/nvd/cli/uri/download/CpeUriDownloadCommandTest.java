@@ -32,7 +32,7 @@ class CpeUriDownloadCommandTest {
         NvdProperties.EndpointAndUrl endpointAndUrl = mock(NvdProperties.EndpointAndUrl.class);
         when(nvdProperties.getNvd()).thenReturn(nvd);
         when(nvd.getCpe()).thenReturn(endpointAndUrl);
-        when(endpointAndUrl.getUrl())
+        when(endpointAndUrl.getMainUrl())
                 .thenReturn("https://nvd.nist.gov/feeds/xml/cpe/2.2/official-cpe-dictionary_v2.2.xml.{archive-type}");
 
         nvdPropertiesMockedStatic = mockStatic(NvdProperties.class);

@@ -22,7 +22,11 @@ import com.github.phanikb.nvd.common.QueueElement;
 import com.github.phanikb.nvd.enums.FeedType;
 import com.github.phanikb.nvd.enums.NvdApiDateType;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DatesProcessorTest {
 
@@ -67,7 +71,9 @@ class DatesProcessorTest {
         }
 
         @Override
-        public void run() {}
+        public void run() {
+            // No-op for testing purposes
+        }
     }
 
     @BeforeEach
@@ -377,7 +383,7 @@ class DatesProcessorTest {
     }
 
     @Test
-    void testGetDownloadUri() throws Exception {
+    void testGetDownloadUri() throws NvdException {
         processor = new TestDatesProcessor(
                 FeedType.CVE,
                 LocalDateTime.MAX,
@@ -487,7 +493,7 @@ class DatesProcessorTest {
     }
 
     @Test
-    void testGetDownloadUriWithEmptyQueryParams() throws Exception {
+    void testGetDownloadUriWithEmptyQueryParams() throws NvdException {
         processor = new TestDatesProcessor(
                 FeedType.CVE,
                 LocalDateTime.MAX,

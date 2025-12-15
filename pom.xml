@@ -209,6 +209,10 @@
               <exclude>src/main/resources/schema/**</exclude>
               <exclude>src/main/java/com/github/phanikb/nvd/api2/**</exclude>
             </excludes>
+            <includes>
+              <include>src/main/java/**</include>
+              <include>src/test/java/**</include>
+            </includes>
             <cleanthat />
             <palantirJavaFormat>
               <version>${palantir.version}</version>
@@ -283,7 +287,6 @@
           <compilerArgs>
             <arg>-Xlint:all</arg>
             <arg>-parameters</arg>
-            <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
           </compilerArgs>
           <annotationProcessorPaths>
             <path>

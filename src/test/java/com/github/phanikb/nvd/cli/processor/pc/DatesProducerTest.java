@@ -28,6 +28,7 @@ import com.github.phanikb.nvd.enums.NvdApiDateType;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -118,27 +119,27 @@ class DatesProducerTest {
     @Test
     void testConstructorWithInvalidDates() {
         List<NvdApiDate> invalidDates =
-                Arrays.asList(new NvdApiDate("lastModStartDate", LocalDateTime.now(), NvdApiDateType.START_DATE));
+                List.of(new NvdApiDate("lastModStartDate", LocalDateTime.now(), NvdApiDateType.START_DATE));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            DatesProducer.create(
-                    FeedType.CVE,
-                    poison,
-                    1,
-                    100,
-                    "https://services.nvd.nist.gov/rest/json/cves/2.0",
-                    tempDir,
-                    "test-prefix",
-                    queryParams,
-                    invalidDates,
-                    downloadQueue);
-        });
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> DatesProducer.create(
+                        FeedType.CVE,
+                        poison,
+                        1,
+                        100,
+                        "https://services.nvd.nist.gov/rest/json/cves/2.0",
+                        tempDir,
+                        "test-prefix",
+                        queryParams,
+                        invalidDates,
+                        downloadQueue));
 
         assertEquals("dates must have 2 elements", exception.getMessage());
     }
 
     @Test
-    void testRunWithStartIndex() throws Exception {
+    void testRunWithStartIndex() throws NvdException {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(50);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -167,18 +168,17 @@ class DatesProducerTest {
         // Check poison element
         QueueElement poisonElement = null;
         for (QueueElement element : downloadQueue) {
-            if (element instanceof ChangeDatesQE changeDatesQE) {
-                if (changeDatesQE.getStartDate().equals(poison)) {
-                    poisonElement = element;
-                    break;
-                }
+            if (element instanceof ChangeDatesQE changeDatesQE
+                    && changeDatesQE.getStartDate().equals(poison)) {
+                poisonElement = element;
+                break;
             }
         }
         assertNotNull(poisonElement);
     }
 
     @Test
-    void testRunWithDatesProcessing() throws Exception {
+    void testRunWithDatesProcessing() throws NvdException {
         when(mockProducerHelper.hasStartIndex()).thenReturn(false);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
         when(mockProducerHelper.getTotalResultsByDate(any(LocalDateTime.class), any(LocalDateTime.class)))
@@ -206,7 +206,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testRunWithNvdException() throws Exception {
+    void testRunWithNvdException() throws NvdException {
         when(mockProducerHelper.hasStartIndex()).thenReturn(false);
         doThrow(new NvdException("Test exception")).when(mockProducerHelper).initResults(anyInt());
 
@@ -227,7 +227,7 @@ class DatesProducerTest {
         // Should still add poison elements even after exception
         assertEquals(1, downloadQueue.size());
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof ChangeDatesQE);
+        assertInstanceOf(ChangeDatesQE.class, element);
         ChangeDatesQE changeDatesQE = (ChangeDatesQE) element;
         assertEquals(poison, changeDatesQE.getStartDate());
     }
@@ -266,7 +266,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testGetTotalPages() throws Exception {
+    void testGetTotalPages() throws NvdException {
         when(mockProducerHelper.getTotalPages(100)).thenReturn(5);
 
         producer = new DatesProducer(
@@ -287,7 +287,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testGetTotalResults() throws Exception {
+    void testGetTotalResults() throws NvdException {
         when(mockProducerHelper.getTotalResults()).thenReturn(500);
 
         producer = new DatesProducer(
@@ -329,7 +329,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testProcessWithStartIndexDetails() throws Exception {
+    void testProcessWithStartIndexDetails() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(0);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -352,7 +352,7 @@ class DatesProducerTest {
         assertEquals(1, downloadQueue.size());
 
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof ChangeDatesQE);
+        assertInstanceOf(ChangeDatesQE.class, element);
         ChangeDatesQE changeDatesQE = (ChangeDatesQE) element;
 
         assertEquals(0, changeDatesQE.getStartIndex());
@@ -363,7 +363,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testDateRangeValidation() throws Exception {
+    void testDateRangeValidation() {
         // Create dates where start is after end to trigger validation error
         List<NvdApiDate> invalidDates = Arrays.asList(
                 new NvdApiDate(
@@ -391,11 +391,10 @@ class DatesProducerTest {
     }
 
     @Test
-    void testQueueElementCreation() throws Exception {
+    void testQueueElementCreation() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(100);
-        when(mockProducerHelper.getQueryParams())
-                .thenReturn(Arrays.asList(new BasicNameValuePair("resultsPerPage", "20")));
+        when(mockProducerHelper.getQueryParams()).thenReturn(List.of(new BasicNameValuePair("resultsPerPage", "20")));
 
         producer = new DatesProducer(
                 FeedType.CVE,
@@ -414,7 +413,7 @@ class DatesProducerTest {
         assertEquals(1, downloadQueue.size());
 
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof ChangeDatesQE);
+        assertInstanceOf(ChangeDatesQE.class, element);
         ChangeDatesQE changeDatesQE = (ChangeDatesQE) element;
 
         assertEquals(100, changeDatesQE.getStartIndex());
@@ -429,7 +428,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testMultiplePoisonElements() throws Exception {
+    void testMultiplePoisonElements() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(0);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -454,10 +453,9 @@ class DatesProducerTest {
         int poisonCount = 0;
         while (!downloadQueue.isEmpty()) {
             QueueElement element = downloadQueue.poll();
-            if (element instanceof ChangeDatesQE changeDatesQE) {
-                if (changeDatesQE.getStartDate().equals(poison)) {
-                    poisonCount++;
-                }
+            if (element instanceof ChangeDatesQE changeDatesQE
+                    && changeDatesQE.getStartDate().equals(poison)) {
+                poisonCount++;
             }
         }
         assertEquals(3, poisonCount);
@@ -502,7 +500,7 @@ class DatesProducerTest {
     }
 
     @Test
-    void testCalculateTotalResults() throws Exception {
+    void testCalculateTotalResults() {
         producer = DatesProducer.create(
                 FeedType.CVE,
                 poison,

@@ -2,18 +2,20 @@ package com.github.phanikb.nvd.cli.processor.pc;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
 import com.github.phanikb.nvd.common.QueueElement;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class IsPoisonPillFunctionTest {
 
     @Test
     void testFunctionalInterfaceBasicUsage() {
-        IsPoisonPillFunction isPoisonPill = (element) -> element.getStartIndex() == -1;
+        IsPoisonPillFunction isPoisonPill = element -> element.getStartIndex() == -1;
 
         URI uri = URI.create("https://example.com/test");
         File outFile = new File("test.json");
@@ -57,7 +59,7 @@ class IsPoisonPillFunctionTest {
 
     @Test
     void testFunctionalInterfaceWithNullElement() {
-        IsPoisonPillFunction isPoisonPill = element -> element == null;
+        IsPoisonPillFunction isPoisonPill = Objects::isNull;
 
         assertTrue(isPoisonPill.isPoisonPill(null));
 

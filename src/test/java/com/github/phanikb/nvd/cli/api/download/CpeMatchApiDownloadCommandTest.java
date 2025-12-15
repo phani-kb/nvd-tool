@@ -65,7 +65,7 @@ class CpeMatchApiDownloadCommandTest {
     private File testOutDir;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
         MockitoAnnotations.openMocks(this);
 
         testOutDir = tempDir.toFile();
@@ -91,7 +91,8 @@ class CpeMatchApiDownloadCommandTest {
         doNothing().when(parentCommand).validateOptions();
     }
 
-    private void setField(Object object, String fieldName, Object value) throws Exception {
+    private void setField(Object object, String fieldName, Object value)
+            throws IllegalAccessException, NoSuchFieldException {
         Field field = null;
         Class<?> currentClass = object.getClass();
 
@@ -112,7 +113,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithValidOptionsNoDateRanges() throws Exception {
+    void testCallWithValidOptionsNoDateRanges() {
         when(mockCpeMatchApiOptions.getLastModDateRange()).thenReturn(null);
         doNothing().when(mockCpeMatchApiOptions).validateOptions();
 
@@ -120,7 +121,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithSingleLastModDateRange() throws Exception {
+    void testCallWithSingleLastModDateRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(30);
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -138,7 +139,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithDateRangeExceedsMaxRange() throws Exception {
+    void testCallWithDateRangeExceedsMaxRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(150); // Exceeds 120 days limit
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -226,7 +227,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testGetQueryParamsWithNullCpeMatchApiOptions() throws Exception {
+    void testGetQueryParamsWithNullCpeMatchApiOptions() throws IllegalAccessException, NoSuchFieldException {
         setField(command, "cpeMatchApiOptions", null);
 
         List<NameValuePair> queryParams = command.getQueryParams();
@@ -236,7 +237,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsSuccess() throws Exception {
+    void testValidateOptionsSuccess() {
         doNothing().when(mockCpeMatchApiOptions).validateOptions();
 
         assertDoesNotThrow(() -> command.validateOptions());
@@ -245,7 +246,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsFailure() throws Exception {
+    void testValidateOptionsFailure() {
         doThrow(new IllegalArgumentException("Invalid options"))
                 .when(mockCpeMatchApiOptions)
                 .validateOptions();
@@ -265,7 +266,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testDateRangeValidationLogic() throws Exception {
+    void testDateRangeValidationLogic() {
         LocalDateTime validStartDate = LocalDateTime.now().minusDays(30);
         LocalDateTime validEndDate = LocalDateTime.now();
 
@@ -283,7 +284,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testCommandSpecValidation() throws Exception {
+    void testCommandSpecValidation() {
         doNothing().when(mockCpeMatchApiOptions).validateOptions();
 
         assertDoesNotThrow(() -> command.validateOptions());
@@ -292,7 +293,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testExecuteSuccess() throws Exception {
+    void testExecuteSuccess() throws NvdException {
         when(mockApiDownloader.getFeedType()).thenReturn(FeedType.CPE_MATCH);
         doNothing().when(mockApiDownloader).download(any());
         doNothing().when(mockApiDownloader).generateOutputFile(any());
@@ -307,7 +308,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testExecuteWithNvdException() throws Exception {
+    void testExecuteWithNvdException() throws NvdException {
         NvdException nvdException = new NvdException("Test download error");
         doThrow(nvdException).when(mockApiDownloader).download(any());
 
@@ -316,7 +317,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsWithResultsPerPageTooLow() throws Exception {
+    void testValidateOptionsWithResultsPerPageTooLow() {
         when(mockCommonOptions.getResultsPerPage()).thenReturn(5); // Less than minimum 10
 
         ParameterException exception = assertThrows(ParameterException.class, () -> command.validateOptions());
@@ -324,7 +325,7 @@ class CpeMatchApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsWithNegativeStartIndex() throws Exception {
+    void testValidateOptionsWithNegativeStartIndex() {
         when(mockCommonOptions.getStartIndex()).thenReturn(-1);
 
         ParameterException exception = assertThrows(ParameterException.class, () -> command.validateOptions());

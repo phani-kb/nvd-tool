@@ -26,13 +26,13 @@ public abstract class UriDownloadCommandProcessor extends CommandProcessor imple
     private final boolean extract;
     protected List<HttpUriDownloadStatus> statusList = List.of();
 
-    public UriDownloadCommandProcessor(FeedType feedType, File outDir, ArchiveType archiveType, boolean extract) {
+    protected UriDownloadCommandProcessor(FeedType feedType, File outDir, ArchiveType archiveType, boolean extract) {
         super(DownloadMode.URI, feedType, outDir);
         this.extract = extract;
         this.archiveType = archiveType;
     }
 
-    public UriDownloadCommandProcessor(
+    protected UriDownloadCommandProcessor(
             FeedType feedType, File outDir, ArchiveType archiveType, boolean extract, Set<URI> uris) {
         this(feedType, outDir, archiveType, extract);
         if (uris != null) {
@@ -58,13 +58,13 @@ public abstract class UriDownloadCommandProcessor extends CommandProcessor imple
     public void preProcess() throws NvdException {
         super.preProcess();
         // check uris count
-        Set<URI> uris = getUris();
-        if (uris == null || uris.isEmpty()) {
+        Set<URI> uriSet = getUris();
+        if (uriSet == null || uriSet.isEmpty()) {
             throw new NvdException("no URI found.");
         }
-        logger.info("uris count: {}", uris.size());
+        logger.info("uris count: {}", uriSet.size());
         // validate the uris
-        for (URI uri : uris) {
+        for (URI uri : uriSet) {
             boolean isValid = Util.isValidDownloadUri(uri);
             if (!isValid) {
                 throw new NvdException("invalid URI: " + uri);

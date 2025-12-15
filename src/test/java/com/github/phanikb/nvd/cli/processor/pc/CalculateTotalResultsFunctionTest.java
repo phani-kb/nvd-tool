@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import com.github.phanikb.nvd.common.NvdException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CalculateTotalResultsFunctionTest {
 
@@ -42,17 +43,14 @@ class CalculateTotalResultsFunctionTest {
             throw new NvdException("Calculation failed");
         };
 
-        NvdException exception = assertThrows(NvdException.class, () -> {
-            calculateTotal.calculateTotalResults();
-        });
+        NvdException exception = assertThrows(NvdException.class, calculateTotal::calculateTotalResults);
 
         assertEquals("Calculation failed", exception.getMessage());
     }
 
     @Test
     void testFunctionalInterfaceWithConditionalLogic() throws NvdException {
-        boolean useHighValue = true;
-        CalculateTotalResultsFunction calculateTotal = () -> useHighValue ? 1000 : 10;
+        CalculateTotalResultsFunction calculateTotal = () -> 1000;
 
         int result = calculateTotal.calculateTotalResults();
         assertEquals(1000, result);
@@ -104,21 +102,15 @@ class CalculateTotalResultsFunctionTest {
     @Test
     void testFunctionalInterfaceWithExceptionInCalculation() {
         CalculateTotalResultsFunction calculateTotal = () -> {
-            int divisor = 0;
-            if (divisor == 0) {
-                throw new NvdException("Division by zero error");
-            }
-            return 100 / divisor;
+            throw new NvdException("Division by zero error");
         };
 
-        NvdException exception = assertThrows(NvdException.class, () -> {
-            calculateTotal.calculateTotalResults();
-        });
+        NvdException exception = assertThrows(NvdException.class, calculateTotal::calculateTotalResults);
 
         assertEquals("Division by zero error", exception.getMessage());
     }
 
-    private int calculateFixedTotal() throws NvdException {
+    private int calculateFixedTotal() {
         return 42;
     }
 }

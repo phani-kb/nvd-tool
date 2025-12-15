@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SimpleBaseUriDownloadCommandTest {
+class SimpleBaseUriDownloadCommandTest {
 
     private static class TestBaseUriDownloadCommand extends BaseUriDownloadCommand {
         private final String[] testUrls;
@@ -63,7 +63,7 @@ public class SimpleBaseUriDownloadCommandTest {
     }
 
     @Test
-    public void testGetUris() {
+    void testGetUris() {
         String[] testUrls = new String[] {"http://test.com/file1.zip", "http://test.com/file2.zip"};
         TestBaseUriDownloadCommand command = new TestBaseUriDownloadCommand(testUrls, FeedType.CVE);
 
@@ -82,7 +82,7 @@ public class SimpleBaseUriDownloadCommandTest {
     }
 
     @Test
-    public void testTransferMethodIsHttp() {
+    void testTransferMethodIsHttp() {
         String[] testUrls = new String[] {"http://test.com/file.zip"};
         TestBaseUriDownloadCommand command = new TestBaseUriDownloadCommand(testUrls, FeedType.CVE);
 
@@ -90,7 +90,7 @@ public class SimpleBaseUriDownloadCommandTest {
     }
 
     @Test
-    public void testGettersDelegate() {
+    void testGettersDelegate() {
         String[] testUrls = new String[] {"http://test.com/file.zip"};
         TestBaseUriDownloadCommand command = new TestBaseUriDownloadCommand(testUrls, FeedType.CVE);
 

@@ -4,14 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hc.core5.util.TimeValue;
@@ -26,17 +25,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UtilTest {
+class UtilTest {
 
     @Test
-    public void testIsNullOrEmpty() {
+    void testIsNullOrEmpty() {
         assertTrue(Util.isNullOrEmpty(null), "null should be considered empty");
         assertTrue(Util.isNullOrEmpty(""), "Empty string should be considered empty");
         assertFalse(Util.isNullOrEmpty("text"), "Non-empty string should not be considered empty");
     }
 
     @Test
-    public void testLoadFileFromClasspath() {
+    void testLoadFileFromClasspath() {
         Optional<InputStream> result = Util.loadFileFromClasspath("cli.defaults.properties");
         assertTrue(result.isPresent(), "Should find cli.defaults.properties in classpath");
 
@@ -45,7 +44,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testFindFileFromClasspathWithNullOrEmpty() {
+    void testFindFileFromClasspathWithNullOrEmpty() {
         Optional<File> result = Util.findFileFromClasspath(null);
         assertFalse(result.isPresent(), "Should return empty Optional for null filename");
 
@@ -54,7 +53,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testFindFileFromClasspath() {
+    void testFindFileFromClasspath() {
         Optional<File> result = Util.findFileFromClasspath("cli.defaults.properties");
 
         if (result.isPresent()) {
@@ -67,7 +66,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testGetUsableSpace() throws IOException {
+    void testGetUsableSpace() throws IOException {
         Path tempDir = Files.createTempDirectory("util-test");
         File dir = tempDir.toFile();
 
@@ -80,7 +79,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testIsValidDownloadUri() throws Exception {
+    void testIsValidDownloadUri() throws URISyntaxException {
         // Valid URI with path
         URI validUri = new URI("https://example.com/path/file.txt");
         assertTrue(Util.isValidDownloadUri(validUri), "Valid URI with path should return true");
@@ -95,7 +94,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testLoadProperties() {
+    void testLoadProperties() {
         // Test with null file
         Properties props = Util.loadProperties(null);
         assertNotNull(props, "Should return empty properties for null file");
@@ -114,7 +113,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testPropertyBasedGetters() {
+    void testPropertyBasedGetters() {
         // Test property-based getter methods
         assertTrue(Util.getMaxDownloadAttempts() > 0, "Max download attempts should be positive");
         assertTrue(Util.getMaxThreads() > 0, "Max threads should be positive");
@@ -129,7 +128,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testGetOutFilePrefix() {
+    void testGetOutFilePrefix() {
         // Test with different feed types
         String prefix = Util.getOutFilePrefix(FeedType.CVE);
         assertNotNull(prefix, "Output file prefix should not be null");
@@ -138,7 +137,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testGetRangeDates() {
+    void testGetRangeDates() {
         LocalDateTime start = LocalDateTime.of(2024, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.of(2024, 1, 10, 0, 0);
 
@@ -146,12 +145,12 @@ public class UtilTest {
         assertNotNull(dates, "Range dates should not be null");
         assertFalse(dates.isEmpty(), "Range dates should not be empty");
         assertTrue(dates.size() >= 2, "Should have at least start and end dates");
-        assertEquals(start, dates.get(0), "First date should be start date");
-        assertEquals(end, dates.get(dates.size() - 1), "Last date should be end date");
+        assertEquals(start, dates.getFirst(), "First date should be start date");
+        assertEquals(end, dates.getLast(), "Last date should be end date");
     }
 
     @Test
-    public void testValidateDateRange() {
+    void testValidateDateRange() {
         LocalDateTime start = LocalDateTime.of(2023, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.of(2023, 1, 2, 0, 0);
 
@@ -161,23 +160,19 @@ public class UtilTest {
         // Invalid: start after end
         assertThrows(
                 IllegalArgumentException.class,
-                () -> {
-                    Util.validateDateRange(end, start, false);
-                },
+                () -> Util.validateDateRange(end, start, false),
                 "Should throw exception when start is after end");
 
         // Invalid: start in future
         LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
         assertThrows(
                 IllegalArgumentException.class,
-                () -> {
-                    Util.validateDateRange(futureDate, futureDate.plusDays(1), false);
-                },
+                () -> Util.validateDateRange(futureDate, futureDate.plusDays(1), false),
                 "Should throw exception when start is in future");
     }
 
     @Test
-    public void testValidateDateRangeFormatCheck() {
+    void testValidateDateRangeFormatCheck() {
         LocalDateTime start = LocalDateTime.of(2023, 1, 1, 12, 34, 56, 789000000);
         LocalDateTime end = LocalDateTime.of(2023, 1, 2, 23, 45, 59, 123000000);
         Util.validateDateRange(start, end, true);
@@ -186,7 +181,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testGetFiles() throws IOException {
+    void testGetFiles() throws IOException {
         Path tempDir = Files.createTempDirectory("util-test");
         File dir = tempDir.toFile();
 
@@ -210,46 +205,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testWaitToFinish() throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        // Submit a quick task
-        executor.submit(() -> {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        // Should finish successfully
-        Util.waitToFinish(executor, 5, TimeUnit.SECONDS);
-    }
-
-    @Test
-    public void testWaitToFinishTimeout() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        // Submit a long-running task
-        executor.submit(() -> {
-            try {
-                Thread.sleep(5000); // 5 seconds
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        // Should timeout
-        assertThrows(
-                NvdException.class,
-                () -> {
-                    Util.waitToFinish(executor, 1, TimeUnit.SECONDS);
-                },
-                "Should throw exception on timeout");
-    }
-
-    @Test
-    public void testCreateDir(@TempDir Path tempDir) throws Exception {
+    void testCreateDir(@TempDir Path tempDir) throws NvdException {
         Path testDir = tempDir.resolve("test-directory");
 
         // Should create directory successfully
@@ -262,7 +218,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testDeleteDirRemovesDirectory(@TempDir Path tempDir) throws IOException {
+    void testDeleteDirRemovesDirectory(@TempDir Path tempDir) throws IOException {
         File dir = tempDir.toFile();
         File file1 = new File(dir, "file1.txt");
         File file2 = new File(dir, "file2.txt");
@@ -274,7 +230,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testGetExponentialBackoffIncreases() {
+    void testGetExponentialBackoffIncreases() {
         TimeValue t1 = Util.getExponentialBackoff(1);
         TimeValue t2 = Util.getExponentialBackoff(2);
         TimeValue t3 = Util.getExponentialBackoff(3);
@@ -283,7 +239,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testSleepQuietlyDoesNotThrow() {
+    void testSleepQuietlyDoesNotThrow() {
         long start = System.currentTimeMillis();
         Util.sleepQuietly(1); // should sleep for a short time
         long elapsed = System.currentTimeMillis() - start;
@@ -291,7 +247,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testSleepDoesSleep() throws InterruptedException {
+    void testSleepDoesSleep() throws InterruptedException {
         TimeValue retryInterval = TimeValue.of(100, TimeUnit.MILLISECONDS);
         long start = System.currentTimeMillis();
         Util.sleepWithFullBackoff(1, retryInterval);

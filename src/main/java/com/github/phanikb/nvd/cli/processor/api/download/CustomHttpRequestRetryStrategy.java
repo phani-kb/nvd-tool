@@ -33,8 +33,8 @@ public class CustomHttpRequestRetryStrategy extends DefaultHttpRequestRetryStrat
             return false;
         }
 
-        if (exception instanceof HttpResponseException
-                && ((HttpResponseException) exception).getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+        if (exception instanceof HttpResponseException httpResponseException
+                && httpResponseException.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
             try {
                 boolean isTestMode = Boolean.parseBoolean(System.getProperty("nvd.test.mode", "false"));
                 if (isTestMode) {

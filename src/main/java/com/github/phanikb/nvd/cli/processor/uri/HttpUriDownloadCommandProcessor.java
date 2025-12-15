@@ -15,7 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
@@ -50,7 +49,7 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]));
         allOf.join(); // wait for all futures to complete
 
-        return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+        return futures.stream().map(CompletableFuture::join).toList();
     }
 
     private HttpUriDownloadStatus downloadUri(URI uri, File outDir) {
@@ -70,7 +69,7 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
     private HttpUriDownloadStatus createFailedStatus(URI uri, String message) {
         HttpUriDownloadStatus status = new HttpUriDownloadStatus(uri, false);
         status.setMessage(message);
-        logger.error(status.toString());
+        logger.error(status);
         return status;
     }
 
@@ -85,6 +84,7 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             return handleResponse(response, uri, outDir, filename, status);
         } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
             logger.error("cannot download {}: {}", uri, e.getMessage());
             throw new NvdDownloadException("cannot download " + uri, e);
         }
@@ -123,7 +123,7 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
         status.setStatusCode(response.statusCode());
         if (response.statusCode() != 200) {
             status.setMessage("cannot download " + uri + ": status code " + response.statusCode());
-            logger.error(status.toString());
+            logger.error(status);
             return status;
         }
         try (InputStream body = response.body()) {
@@ -137,7 +137,7 @@ public class HttpUriDownloadCommandProcessor extends UriDownloadCommandProcessor
                 logger.error("Error while copying input stream to file: {}", e.getMessage());
                 status.setMessage("Error while downloading " + uri);
             }
-            logger.debug(status.toString());
+            logger.debug(status);
             return status;
         }
     }

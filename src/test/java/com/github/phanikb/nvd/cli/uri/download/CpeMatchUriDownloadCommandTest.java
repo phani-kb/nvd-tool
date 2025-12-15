@@ -16,13 +16,12 @@ import static org.mockito.Mockito.when;
 class CpeMatchUriDownloadCommandTest {
 
     private CpeMatchUriDownloadCommand cpeMatchUriDownloadCommand;
-    private UriDownloadCommand uriDownloadCommand;
     private MockedStatic<NvdProperties> nvdPropertiesMockedStatic;
 
     @BeforeEach
     void setUp() {
         cpeMatchUriDownloadCommand = new CpeMatchUriDownloadCommand();
-        uriDownloadCommand = mock(UriDownloadCommand.class);
+        UriDownloadCommand uriDownloadCommand = mock(UriDownloadCommand.class);
         cpeMatchUriDownloadCommand.parent = uriDownloadCommand;
 
         when(uriDownloadCommand.getArchiveType()).thenReturn(com.github.phanikb.nvd.enums.ArchiveType.ZIP);
@@ -32,7 +31,7 @@ class CpeMatchUriDownloadCommandTest {
         NvdProperties.EndpointAndUrl endpointAndUrl = mock(NvdProperties.EndpointAndUrl.class);
         when(nvdProperties.getNvd()).thenReturn(nvd);
         when(nvd.getCpeMatch()).thenReturn(endpointAndUrl);
-        when(endpointAndUrl.getUrl())
+        when(endpointAndUrl.getMainUrl())
                 .thenReturn("https://nvd.nist.gov/feeds/json/cpematch/1.0/nvdcpematch-1.0.json.{archive-type}");
 
         nvdPropertiesMockedStatic = mockStatic(NvdProperties.class);

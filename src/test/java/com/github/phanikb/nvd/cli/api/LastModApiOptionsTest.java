@@ -17,7 +17,7 @@ class LastModApiOptionsTest {
     @Test
     void testValidateOptionsDoesNotThrow() {
         TestableLastModApiOptions options = new TestableLastModApiOptions();
-        assertDoesNotThrow(() -> options.validateOptions());
+        assertDoesNotThrow(options::validateOptions);
     }
 
     @Test

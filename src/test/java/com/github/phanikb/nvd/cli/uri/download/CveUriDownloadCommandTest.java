@@ -39,7 +39,7 @@ class CveUriDownloadCommandTest {
         NvdProperties.EndpointAndUrl endpointAndUrl = mock(NvdProperties.EndpointAndUrl.class);
         when(nvdProperties.getNvd()).thenReturn(nvd);
         when(nvd.getCve()).thenReturn(endpointAndUrl);
-        when(endpointAndUrl.getUrl())
+        when(endpointAndUrl.getMainUrl())
                 .thenReturn("https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{download-type}.json.{archive-type}");
 
         nvdPropertiesMockedStatic = mockStatic(NvdProperties.class);

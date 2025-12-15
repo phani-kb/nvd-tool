@@ -6,7 +6,7 @@ public abstract class DownloadUriProducer<T> implements Runnable, IApiDownloadUr
     protected final T poison;
     protected final int poisonPerCreator;
 
-    public DownloadUriProducer(T poison, int poisonPerCreator) {
+    protected DownloadUriProducer(T poison, int poisonPerCreator) {
         this.poison = poison;
         this.poisonPerCreator = poisonPerCreator;
     }

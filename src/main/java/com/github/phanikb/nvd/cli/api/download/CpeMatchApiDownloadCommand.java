@@ -11,6 +11,7 @@ import org.apache.hc.core5.http.message.BasicNameValuePair;
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.cli.api.CpeMatchApiOptions;
+import com.github.phanikb.nvd.cli.api.LastModApiOptions.LastModDateRange;
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
 import com.github.phanikb.nvd.common.CpeName;
 import com.github.phanikb.nvd.enums.ApiQueryParams;
@@ -63,7 +64,7 @@ public class CpeMatchApiDownloadCommand extends BaseApiDownloadCommand {
                     new BasicNameValuePair(ApiQueryParams.MATCH_CRITERIA_ID.getName(), matchCriteriaId.toString()));
         }
 
-        CpeMatchApiOptions.LastModDateRange lastModDateRange = cpeMatchApiOptions.getLastModDateRange();
+        LastModDateRange lastModDateRange = cpeMatchApiOptions.getLastModDateRange();
         if (lastModDateRange != null) {
             queryParams.addAll(getDateRangeQueryParams(
                     ApiQueryParams.LAST_MODIFIED_START_DATE,

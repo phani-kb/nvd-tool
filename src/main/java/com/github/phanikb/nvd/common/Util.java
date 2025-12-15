@@ -21,7 +21,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hc.core5.util.TimeValue;
@@ -43,22 +42,16 @@ import static com.github.phanikb.nvd.common.Constants.OUT_FILE_PREFIX;
 
 public final class Util {
     private static final Logger logger = LogManager.getLogger(Util.class);
-    private static volatile NvdProperties properties;
     private static final boolean IS_TEST_MODE = Boolean.parseBoolean(System.getProperty("nvd.test.mode", "false"));
 
-    private Util() {
-        // prevent instantiation
-    }
+    private Util() {}
 
     private static NvdProperties getProperties() {
-        if (properties == null) {
-            synchronized (Util.class) {
-                if (properties == null) {
-                    properties = NvdProperties.getInstance();
-                }
-            }
-        }
-        return properties;
+        return Holder.properties;
+    }
+
+    private static final class Holder {
+        private static final NvdProperties properties = NvdProperties.getInstance();
     }
 
     public static boolean isNullOrEmpty(String str) {
@@ -200,7 +193,7 @@ public final class Util {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Temporal & TemporalAdjuster> T addDays(T date, long days) {
+    private static <T extends Temporal & TemporalAdjuster> T addDays(T date, int days) {
         return (T) date.plus(days, ChronoUnit.DAYS);
     }
 
@@ -240,7 +233,7 @@ public final class Util {
 
     public static void sleep(int attempts, TimeValue retryInterval) throws InterruptedException {
         if (IS_TEST_MODE) {
-            fastSleep(attempts, retryInterval);
+            fastSleep(attempts);
         } else {
             Thread.sleep(getExponentialBackoff(attempts, retryInterval).toMilliseconds());
         }
@@ -250,7 +243,7 @@ public final class Util {
         Thread.sleep(getExponentialBackoff(attempts, retryInterval).toMilliseconds());
     }
 
-    public static void fastSleep(int attempts, TimeValue retryInterval) throws InterruptedException {
+    public static void fastSleep(int attempts) throws InterruptedException {
         long fastDelay = Math.min(50, 10 + (attempts * 5));
         Thread.sleep(fastDelay);
     }
@@ -267,9 +260,11 @@ public final class Util {
         }
 
         if (checkFormat) {
-            startDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
+            String sf = startDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
+            logger.debug("start date formatted: {}", sf);
             if (endDate != null) {
-                endDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
+                String ef = endDate.format(DateFormats.ISO_DATE_TIME_EXT_FORMATTER);
+                logger.debug("end date formatted: {}", ef);
             }
         }
     }
@@ -306,8 +301,8 @@ public final class Util {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonFactory jsonFactory = mapper.getFactory();
 
-        try (BufferedWriter writer = Files.newBufferedWriter(outFile.toPath())) {
-            JsonGenerator generator = jsonFactory.createGenerator(writer);
+        try (BufferedWriter writer = Files.newBufferedWriter(outFile.toPath());
+                JsonGenerator generator = jsonFactory.createGenerator(writer)) {
             generator.useDefaultPrettyPrinter();
             generator.writeStartObject();
             generator.writeFieldName(collectionNodeName);
@@ -357,7 +352,6 @@ public final class Util {
             generator.writeObjectField("format", format);
             generator.writeObjectField("totalResults", actualResultsCount);
             generator.writeEndObject();
-            generator.close();
             logger.info(
                     "merged downloaded files into {}, file size {} MB, total results: {}",
                     outFile.getAbsolutePath(),
@@ -378,8 +372,6 @@ public final class Util {
 
         try {
             format.archive(outFile, outFile.getParentFile());
-        } catch (ArchiveException e) {
-            logger.error("failed to compress file: {}, error: {}", outFile.getAbsolutePath(), e.getMessage());
         } catch (IOException e) {
             logger.error("failed to compress file: {}, error: {}", outFile.getAbsolutePath(), e.getMessage());
         }

@@ -8,19 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RequestTrackerTest {
+class RequestTrackerTest {
 
     private final int rateLimit = 5;
     private final long windowInMillis = 1000;
     private RequestTracker tracker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         tracker = new RequestTracker(rateLimit, windowInMillis);
     }
 
     @Test
-    public void testConstructor() {
+    void testConstructor() {
         assertEquals(rateLimit, tracker.getMaxRequests(), "Max requests should match constructor parameter");
         assertEquals(windowInMillis, tracker.getWindowInMillis(), "Window size should match constructor parameter");
         assertNotNull(tracker.getRequestTimes(), "Request times map should not be null");
@@ -28,7 +28,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testAddRequestBelowLimit() {
+    void testAddRequestBelowLimit() {
         for (int i = 0; i < rateLimit; i++) {
             boolean result = tracker.addRequest("request-" + i);
             assertTrue(result, "Adding request below rate limit should return true");
@@ -37,7 +37,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testAddRequestAtLimit() {
+    void testAddRequestAtLimit() {
         for (int i = 0; i < rateLimit; i++) {
             tracker.addRequest("request-" + i);
         }
@@ -49,7 +49,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testExpiredRequestsRemoval() throws InterruptedException {
+    void testExpiredRequestsRemoval() throws InterruptedException {
         // Add one request
         tracker.addRequest("first-request");
         assertEquals(1, tracker.size(), "Size should be 1 after adding a request");
@@ -63,7 +63,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testMultipleRequestsSameKey() {
+    void testMultipleRequestsSameKey() {
         String key = "same-key";
         for (int i = 0; i < 3; i++) {
             tracker.addRequest(key);
@@ -73,7 +73,7 @@ public class RequestTrackerTest {
     }
 
     @Test
-    public void testAddingRequestsAfterReset() throws InterruptedException {
+    void testAddingRequestsAfterReset() throws InterruptedException {
         for (int i = 0; i < rateLimit; i++) {
             tracker.addRequest("request-" + i);
         }

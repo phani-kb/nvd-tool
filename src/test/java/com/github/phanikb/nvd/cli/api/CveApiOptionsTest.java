@@ -18,7 +18,7 @@ class CveApiOptionsTest {
     @Test
     void testValidateOptionsDoesNotThrow() {
         CveApiOptions options = new CveApiOptions();
-        assertDoesNotThrow(() -> options.validateOptions());
+        assertDoesNotThrow(options::validateOptions);
     }
 
     @Test
@@ -38,7 +38,7 @@ class CveApiOptionsTest {
     void testKeywordSearchValid() {
         CveApiOptions.KeywordSearch keywordSearch = new CveApiOptions.KeywordSearch();
         keywordSearch.setKeywordExactMatch(true);
-        keywordSearch.setKeywordSearch("test");
+        keywordSearch.setKws("test");
         assertFalse(keywordSearch.isInvalid());
     }
 
@@ -125,7 +125,8 @@ class CveApiOptionsTest {
     void testThrowsIfKeywordSearchInvalid() {
         CveApiOptions options = new CveApiOptions();
         CveApiOptions.KeywordSearch keywordSearch = new CveApiOptions.KeywordSearch();
-        keywordSearch.setKeywordExactMatch(true);
+        keywordSearch.setKeywordExactMatch(false);
+        keywordSearch.setKws(null);
         options.setKeywordSearch(keywordSearch);
         assertThrows(IllegalArgumentException.class, options::validateOptions);
     }
@@ -143,6 +144,7 @@ class CveApiOptionsTest {
     void testThrowsIfCpeVulnerableInvalid() {
         CveApiOptions options = new CveApiOptions();
         CveApiOptions.CpeVulnerable cpeVulnerable = new CveApiOptions.CpeVulnerable();
+        cpeVulnerable.setCpeName("");
         cpeVulnerable.setVulnerable(true);
         options.setCpeVulnerable(cpeVulnerable);
         assertThrows(IllegalArgumentException.class, options::validateOptions);
@@ -201,7 +203,7 @@ class CveApiOptionsTest {
         options.setPubDateRange(range);
         CveApiOptions.KeywordSearch keywordSearch = new CveApiOptions.KeywordSearch();
         keywordSearch.setKeywordExactMatch(false);
-        keywordSearch.setKeywordSearch("test");
+        keywordSearch.setKws("test");
         options.setKeywordSearch(keywordSearch);
         CveApiOptions.CpeVulnerable cpeVulnerable = new CveApiOptions.CpeVulnerable();
         cpeVulnerable.setCpeName("cpe:2.3:o:linux:linux_kernel:2.6.0:*:*:*:*:*:*:*");

@@ -34,10 +34,13 @@ import static com.github.phanikb.nvd.common.Constants.DEFAULT_RATE_LIMIT;
 
 public final class HttpUtil {
     private static final Logger logger = LogManager.getLogger(HttpUtil.class);
-    private static final NvdProperties properties = NvdProperties.getInstance();
 
     private HttpUtil() {
         // prevent instantiation
+    }
+
+    private static NvdProperties getProperties() {
+        return NvdProperties.getInstance();
     }
 
     /**
@@ -66,16 +69,21 @@ public final class HttpUtil {
      * @return an InetSocketAddress for the proxy, or null if not configured
      */
     public static InetSocketAddress getProxy() {
-        String host = properties.getNvd().getProxy().getHost();
-        Integer port = properties.getNvd().getProxy().getPort();
+        String host = getProperties().getNvd().getProxy().getHost();
+        Integer port = getProperties().getNvd().getProxy().getPort();
         return (Util.isNullOrEmpty(host) || port == null) ? null : new InetSocketAddress(host, port);
     }
 
     public static TimeValue getDownloadDelay() {
-        long configuredDelay = properties.getNvd().getDownload().getUsingApi().getDelayBetweenRequestsInMs();
+        long configuredDelay =
+                getProperties().getNvd().getDownload().getUsingApi().getDelayBetweenRequestsInMs();
         int rateLimit = getRateLimit();
-        int windowSizeInSecs =
-                properties.getNvd().getDownload().getUsingApi().getProcessor().getRollingWindowInSecs();
+        int windowSizeInSecs = getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getRollingWindowInSecs();
 
         if (rateLimit > 0) {
             long minDelay = (windowSizeInSecs * 1000L) / rateLimit;
@@ -88,11 +96,19 @@ public final class HttpUtil {
     }
 
     public static int getRateLimit() {
-        int rateLimitWithKey =
-                properties.getNvd().getDownload().getUsingApi().getProcessor().getRateLimitWithKey();
-        int rateLimitWithoutKey =
-                properties.getNvd().getDownload().getUsingApi().getProcessor().getRateLimitWithoutKey();
-        String apiKey = properties.getNvd().getApi().getKey();
+        int rateLimitWithKey = getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getRateLimitWithKey();
+        int rateLimitWithoutKey = getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getRateLimitWithoutKey();
+        String apiKey = getProperties().getNvd().getApi().getKey();
 
         int rateLimit = Util.isNullOrEmpty(apiKey) ? rateLimitWithoutKey : rateLimitWithKey;
 
@@ -105,19 +121,24 @@ public final class HttpUtil {
     }
 
     public static int getRollingWindowSizeInSecs() {
-        return properties.getNvd().getDownload().getUsingApi().getProcessor().getRollingWindowInSecs();
+        return getProperties()
+                .getNvd()
+                .getDownload()
+                .getUsingApi()
+                .getProcessor()
+                .getRollingWindowInSecs();
     }
 
     public static int getMaxRetries() {
-        return properties.getNvd().getDownload().getUsingApi().getMaxRetries();
+        return getProperties().getNvd().getDownload().getUsingApi().getMaxRetries();
     }
 
     public static int getRetryIntervalInSecs() {
-        return properties.getNvd().getDownload().getUsingApi().getRetryIntervalInSecs();
+        return getProperties().getNvd().getDownload().getUsingApi().getRetryIntervalInSecs();
     }
 
     public static List<BasicHeader> getNvdDefaultHeaders() {
-        String apiKey = properties.getNvd().getApi().getKey();
+        String apiKey = getProperties().getNvd().getApi().getKey();
         List<BasicHeader> uriHeaders = new ArrayList<>();
         uriHeaders.add(new BasicHeader("Accept", "application/json"));
         uriHeaders.add(new BasicHeader("User-Agent", getUserAgent()));
@@ -151,8 +172,6 @@ public final class HttpUtil {
 
     public static <T> void downloadHttpGetRequest(URI uri, File outFile, HttpClientResponseHandler<T> responseHandler)
             throws NvdException {
-        // replaceUriHeader("User-Agent", getUserAgent());
-
         boolean isTestMode = Boolean.parseBoolean(System.getProperty("nvd.test.mode", "false"));
         RequestConfig.Builder configBuilder = RequestConfig.custom();
         if (isTestMode) {
@@ -172,7 +191,6 @@ public final class HttpUtil {
             try (BufferedWriter writer = Files.newBufferedWriter(outFile.toPath())) {
                 ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                // mapper.enable(SerializationFeature.INDENT_OUTPUT);
                 mapper.writeValue(writer, apiJson);
             }
         } catch (Exception e) {

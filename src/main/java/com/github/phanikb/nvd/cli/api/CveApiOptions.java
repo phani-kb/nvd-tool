@@ -121,19 +121,17 @@ public class CveApiOptions extends LastModApiOptions {
             validateDateRange(pubDateRange.getPubStartDate(), pubDateRange.getPubEndDate());
         }
 
-        if (pubDateRange != null && getLastModDateRange() != null) {
-            if (!getPubDateRange().isWithinAllowableRange()
-                    && !getLastModDateRange().isWithinAllowableRange()) {
-                throw new IllegalArgumentException("Date ranges are outside the allowable range.");
-            }
+        if (pubDateRange != null
+                && getLastModDateRange() != null
+                && !getPubDateRange().isWithinAllowableRange()
+                && !getLastModDateRange().isWithinAllowableRange()) {
+            throw new IllegalArgumentException("Date ranges are outside the allowable range.");
         }
 
-        CveApiOptions.KeywordSearch keywordSearch = getKeywordSearch();
         if (keywordSearch != null && keywordSearch.isInvalid()) {
             throw new IllegalArgumentException("Invalid keyword search options, exact match requires keyword.");
         }
 
-        CveApiOptions.CpeVulnerable cpeVulnerable = getCpeVulnerable();
         if (cpeVulnerable != null) {
             if (cpeVulnerable.isInvalid()) {
                 throw new IllegalArgumentException("Missing required option '--cpe-name'");
@@ -142,12 +140,10 @@ public class CveApiOptions extends LastModApiOptions {
             }
         }
 
-        CveApiOptions.VersionEnd versionEnd = getVersionEnd();
         if (versionEnd != null && virtualMatchString == null) {
             throw new IllegalArgumentException("Option '--version-end' requires '--virtual-ms'");
         }
 
-        CveApiOptions.VersionStart versionStart = getVersionStart();
         if (versionStart != null && virtualMatchString == null) {
             throw new IllegalArgumentException("Option '--version-start' requires '--virtual-ms'");
         }
@@ -214,7 +210,7 @@ public class CveApiOptions extends LastModApiOptions {
         private boolean isVulnerable;
 
         public boolean isInvalid() {
-            return cpeName == null && isVulnerable;
+            return (cpeName == null || cpeName.isBlank()) && isVulnerable;
         }
     }
 
@@ -228,14 +224,14 @@ public class CveApiOptions extends LastModApiOptions {
                 paramLabel = "TYPE",
                 required = true,
                 description = "Valid values are ${COMPLETION-CANDIDATES}.")
-        private VersionType versionEndType;
+        private VersionType vet;
 
         @CommandLine.Option(
                 names = {"--ve", "--version-end"},
                 paramLabel = "VERSION",
                 required = true,
                 description = "Ending version.")
-        private String versionEnd;
+        private String ve;
     }
 
     @Getter
@@ -255,7 +251,7 @@ public class CveApiOptions extends LastModApiOptions {
                 paramLabel = "VERSION",
                 required = true,
                 description = "Starting version.")
-        private String versionStart;
+        private String vs;
     }
 
     @Getter
@@ -271,10 +267,10 @@ public class CveApiOptions extends LastModApiOptions {
                 names = {"--kw-search"},
                 paramLabel = "STRING",
                 description = "Returns only the CVEs where a word or phrase is found in the current description.")
-        private String keywordSearch;
+        private String kws;
 
         public boolean isInvalid() {
-            return keywordExactMatch && keywordSearch == null;
+            return kws == null;
         }
     }
 

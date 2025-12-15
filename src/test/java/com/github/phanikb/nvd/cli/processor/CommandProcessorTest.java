@@ -1,6 +1,7 @@
 package com.github.phanikb.nvd.cli.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,9 @@ import com.github.phanikb.nvd.enums.FeedType;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,11 +38,13 @@ class CommandProcessorTest {
         }
 
         @Override
-        public void process() {}
+        public void process() {
+            // No-op for testing purposes
+        }
     }
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IOException {
         validOutDir = tempDir.toFile();
         nonExistentDir = new File(tempDir.toFile(), "non-existent");
         fileNotDir = new File(tempDir.toFile(), "test-file.txt");
@@ -141,7 +146,7 @@ class CommandProcessorTest {
     void testICommandProcessorInterfaceImplementation() {
         commandProcessor = new TestCommandProcessor(DownloadMode.API, FeedType.CVE, validOutDir);
 
-        assertTrue(commandProcessor instanceof ICommandProcessor);
+        assertInstanceOf(ICommandProcessor.class, commandProcessor);
 
         assertEquals(FeedType.CVE, commandProcessor.getFeedType());
         assertEquals(validOutDir, commandProcessor.getOutDir());
@@ -156,7 +161,7 @@ class CommandProcessorTest {
 
         Exception exception = assertThrows(NvdDownloadException.class, () -> commandProcessor.preProcess());
 
-        assertTrue(exception instanceof NvdException);
+        assertInstanceOf(NvdException.class, exception);
     }
 
     @Test
@@ -208,9 +213,9 @@ class CommandProcessorTest {
         assertDoesNotThrow(() -> new TestCommandProcessor(null, null, null));
 
         commandProcessor = new TestCommandProcessor(null, null, null);
-        assertEquals(null, commandProcessor.getDwnMode());
-        assertEquals(null, commandProcessor.getFeedType());
-        assertEquals(null, commandProcessor.getOutDir());
+        assertNull(commandProcessor.getDwnMode());
+        assertNull(commandProcessor.getFeedType());
+        assertNull(commandProcessor.getOutDir());
     }
 
     @Test
@@ -231,7 +236,7 @@ class CommandProcessorTest {
     }
 
     @Test
-    void testCompleteWorkflow() throws NvdException {
+    void testCompleteWorkflow() {
         commandProcessor = new TestCommandProcessor(DownloadMode.URI, FeedType.CPE_MATCH, validOutDir);
 
         assertDoesNotThrow(() -> {

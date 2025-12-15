@@ -11,10 +11,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
@@ -40,7 +38,7 @@ public enum ArchiveType {
         return ArchiveType.UNKNOWN;
     }
 
-    public void extract(File src, File destDir) throws IOException, ArchiveException, CompressorException {
+    public void extract(File src, File destDir) throws IOException {
         switch (this) {
             case UNKNOWN -> throw new IllegalArgumentException("unsupported file type: " + extension);
             case ZIP -> extractArchive(src, destDir);
@@ -49,14 +47,20 @@ public enum ArchiveType {
         }
     }
 
-    private void extractArchive(File src, File destDir) throws IOException, ArchiveException {
+    private void extractArchive(File src, File destDir) throws IOException {
+        if (!destDir.exists()) destDir.mkdirs();
         try (InputStream is = new FileInputStream(src);
                 ArchiveInputStream<? extends ArchiveEntry> archiveInputStream =
                         new ArchiveStreamFactory().createArchiveInputStream(extension.substring(1), is)) {
 
             ArchiveEntry entry;
             while ((entry = archiveInputStream.getNextEntry()) != null) {
-                File outputFile = new File(destDir, entry.getName());
+                String entryName = entry.getName();
+                String safeName = (entry.isDirectory() || entryName == null) ? "" : new File(entryName).getName();
+                if (safeName.isEmpty()) {
+                    continue;
+                }
+                File outputFile = new File(destDir, safeName);
                 try (OutputStream os = new FileOutputStream(outputFile)) {
                     IOUtils.copy(archiveInputStream, os);
                 }
@@ -64,7 +68,7 @@ public enum ArchiveType {
         }
     }
 
-    private void extractCompressed(File src, File destDir) throws IOException, CompressorException {
+    private void extractCompressed(File src, File destDir) throws IOException {
         try (InputStream is = new FileInputStream(src);
                 CompressorInputStream compressorInputStream =
                         new CompressorStreamFactory().createCompressorInputStream(extension.substring(1), is);
@@ -75,7 +79,7 @@ public enum ArchiveType {
         }
     }
 
-    public void archive(File src, File destDir) throws IOException, ArchiveException {
+    public void archive(File src, File destDir) throws IOException {
         switch (this) {
             case ZIP -> {
                 try (ZipOutputStream zos =

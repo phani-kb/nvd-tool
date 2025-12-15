@@ -12,6 +12,7 @@ import lombok.Setter;
 import picocli.CommandLine;
 
 import com.github.phanikb.nvd.cli.api.CveApiOptions;
+import com.github.phanikb.nvd.cli.api.LastModApiOptions.LastModDateRange;
 import com.github.phanikb.nvd.cli.processor.api.download.ApiDownloader;
 import com.github.phanikb.nvd.common.Constants;
 import com.github.phanikb.nvd.common.DateFormats;
@@ -217,9 +218,8 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
             if (kwSearch.isKeywordExactMatch()) {
                 queryParams.add(new BasicNameValuePair(ApiQueryParams.KW_EXACT_MATCH.getName(), null));
             }
-            if (kwSearch.getKeywordSearch() != null) {
-                queryParams.add(
-                        new BasicNameValuePair(ApiQueryParams.KW_SEARCH.getName(), kwSearch.getKeywordSearch()));
+            if (kwSearch.getKws() != null) {
+                queryParams.add(new BasicNameValuePair(ApiQueryParams.KW_SEARCH.getName(), kwSearch.getKws()));
             }
         }
 
@@ -299,7 +299,7 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
             }
         }
 
-        CveApiOptions.LastModDateRange lastModDateRange = cveApiOptions.getLastModDateRange();
+        LastModDateRange lastModDateRange = cveApiOptions.getLastModDateRange();
         if (lastModDateRange != null) {
             queryParams.addAll(getDateRangeQueryParams(
                     ApiQueryParams.LAST_MODIFIED_START_DATE,
@@ -313,16 +313,16 @@ public class CveApiDownloadCommand extends BaseApiDownloadCommand {
         if (cveApiOptions.getVersionEnd() != null) {
             queryParams.add(new BasicNameValuePair(
                     ApiQueryParams.VERSION_END.getName(),
-                    cveApiOptions.getVersionEnd().getVersionEnd()));
+                    cveApiOptions.getVersionEnd().getVe()));
             queryParams.add(new BasicNameValuePair(
                     ApiQueryParams.VERSION_END_TYPE.getName(),
-                    cveApiOptions.getVersionEnd().getVersionEndType().getValue()));
+                    cveApiOptions.getVersionEnd().getVet().getValue()));
         }
 
         if (cveApiOptions.getVersionStart() != null) {
             queryParams.add(new BasicNameValuePair(
                     ApiQueryParams.VERSION_START.getName(),
-                    cveApiOptions.getVersionStart().getVersionStart()));
+                    cveApiOptions.getVersionStart().getVs()));
             queryParams.add(new BasicNameValuePair(
                     ApiQueryParams.VERSION_START_TYPE.getName(),
                     cveApiOptions.getVersionStart().getVersionStartType().getValue()));

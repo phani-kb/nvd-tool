@@ -21,10 +21,12 @@ import org.mockito.MockitoAnnotations;
 
 import com.github.phanikb.nvd.common.NvdException;
 import com.github.phanikb.nvd.common.QueueElement;
+import com.github.phanikb.nvd.enums.ApiQueryParams;
 import com.github.phanikb.nvd.enums.FeedType;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,7 +100,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testRunWithStartIndex() throws Exception {
+    void testRunWithStartIndex() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(50);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -123,20 +125,20 @@ class StartIndexProducerTest {
         assertEquals(2, downloadQueue.size());
 
         QueueElement firstElement = downloadQueue.poll();
-        assertTrue(firstElement instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, firstElement);
         StartIndexQE startIndexQE = (StartIndexQE) firstElement;
         assertEquals(50, startIndexQE.getStartIndex());
         assertEquals(149, startIndexQE.getEndIndex()); // 50 + 100 - 1
 
         QueueElement poisonElement = downloadQueue.poll();
-        assertTrue(poisonElement instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, poisonElement);
         StartIndexQE poisonQE = (StartIndexQE) poisonElement;
         assertEquals(poison, poisonQE.getStartIndex());
         assertEquals(poison, poisonQE.getEndIndex());
     }
 
     @Test
-    void testRunWithoutStartIndex() throws Exception {
+    void testRunWithoutStartIndex() throws NvdException {
         when(mockProducerHelper.hasStartIndex()).thenReturn(false);
         when(mockProducerHelper.getTotalPages(100)).thenReturn(3);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -162,7 +164,7 @@ class StartIndexProducerTest {
 
         for (int page = 1; page <= 3; page++) {
             QueueElement element = downloadQueue.poll();
-            assertTrue(element instanceof StartIndexQE);
+            assertInstanceOf(StartIndexQE.class, element);
             StartIndexQE startIndexQE = (StartIndexQE) element;
             int expectedStartIndex = (page - 1) * 100;
             int expectedEndIndex = expectedStartIndex + 100 - 1;
@@ -171,13 +173,13 @@ class StartIndexProducerTest {
         }
 
         QueueElement poisonElement = downloadQueue.poll();
-        assertTrue(poisonElement instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, poisonElement);
         StartIndexQE poisonQE = (StartIndexQE) poisonElement;
         assertEquals(poison, poisonQE.getStartIndex());
     }
 
     @Test
-    void testRunWithNvdException() throws Exception {
+    void testRunWithNvdException() throws NvdException {
         when(mockProducerHelper.hasStartIndex()).thenReturn(false);
         when(mockProducerHelper.getTotalPages(anyInt())).thenThrow(new NvdException("Test exception"));
 
@@ -196,13 +198,13 @@ class StartIndexProducerTest {
 
         assertEquals(1, downloadQueue.size());
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, element);
         StartIndexQE poisonQE = (StartIndexQE) element;
         assertEquals(poison, poisonQE.getStartIndex());
     }
 
     @Test
-    void testGetDownloadUri() throws Exception {
+    void testGetDownloadUri() throws NvdException {
         producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
@@ -215,8 +217,8 @@ class StartIndexProducerTest {
                 downloadQueue);
 
         List<NameValuePair> testParams = Arrays.asList(
-                new BasicNameValuePair("resultsPerPage", "50"),
-                new BasicNameValuePair("startIndex", "999") // This should be overridden
+                new BasicNameValuePair(ApiQueryParams.RESULTS_PER_PAGE.getName(), "50"),
+                new BasicNameValuePair(ApiQueryParams.START_INDEX.getName(), "999") // This should be overridden
                 );
 
         URI downloadUri = producer.getDownloadUri(100, testParams);
@@ -242,11 +244,9 @@ class StartIndexProducerTest {
                 queryParams,
                 downloadQueue);
 
-        List<NameValuePair> testParams = Arrays.asList(new BasicNameValuePair("resultsPerPage", "50"));
+        List<NameValuePair> testParams = List.of(new BasicNameValuePair("resultsPerPage", "50"));
 
-        NvdException exception = assertThrows(NvdException.class, () -> {
-            producer.getDownloadUri(100, testParams);
-        });
+        NvdException exception = assertThrows(NvdException.class, () -> producer.getDownloadUri(100, testParams));
 
         assertEquals("failed to build URI", exception.getMessage());
     }
@@ -284,7 +284,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testGetTotalPages() throws Exception {
+    void testGetTotalPages() throws NvdException {
         when(mockProducerHelper.getTotalPages(100)).thenReturn(5);
 
         producer = new StartIndexProducer(
@@ -304,7 +304,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testGetTotalResults() throws Exception {
+    void testGetTotalResults() throws NvdException {
         when(mockProducerHelper.getTotalResults()).thenReturn(500);
 
         producer = new StartIndexProducer(
@@ -324,7 +324,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testGetTotalFiles() throws Exception {
+    void testGetTotalFiles() throws NvdException {
         when(mockProducerHelper.getTotalPages(100)).thenReturn(10);
 
         producer = new StartIndexProducer(
@@ -344,7 +344,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testGenerateTotalResultsUri() throws Exception {
+    void testGenerateTotalResultsUri() throws NvdException {
         producer = StartIndexProducer.create(
                 FeedType.CVE,
                 poison,
@@ -379,9 +379,7 @@ class StartIndexProducerTest {
                 queryParams,
                 downloadQueue);
 
-        NvdException exception = assertThrows(NvdException.class, () -> {
-            producer.generateTotalResultsUri();
-        });
+        NvdException exception = assertThrows(NvdException.class, () -> producer.generateTotalResultsUri());
 
         assertEquals("failed to build URI", exception.getMessage());
     }
@@ -406,11 +404,10 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testQueueElementCreation() throws Exception {
+    void testQueueElementCreation() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(200);
-        when(mockProducerHelper.getQueryParams())
-                .thenReturn(Arrays.asList(new BasicNameValuePair("resultsPerPage", "25")));
+        when(mockProducerHelper.getQueryParams()).thenReturn(List.of(new BasicNameValuePair("resultsPerPage", "25")));
 
         producer = new StartIndexProducer(
                 FeedType.CVE,
@@ -428,7 +425,7 @@ class StartIndexProducerTest {
         assertEquals(1, downloadQueue.size());
 
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, element);
         StartIndexQE startIndexQE = (StartIndexQE) element;
 
         assertEquals(200, startIndexQE.getStartIndex());
@@ -443,7 +440,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testMultiplePoisonElements() throws Exception {
+    void testMultiplePoisonElements() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(0);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -468,10 +465,8 @@ class StartIndexProducerTest {
         int poisonCount = 0;
         while (!downloadQueue.isEmpty()) {
             QueueElement element = downloadQueue.poll();
-            if (element instanceof StartIndexQE startIndexQE) {
-                if (startIndexQE.getStartIndex() == poison) {
-                    poisonCount++;
-                }
+            if (element instanceof StartIndexQE startIndexQE && startIndexQE.getStartIndex() == poison) {
+                poisonCount++;
             }
         }
         assertEquals(3, poisonCount);
@@ -495,7 +490,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testZeroStartIndex() throws Exception {
+    void testZeroStartIndex() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(0);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -516,7 +511,7 @@ class StartIndexProducerTest {
         assertEquals(1, downloadQueue.size());
 
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, element);
         StartIndexQE startIndexQE = (StartIndexQE) element;
 
         assertEquals(0, startIndexQE.getStartIndex());
@@ -528,7 +523,7 @@ class StartIndexProducerTest {
     }
 
     @Test
-    void testLargeStartIndex() throws Exception {
+    void testLargeStartIndex() {
         when(mockProducerHelper.hasStartIndex()).thenReturn(true);
         when(mockProducerHelper.getStartIndex()).thenReturn(999999);
         when(mockProducerHelper.getQueryParams()).thenReturn(queryParams);
@@ -549,7 +544,7 @@ class StartIndexProducerTest {
         assertEquals(1, downloadQueue.size());
 
         QueueElement element = downloadQueue.poll();
-        assertTrue(element instanceof StartIndexQE);
+        assertInstanceOf(StartIndexQE.class, element);
         StartIndexQE startIndexQE = (StartIndexQE) element;
 
         assertEquals(999999, startIndexQE.getStartIndex());

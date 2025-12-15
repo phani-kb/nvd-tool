@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NvdApiDateTest {
+class NvdApiDateTest {
 
     @Test
-    public void testConstructorAndGetters() {
+    void testConstructorAndGetters() {
         String name = "testDate";
         LocalDateTime now = LocalDateTime.now();
         NvdApiDateType type = NvdApiDateType.START_DATE;
@@ -26,7 +26,7 @@ public class NvdApiDateTest {
     }
 
     @Test
-    public void testEquality() {
+    void testEquality() {
         String name = "testDate";
         LocalDateTime now = LocalDateTime.now();
         NvdApiDateType type = NvdApiDateType.START_DATE;
@@ -41,7 +41,7 @@ public class NvdApiDateTest {
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         String name = "testDate";
         LocalDateTime now = LocalDateTime.now();
         NvdApiDateType type = NvdApiDateType.END_DATE;
@@ -54,7 +54,7 @@ public class NvdApiDateTest {
     }
 
     @Test
-    public void testWithStartDateType() {
+    void testWithStartDateType() {
         String name = "startDate";
         LocalDateTime now = LocalDateTime.now();
         NvdApiDateType type = NvdApiDateType.START_DATE;
@@ -64,7 +64,7 @@ public class NvdApiDateTest {
     }
 
     @Test
-    public void testWithEndDateType() {
+    void testWithEndDateType() {
         String name = "endDate";
         LocalDateTime now = LocalDateTime.now();
         NvdApiDateType type = NvdApiDateType.END_DATE;

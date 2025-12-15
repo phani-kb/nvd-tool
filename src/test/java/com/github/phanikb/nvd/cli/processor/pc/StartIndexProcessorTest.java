@@ -12,7 +12,14 @@ import org.junit.jupiter.api.io.TempDir;
 import com.github.phanikb.nvd.common.QueueElement;
 import com.github.phanikb.nvd.enums.FeedType;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StartIndexProcessorTest {
 
@@ -55,7 +62,9 @@ class StartIndexProcessorTest {
         }
 
         @Override
-        public void run() {}
+        public void run() {
+            // No-op for testing purposes
+        }
     }
 
     @BeforeEach
@@ -171,13 +180,10 @@ class StartIndexProcessorTest {
     }
 
     @Test
-    void testGetDownloadFileTimestampUniqueness() throws InterruptedException {
+    void testGetDownloadFileTimestampUniqueness() {
         processor = new TestStartIndexProcessor(FeedType.CVE, poison, tempDir, "timestamp-test", downloadQueue);
 
         File file1 = processor.getDownloadFile(0, 99, tempDir);
-
-        Thread.sleep(1000);
-
         File file2 = processor.getDownloadFile(100, 199, tempDir);
 
         assertNotEquals(file1.getName(), file2.getName());
@@ -207,8 +213,8 @@ class StartIndexProcessorTest {
     void testInheritanceFromBaseProcessor() {
         processor = new TestStartIndexProcessor(FeedType.CVE, poison, tempDir, "inheritance-test", downloadQueue);
 
-        assertTrue(processor instanceof BaseProcessor);
-        assertTrue(processor instanceof Runnable);
+        assertInstanceOf(BaseProcessor.class, processor);
+        assertInstanceOf(Runnable.class, processor);
     }
 
     @Test

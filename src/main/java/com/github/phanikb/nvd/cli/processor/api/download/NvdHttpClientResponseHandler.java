@@ -23,12 +23,15 @@ import com.github.phanikb.nvd.enums.FeedType;
 
 public record NvdHttpClientResponseHandler<T>(Class<T> clazz) implements HttpClientResponseHandler<T> {
 
-    public static NvdHttpClientResponseHandler<?> getResponseHandler(FeedType type) {
+    @SuppressWarnings("unchecked")
+    public static <T> NvdHttpClientResponseHandler<T> getResponseHandler(FeedType type) {
         return switch (type) {
-            case CVE -> new NvdHttpClientResponseHandler<>(CveApiJson20Schema.class);
-            case CVE_HISTORY -> new NvdHttpClientResponseHandler<>(CveHistoryApiJson20Schema.class);
-            case CPE -> new NvdHttpClientResponseHandler<>(CpeApiJson20Schema.class);
-            case CPE_MATCH -> new NvdHttpClientResponseHandler<>(CpematchApiJson20Schema.class);
+            case CVE -> (NvdHttpClientResponseHandler<T>) new NvdHttpClientResponseHandler<>(CveApiJson20Schema.class);
+            case CVE_HISTORY -> (NvdHttpClientResponseHandler<T>)
+                    new NvdHttpClientResponseHandler<>(CveHistoryApiJson20Schema.class);
+            case CPE -> (NvdHttpClientResponseHandler<T>) new NvdHttpClientResponseHandler<>(CpeApiJson20Schema.class);
+            case CPE_MATCH -> (NvdHttpClientResponseHandler<T>)
+                    new NvdHttpClientResponseHandler<>(CpematchApiJson20Schema.class);
             default -> throw new IllegalArgumentException("unsupported http response for feed type: " + type);
         };
     }

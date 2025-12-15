@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NvdIdTest {
+class NvdIdTest {
 
     private static class TestNvdId extends NvdId {
         private final String id;
         private final String pattern;
 
-        public TestNvdId(String id, String pattern) {
+        TestNvdId(String id, String pattern) {
             this.id = id;
             this.pattern = pattern;
         }
@@ -28,14 +28,14 @@ public class NvdIdTest {
     }
 
     @Test
-    public void testValidateIdWithValidId() {
+    void testValidateIdWithValidId() {
         TestNvdId nvdId = new TestNvdId("CVE-2023-1234", "CVE-\\d{4}-\\d{4,}");
 
         nvdId.validateId();
     }
 
     @Test
-    public void testValidateIdWithNullId() {
+    void testValidateIdWithNullId() {
         TestNvdId nvdId = new TestNvdId(null, "CVE-\\d{4}-\\d{4,}");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, nvdId::validateId);
@@ -43,7 +43,7 @@ public class NvdIdTest {
     }
 
     @Test
-    public void testValidateIdWithEmptyId() {
+    void testValidateIdWithEmptyId() {
         TestNvdId nvdId = new TestNvdId("", "CVE-\\d{4}-\\d{4,}");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, nvdId::validateId);
@@ -51,7 +51,7 @@ public class NvdIdTest {
     }
 
     @Test
-    public void testValidateIdWithInvalidId() {
+    void testValidateIdWithInvalidId() {
         TestNvdId nvdId = new TestNvdId("INVALID-123", "CVE-\\d{4}-\\d{4,}");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, nvdId::validateId);
@@ -59,14 +59,14 @@ public class NvdIdTest {
     }
 
     @Test
-    public void testValidateIdWithDifferentPattern() {
+    void testValidateIdWithDifferentPattern() {
         TestNvdId nvdId = new TestNvdId("CWE-123", "CWE-\\d+");
 
         nvdId.validateId();
     }
 
     @Test
-    public void testGetIdAndGetPattern() {
+    void testGetIdAndGetPattern() {
         String testId = "TEST-123";
         String testPattern = "TEST-\\d+";
         TestNvdId nvdId = new TestNvdId(testId, testPattern);

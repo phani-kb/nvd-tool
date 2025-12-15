@@ -18,8 +18,8 @@ import static com.github.phanikb.nvd.common.Constants.DEFAULT_RETRY_INTERVAL_SEC
 @Getter
 @Setter
 @ToString
-public final class NvdProperties {
-    private static final NvdProperties properties = loadNvdProperties();
+public class NvdProperties {
+    private static NvdProperties properties;
     private Nvd nvd;
 
     private NvdProperties() {
@@ -30,16 +30,16 @@ public final class NvdProperties {
         ApiEndpointVersion version = properties.getNvd().getApi().getVersion();
         return switch (type) {
             case CVE -> switch (version) {
-                case V2 -> properties.getNvd().getCve().getApiV2().getEndpoint();
+                case V2 -> properties.getNvd().getCve().getApiV2().getEp();
             };
             case CPE -> switch (version) {
-                case V2 -> properties.getNvd().getCpe().getApiV2().getEndpoint();
+                case V2 -> properties.getNvd().getCpe().getApiV2().getEp();
             };
             case CPE_MATCH -> switch (version) {
-                case V2 -> properties.getNvd().getCpeMatch().getApiV2().getEndpoint();
+                case V2 -> properties.getNvd().getCpeMatch().getApiV2().getEp();
             };
             case CVE_HISTORY -> switch (version) {
-                case V2 -> properties.getNvd().getCveHistory().getApiV2().getEndpoint();
+                case V2 -> properties.getNvd().getCveHistory().getApiV2().getEp();
             };
         };
     }
@@ -50,21 +50,86 @@ public final class NvdProperties {
     }
 
     private static NvdProperties createDefaultProperties() {
-        // Create default properties when nvd.yml is not found
         NvdProperties defaultProps = new NvdProperties();
         Nvd nvd = new Nvd();
 
+        Proxy proxy = new Proxy();
+        proxy.setHost(null);
+        proxy.setPort(null);
+        nvd.setProxy(proxy);
+
         Api api = new Api();
         api.setVersion(ApiEndpointVersion.V2);
+        api.setKey(null);
         api.setKeyUrl("https://nvd.nist.gov/developers/request-an-api-key");
         nvd.setApi(api);
 
+        Endpoint cveEndpoint = new Endpoint();
+        cveEndpoint.setEp("https://services.nvd.nist.gov/rest/json/cves/2.0");
+        EndpointAndUrl cve = new EndpointAndUrl();
+        cve.setApiV2(cveEndpoint);
+        Url cveUrl = new Url();
+        cveUrl.setValue("https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{download-type}.json.{archive-type}");
+        cve.setMainUrl(cveUrl.getValue());
+        nvd.setCve(cve);
+
+        Endpoint cpeEndpoint = new Endpoint();
+        cpeEndpoint.setEp("https://services.nvd.nist.gov/rest/json/cpes/2.0");
+        EndpointAndUrl cpe = new EndpointAndUrl();
+        cpe.setApiV2(cpeEndpoint);
+        Url cpeUrl = new Url();
+        cpeUrl.setValue(
+                "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.{archive-type}");
+        cpe.setMainUrl(cpeUrl.getValue());
+        nvd.setCpe(cpe);
+
+        Endpoint cpeMatchEndpoint = new Endpoint();
+        cpeMatchEndpoint.setEp("https://services.nvd.nist.gov/rest/json/cpematch/2.0");
+        EndpointAndUrl cpeMatch = new EndpointAndUrl();
+        cpeMatch.setApiV2(cpeMatchEndpoint);
+        Url cpeMatchUrl = new Url();
+        cpeMatchUrl.setValue("https://nvd.nist.gov/feeds/json/cpematch/1.0/nvdcpematch-1.0.json.{archive-type}");
+        cpeMatch.setMainUrl(cpeMatchUrl.getValue());
+        nvd.setCpeMatch(cpeMatch);
+
+        CveHistory cveHistory = new CveHistory();
+        Endpoint cveHistoryEndpoint = new Endpoint();
+        cveHistoryEndpoint.setEp("https://services.nvd.nist.gov/rest/json/cvehistory/2.0");
+        cveHistory.setApiV2(cveHistoryEndpoint);
+        nvd.setCveHistory(cveHistory);
+
+        Url cweUrl = new Url();
+        cweUrl.setValue("https://cwe.mitre.org/data/xml/cwec_latest.xml.zip");
+        nvd.setCwe(cweUrl);
+
+        Download download = getDownload();
+        nvd.setDownload(download);
+
+        Merge merge = new Merge();
+        merge.setSkipInvalidCollection(true);
+        nvd.setMerge(merge);
+
+        defaultProps.setNvd(nvd);
+        return defaultProps;
+    }
+
+    private static Download getDownload() {
         Download download = new Download();
+        UsingUri usingUri = new UsingUri();
+        usingUri.setMaxConcurrentDownloads(1);
+        download.setUsingUri(usingUri);
+
         UsingApi usingApi = new UsingApi();
-        usingApi.setMaxDownloadAttempts(10);
         usingApi.setMaxRetries(3);
+        usingApi.setMaxDownloadAttempts(10);
         usingApi.setRetryIntervalInSecs(30);
         usingApi.setDelayBetweenRequestsInMs(6000);
+        LastModifiedDates lastModifiedDates = new LastModifiedDates();
+        lastModifiedDates.setMaxRangeInDays(120);
+        usingApi.setLastModifiedDates(lastModifiedDates);
+        ChangeDates changeDates = new ChangeDates();
+        changeDates.setMaxRangeInDays(120);
+        usingApi.setChangeDates(changeDates);
 
         Processor processor = new Processor();
         processor.setMaxThreads(4);
@@ -77,14 +142,7 @@ public final class NvdProperties {
         usingApi.setProcessor(processor);
 
         download.setUsingApi(usingApi);
-        nvd.setDownload(download);
-
-        Merge merge = new Merge();
-        merge.setSkipInvalidCollection(true);
-        nvd.setMerge(merge);
-
-        defaultProps.setNvd(nvd);
-        return defaultProps;
+        return download;
     }
 
     private static NvdProperties getProperties(InputStream inputStream) {
@@ -93,6 +151,9 @@ public final class NvdProperties {
     }
 
     public static NvdProperties getInstance() {
+        if (properties == null) {
+            properties = loadNvdProperties();
+        }
         return properties;
     }
 
@@ -145,21 +206,21 @@ public final class NvdProperties {
     @Setter
     @ToString
     public static class Endpoint {
-        @NonNull private String endpoint;
+        @NonNull private String ep;
     }
 
     @Getter
     @Setter
     @ToString
     public static class Url {
-        @NonNull private String url;
+        @NonNull private String value;
     }
 
     @Getter
     @Setter
     @ToString
     public static class EndpointAndUrl {
-        @NonNull private String url;
+        @NonNull private String mainUrl;
 
         @NonNull private Endpoint apiV2;
     }

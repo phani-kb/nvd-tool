@@ -16,7 +16,7 @@ public class CweUriDownloadCommand extends BaseUriDownloadCommand {
     public String[] getUrls() {
         NvdProperties nvdProperties = NvdProperties.getInstance();
         String[] urls = new String[1];
-        urls[0] = nvdProperties.getNvd().getCwe().getUrl();
+        urls[0] = nvdProperties.getNvd().getCwe().getValue();
         return urls;
     }
 

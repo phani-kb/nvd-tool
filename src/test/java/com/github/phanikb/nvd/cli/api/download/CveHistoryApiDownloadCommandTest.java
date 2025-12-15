@@ -64,7 +64,7 @@ class CveHistoryApiDownloadCommandTest {
     private File testOutDir;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
         MockitoAnnotations.openMocks(this);
 
         testOutDir = tempDir.toFile();
@@ -90,7 +90,8 @@ class CveHistoryApiDownloadCommandTest {
         doNothing().when(parentCommand).validateOptions();
     }
 
-    private void setField(Object object, String fieldName, Object value) throws Exception {
+    private void setField(Object object, String fieldName, Object value)
+            throws IllegalAccessException, NoSuchFieldException {
         Field field = null;
         Class<?> currentClass = object.getClass();
 
@@ -111,7 +112,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithValidOptionsNoDateRanges() throws Exception {
+    void testCallWithValidOptionsNoDateRanges() {
         when(mockCveHistoryApiOptions.getChangeDateRange()).thenReturn(null);
         doNothing().when(mockCveHistoryApiOptions).validateOptions();
 
@@ -119,7 +120,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithSingleChangeDateRange() throws Exception {
+    void testCallWithSingleChangeDateRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(30);
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -137,7 +138,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithDateRangeExceedsMaxRange() throws Exception {
+    void testCallWithDateRangeExceedsMaxRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(150); // Exceeds 120 days limit
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -234,7 +235,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testGetQueryParamsWithNullCveHistoryApiOptions() throws Exception {
+    void testGetQueryParamsWithNullCveHistoryApiOptions() throws IllegalAccessException, NoSuchFieldException {
         setField(command, "cveHistoryApiOptions", null);
 
         List<NameValuePair> queryParams = command.getQueryParams();
@@ -244,7 +245,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsSuccess() throws Exception {
+    void testValidateOptionsSuccess() {
         doNothing().when(mockCveHistoryApiOptions).validateOptions();
 
         assertDoesNotThrow(() -> command.validateOptions());
@@ -253,7 +254,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsFailure() throws Exception {
+    void testValidateOptionsFailure() {
         doThrow(new IllegalArgumentException("Invalid options"))
                 .when(mockCveHistoryApiOptions)
                 .validateOptions();
@@ -288,7 +289,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testDateRangeValidationLogic() throws Exception {
+    void testDateRangeValidationLogic() {
         LocalDateTime validStartDate = LocalDateTime.now().minusDays(30);
         LocalDateTime validEndDate = LocalDateTime.now();
 
@@ -306,7 +307,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testCommandSpecValidation() throws Exception {
+    void testCommandSpecValidation() {
         doNothing().when(mockCveHistoryApiOptions).validateOptions();
 
         assertDoesNotThrow(() -> command.validateOptions());
@@ -315,7 +316,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testExecuteSuccess() throws Exception {
+    void testExecuteSuccess() throws NvdException {
         when(mockApiDownloader.getFeedType()).thenReturn(FeedType.CVE_HISTORY);
         doNothing().when(mockApiDownloader).download(any());
         doNothing().when(mockApiDownloader).generateOutputFile(any());
@@ -330,7 +331,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testExecuteWithNvdException() throws Exception {
+    void testExecuteWithNvdException() throws NvdException {
         NvdException nvdException = new NvdException("Test download error");
         doThrow(nvdException).when(mockApiDownloader).download(any());
 
@@ -339,7 +340,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsWithResultsPerPageTooLow() throws Exception {
+    void testValidateOptionsWithResultsPerPageTooLow() {
         when(mockCommonOptions.getResultsPerPage()).thenReturn(5); // Less than minimum 10
 
         ParameterException exception = assertThrows(ParameterException.class, () -> command.validateOptions());
@@ -347,7 +348,7 @@ class CveHistoryApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsWithNegativeStartIndex() throws Exception {
+    void testValidateOptionsWithNegativeStartIndex() {
         when(mockCommonOptions.getStartIndex()).thenReturn(-1);
 
         ParameterException exception = assertThrows(ParameterException.class, () -> command.validateOptions());

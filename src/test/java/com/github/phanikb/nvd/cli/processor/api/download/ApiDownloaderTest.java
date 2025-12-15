@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -109,7 +110,7 @@ class ApiDownloaderTest {
     }
 
     @Test
-    void testDownloadWithProducerException() throws NvdException {
+    void testDownloadWithProducerException() {
         doThrow(new RuntimeException("Producer error"))
                 .when(mockProducer)
                 .generateUris(any(ExecutorService.class), anyInt());
@@ -139,7 +140,7 @@ class ApiDownloaderTest {
     }
 
     @Test
-    void testGenerateOutputFileWithNoFiles() throws NvdException, IOException {
+    void testGenerateOutputFileWithNoFiles() throws NvdException {
         apiDownloader.generateOutputFile("vulnerabilities");
 
         File outputFile = new File(outDir.getParent(), OUT_FILE);
@@ -147,38 +148,50 @@ class ApiDownloaderTest {
     }
 
     @Test
-    void testGenerateOutputFileWithFiles() throws NvdException, IOException, InterruptedException {
+    void testGenerateOutputFileWithFiles() throws NvdException, IOException {
         String prefix = "nvdcve-V2";
-        String jsonContent1 = "{\n" + "  \"resultsPerPage\": 1,\n"
-                + "  \"startIndex\": 0,\n"
-                + "  \"totalResults\": 3,\n"
-                + "  \"format\": \"NVD_CVE\",\n"
-                + "  \"version\": \"2.0\",\n"
-                + "  \"timestamp\": \"2023-01-01T00:00:00.000Z\",\n"
-                + "  \"vulnerabilities\": [\n"
-                + "    {\"cve\": {\"id\": \"CVE-2023-0001\"}}\n"
-                + "  ]\n"
-                + "}";
-        String jsonContent2 = "{\n" + "  \"resultsPerPage\": 1,\n"
-                + "  \"startIndex\": 1,\n"
-                + "  \"totalResults\": 3,\n"
-                + "  \"format\": \"NVD_CVE\",\n"
-                + "  \"version\": \"2.0\",\n"
-                + "  \"timestamp\": \"2023-01-01T00:00:00.000Z\",\n"
-                + "  \"vulnerabilities\": [\n"
-                + "    {\"cve\": {\"id\": \"CVE-2023-0002\"}}\n"
-                + "  ]\n"
-                + "}";
-        String jsonContent3 = "{\n" + "  \"resultsPerPage\": 1,\n"
-                + "  \"startIndex\": 2,\n"
-                + "  \"totalResults\": 3,\n"
-                + "  \"format\": \"NVD_CVE\",\n"
-                + "  \"version\": \"2.0\",\n"
-                + "  \"timestamp\": \"2023-01-01T00:00:00.000Z\",\n"
-                + "  \"vulnerabilities\": [\n"
-                + "    {\"cve\": {\"id\": \"CVE-2023-0003\"}}\n"
-                + "  ]\n"
-                + "}";
+        String jsonContent1 =
+                """
+                {
+                  "resultsPerPage": 1,
+                  "startIndex": 0,
+                  "totalResults": 3,
+                  "format": "NVD_CVE",
+                  "version": "2.0",
+                  "timestamp": "2023-01-01T00:00:00.000Z",
+                  "vulnerabilities": [
+                    {"cve": {"id": "CVE-2023-0001"}}
+                  ]
+                }
+                """;
+        String jsonContent2 =
+                """
+                {
+                  "resultsPerPage": 1,
+                  "startIndex": 1,
+                  "totalResults": 3,
+                  "format": "NVD_CVE",
+                  "version": "2.0",
+                  "timestamp": "2023-01-01T00:00:00.000Z",
+                  "vulnerabilities": [
+                    {"cve": {"id": "CVE-2023-0002"}}
+                  ]
+                }
+                """;
+        String jsonContent3 =
+                """
+                {
+                  "resultsPerPage": 1,
+                  "startIndex": 2,
+                  "totalResults": 3,
+                  "format": "NVD_CVE",
+                  "version": "2.0",
+                  "timestamp": "2023-01-01T00:00:00.000Z",
+                  "vulnerabilities": [
+                    {"cve": {"id": "CVE-2023-0003"}}
+                  ]
+                }
+                """;
 
         createTestFile(prefix + "-1.json", jsonContent1);
         createTestFile(prefix + "-2.json", jsonContent2);
@@ -201,7 +214,7 @@ class ApiDownloaderTest {
     }
 
     @Test
-    void testGenerateOutputFileWithCompression() throws NvdException, IOException, InterruptedException {
+    void testGenerateOutputFileWithCompression() throws NvdException, IOException {
         ApiDownloader compressedDownloader = new ApiDownloader(
                 FeedType.CVE,
                 outDir,
@@ -213,16 +226,20 @@ class ApiDownloaderTest {
                 mockProducer);
 
         String prefix = "nvdcve-V2";
-        String jsonContent = "{\n" + "  \"resultsPerPage\": 1,\n"
-                + "  \"startIndex\": 0,\n"
-                + "  \"totalResults\": 1,\n"
-                + "  \"format\": \"NVD_CVE\",\n"
-                + "  \"version\": \"2.0\",\n"
-                + "  \"timestamp\": \"2023-01-01T00:00:00.000Z\",\n"
-                + "  \"vulnerabilities\": [\n"
-                + "    {\"cve\": {\"id\": \"CVE-2023-0001\"}}\n"
-                + "  ]\n"
-                + "}";
+        String jsonContent =
+                """
+                {
+                  "resultsPerPage": 1,
+                  "startIndex": 0,
+                  "totalResults": 1,
+                  "format": "NVD_CVE",
+                  "version": "2.0",
+                  "timestamp": "2023-01-01T00:00:00.000Z",
+                  "vulnerabilities": [
+                    {"cve": {"id": "CVE-2023-0001"}}
+                  ]
+                }
+                """;
         createTestFile(prefix + "-1.json", jsonContent);
 
         when(mockProducer.getTotalResults()).thenReturn(1);
@@ -246,7 +263,7 @@ class ApiDownloaderTest {
     void testDeleteTempDir() throws IOException {
         createTestFile("temp-file.txt", "test content");
         assertTrue(outDir.exists());
-        assertTrue(outDir.listFiles().length > 0);
+        assertTrue(Objects.requireNonNull(outDir.listFiles()).length > 0);
 
         apiDownloader.deleteTempDir();
 
@@ -369,18 +386,22 @@ class ApiDownloaderTest {
     }
 
     @Test
-    void testGenerateOutputFileWithMismatchedCounts() throws NvdException, IOException, InterruptedException {
+    void testGenerateOutputFileWithMismatchedCounts() throws NvdException, IOException {
         String prefix = "nvdcve-V2";
-        String jsonContent = "{\n" + "  \"resultsPerPage\": 1,\n"
-                + "  \"startIndex\": 0,\n"
-                + "  \"totalResults\": 1,\n"
-                + "  \"format\": \"NVD_CVE\",\n"
-                + "  \"version\": \"2.0\",\n"
-                + "  \"timestamp\": \"2023-01-01T00:00:00.000Z\",\n"
-                + "  \"vulnerabilities\": [\n"
-                + "    {\"cve\": {\"id\": \"CVE-2023-0001\"}}\n"
-                + "  ]\n"
-                + "}";
+        String jsonContent =
+                """
+                {
+                  "resultsPerPage": 1,
+                  "startIndex": 0,
+                  "totalResults": 1,
+                  "format": "NVD_CVE",
+                  "version": "2.0",
+                  "timestamp": "2023-01-01T00:00:00.000Z",
+                  "vulnerabilities": [
+                    {"cve": {"id": "CVE-2023-0001"}}
+                  ]
+                }
+                """;
         createTestFile(prefix + "-1.json", jsonContent);
 
         when(mockProducer.getTotalResults()).thenReturn(5);

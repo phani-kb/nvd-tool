@@ -16,21 +16,19 @@ import static org.mockito.Mockito.when;
 class CweUriDownloadCommandTest {
 
     private CweUriDownloadCommand cweUriDownloadCommand;
-    private UriDownloadCommand uriDownloadCommand;
     private MockedStatic<NvdProperties> nvdPropertiesMockedStatic;
 
     @BeforeEach
     void setUp() {
         cweUriDownloadCommand = new CweUriDownloadCommand();
-        uriDownloadCommand = mock(UriDownloadCommand.class);
-        cweUriDownloadCommand.parent = uriDownloadCommand;
+        cweUriDownloadCommand.parent = mock(UriDownloadCommand.class);
 
         NvdProperties nvdProperties = mock(NvdProperties.class);
         NvdProperties.Nvd nvd = mock(NvdProperties.Nvd.class);
         NvdProperties.Url url = mock(NvdProperties.Url.class);
         when(nvdProperties.getNvd()).thenReturn(nvd);
         when(nvd.getCwe()).thenReturn(url);
-        when(url.getUrl()).thenReturn("https://cwe.mitre.org/data/xml/cwec_v4.14.xml.zip");
+        when(url.getValue()).thenReturn("https://cwe.mitre.org/data/xml/cwec_v4.14.xml.zip");
 
         nvdPropertiesMockedStatic = mockStatic(NvdProperties.class);
         nvdPropertiesMockedStatic.when(NvdProperties::getInstance).thenReturn(nvdProperties);

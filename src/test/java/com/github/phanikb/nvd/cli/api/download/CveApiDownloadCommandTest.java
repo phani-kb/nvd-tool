@@ -69,7 +69,7 @@ class CveApiDownloadCommandTest {
     private File testOutDir;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
         MockitoAnnotations.openMocks(this);
 
         testOutDir = tempDir.toFile();
@@ -95,7 +95,8 @@ class CveApiDownloadCommandTest {
         doNothing().when(parentCommand).validateOptions();
     }
 
-    private void setField(Object object, String fieldName, Object value) throws Exception {
+    private void setField(Object object, String fieldName, Object value)
+            throws IllegalAccessException, NoSuchFieldException {
         Field field = null;
         Class<?> currentClass = object.getClass();
 
@@ -116,7 +117,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithValidOptionsNoDateRanges() throws Exception {
+    void testCallWithValidOptionsNoDateRanges() {
         when(mockCveApiOptions.getLastModDateRange()).thenReturn(null);
         when(mockCveApiOptions.getPubDateRange()).thenReturn(null);
         doNothing().when(mockCveApiOptions).validateOptions();
@@ -127,7 +128,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithSingleLastModDateRange() throws Exception {
+    void testCallWithSingleLastModDateRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(30);
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -146,7 +147,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithSinglePubDateRange() throws Exception {
+    void testCallWithSinglePubDateRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(30);
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -165,7 +166,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithDateRangeExceedsMaxRange() throws Exception {
+    void testCallWithDateRangeExceedsMaxRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(150); // Exceeds 120 days limit
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -182,7 +183,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithBothDateRangesExceedsMaxRange() throws Exception {
+    void testCallWithBothDateRangesExceedsMaxRange() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(150); // Exceeds 120 days limit
         LocalDateTime endDate = LocalDateTime.now();
 
@@ -203,7 +204,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCallWithMixedDateRanges() throws Exception {
+    void testCallWithMixedDateRanges() {
         LocalDateTime validStartDate = LocalDateTime.now().minusDays(30);
         LocalDateTime validEndDate = LocalDateTime.now();
         LocalDateTime invalidStartDate = LocalDateTime.now().minusDays(150);
@@ -311,7 +312,7 @@ class CveApiDownloadCommandTest {
     @Test
     void testGetQueryParamsWithKeywordSearch() {
         CveApiOptions.KeywordSearch keywordSearch = mock(CveApiOptions.KeywordSearch.class);
-        when(keywordSearch.getKeywordSearch()).thenReturn("test keyword");
+        when(keywordSearch.getKws()).thenReturn("test keyword");
         when(keywordSearch.isKeywordExactMatch()).thenReturn(true);
         when(mockCveApiOptions.getKeywordSearch()).thenReturn(keywordSearch);
 
@@ -349,7 +350,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testGetQueryParamsWithNullCveApiOptions() throws Exception {
+    void testGetQueryParamsWithNullCveApiOptions() throws IllegalAccessException, NoSuchFieldException {
         setField(command, "cveApiOptions", null);
 
         List<NameValuePair> queryParams = command.getQueryParams();
@@ -359,7 +360,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsSuccess() throws Exception {
+    void testValidateOptionsSuccess() {
         doNothing().when(mockCveApiOptions).validateOptions();
 
         assertDoesNotThrow(() -> command.validateOptions());
@@ -368,7 +369,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsFailure() throws Exception {
+    void testValidateOptionsFailure() {
         doThrow(new IllegalArgumentException("Invalid options"))
                 .when(mockCveApiOptions)
                 .validateOptions();
@@ -384,7 +385,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testDateRangeValidationLogic() throws Exception {
+    void testDateRangeValidationLogic() {
         LocalDateTime validStartDate = LocalDateTime.now().minusDays(30);
         LocalDateTime validEndDate = LocalDateTime.now();
 
@@ -403,7 +404,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testCommandSpecValidation() throws Exception {
+    void testCommandSpecValidation() {
         doNothing().when(mockCveApiOptions).validateOptions();
 
         assertDoesNotThrow(() -> command.validateOptions());
@@ -412,7 +413,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testExecuteSuccess() throws Exception {
+    void testExecuteSuccess() throws NvdException {
         when(mockApiDownloader.getFeedType()).thenReturn(FeedType.CVE);
         doNothing().when(mockApiDownloader).download(any());
         doNothing().when(mockApiDownloader).generateOutputFile(any());
@@ -427,7 +428,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testExecuteWithNvdException() throws Exception {
+    void testExecuteWithNvdException() throws NvdException {
         NvdException nvdException = new NvdException("Test download error");
         doThrow(nvdException).when(mockApiDownloader).download(any());
 
@@ -436,7 +437,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsWithResultsPerPageTooLow() throws Exception {
+    void testValidateOptionsWithResultsPerPageTooLow() {
         when(mockCommonOptions.getResultsPerPage()).thenReturn(5); // Less than minimum 10
 
         ParameterException exception = assertThrows(ParameterException.class, () -> command.validateOptions());
@@ -444,7 +445,7 @@ class CveApiDownloadCommandTest {
     }
 
     @Test
-    void testValidateOptionsWithNegativeStartIndex() throws Exception {
+    void testValidateOptionsWithNegativeStartIndex() {
         when(mockCommonOptions.getStartIndex()).thenReturn(-1);
 
         ParameterException exception = assertThrows(ParameterException.class, () -> command.validateOptions());

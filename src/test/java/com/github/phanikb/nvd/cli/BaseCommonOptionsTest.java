@@ -2,7 +2,12 @@ package com.github.phanikb.nvd.cli;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BaseCommonOptionsTest {
 
@@ -38,10 +43,10 @@ class BaseCommonOptionsTest {
     void testClassAnnotations() {
         BaseCommonOptions options = new BaseCommonOptions();
 
-        assertDoesNotThrow(() -> options.getOutDir());
-        assertDoesNotThrow(() -> options.getOutFilename());
+        assertDoesNotThrow(options::getOutDir);
+        assertDoesNotThrow(options::getOutFilename);
 
-        assertDoesNotThrow(() -> options.toString());
+        assertDoesNotThrow(options::toString);
     }
 
     @Test
