@@ -16,7 +16,7 @@ class BuildConfigTest {
     @Test
     void testVersion() {
         assertNotNull(BuildConfig.VERSION, "VERSION should not be null");
-        assertEquals("0.1.0-SNAPSHOT", BuildConfig.VERSION, "VERSION should be '0.1.0-SNAPSHOT'");
+        assertEquals("0.3.0-SNAPSHOT", BuildConfig.VERSION, "VERSION should be '0.3.0-SNAPSHOT'");
     }
 
     @Test
@@ -24,6 +24,6 @@ class BuildConfigTest {
         assertNotNull(BuildConfig.ARTIFACT_ID, "ARTIFACT_ID should not be null");
         assertNotNull(BuildConfig.VERSION, "VERSION should not be null");
         assertEquals("nvd-tool", BuildConfig.ARTIFACT_ID);
-        assertEquals("0.1.0-SNAPSHOT", BuildConfig.VERSION);
+        assertEquals("0.3.0-SNAPSHOT", BuildConfig.VERSION);
     }
 }

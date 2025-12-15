@@ -14,4 +14,6 @@ public interface IApiDownloadUriProducer {
     int getTotalResults() throws NvdException;
 
     int getTotalFiles() throws NvdException;
+
+    void setMaxResultsPerPage(int maxResultsPerPage);
 }

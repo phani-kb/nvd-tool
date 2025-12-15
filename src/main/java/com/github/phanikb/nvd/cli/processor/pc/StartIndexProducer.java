@@ -25,6 +25,9 @@ import static com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientRes
 public class StartIndexProducer extends StartIndexProcessor<Integer> implements IApiDownloadUriProducer {
     private ProducerHelper producerHelper;
 
+    @Setter
+    private int maxResultsPerPageOverride;
+
     public static class Config {
         public final FeedType type;
         public final int poison;
@@ -35,6 +38,10 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
 
         @Getter
         public final String endpoint;
+
+        @Setter
+        @Getter
+        private int maxResultsPerPage;
 
         @Setter
         @Getter
@@ -55,12 +62,21 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
             this.outFilePrefix = outFilePrefix;
             this.downloadQueue = downloadQueue;
             this.endpoint = endpoint;
+            this.maxResultsPerPage = 0;
             this.producerHelper = null;
         }
     }
 
     public StartIndexProducer(Config config) {
-        super(config.type, config.poison, config.outDir, config.outFilePrefix, config.downloadQueue);
+        super(
+                config.type,
+                config.poison,
+                config.poisonPerCreator,
+                config.getMaxResultsPerPage(),
+                config.endpoint,
+                config.outDir,
+                config.outFilePrefix,
+                config.downloadQueue);
         this.producerHelper = config.getProducerHelper();
     }
 
@@ -74,10 +90,19 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
             BlockingDeque<QueueElement> downloadQueue) {
         Config config = new Config(type, poison, poisonPerCreator, outDir, outFilePrefix, downloadQueue, endpoint);
         StartIndexProducer producer = new StartIndexProducer(config);
-        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, null);
+        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, List.of());
         producer.producerHelper = helper;
         config.setProducerHelper(helper);
         return producer;
+    }
+
+    @Override
+    public int getMaxResultsPerPage() {
+        return maxResultsPerPageOverride != 0 ? maxResultsPerPageOverride : super.getMaxResultsPerPage();
+    }
+
+    public void setMaxResultsPerPage(int maxResultsPerPage) {
+        this.maxResultsPerPageOverride = maxResultsPerPage;
     }
 
     @Override
@@ -142,6 +167,7 @@ public class StartIndexProducer extends StartIndexProcessor<Integer> implements 
         for (int i = 0; i < numberOfProducers; i++) {
             Config config =
                     new Config(feedType, poison, poisonPerCreator, outDir, outFilePrefix, downloadQueue, endpoint);
+            config.setMaxResultsPerPage(maxResultsPerPage);
             config.setProducerHelper(producerHelper);
             executorService.submit(new StartIndexProducer(config));
         }

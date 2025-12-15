@@ -14,6 +14,7 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.apache.hc.core5.util.TimeValue;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import com.github.phanikb.nvd.cli.processor.api.IApiDownloadUriProducer;
 import com.github.phanikb.nvd.cli.processor.api.download.NvdHttpClientResponseHandler;
@@ -33,6 +34,9 @@ import static com.github.phanikb.nvd.common.Util.getRangeDates;
 @Getter
 public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApiDownloadUriProducer {
     private ProducerHelper producerHelper;
+
+    @Setter
+    private int maxResultsPerPageOverride;
 
     public static DatesProducer create(
             FeedType type,
@@ -55,8 +59,7 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
                 outFilePrefix,
                 dates,
                 downloadQueue);
-        ProducerHelper helper = new ProducerHelper(type, producer::calculateTotalResults, queryParams);
-        producer.producerHelper = helper;
+        producer.producerHelper = new ProducerHelper(type, producer::calculateTotalResults, queryParams);
         return producer;
     }
 
@@ -87,6 +90,16 @@ public class DatesProducer extends DatesProcessor<LocalDateTime> implements IApi
             ProducerHelper producerHelper) {
         super(type, poison, poisonPerCreator, maxResultsPerPage, endpoint, outDir, outFilePrefix, dates, downloadQueue);
         this.producerHelper = producerHelper;
+    }
+
+    @Override
+    public int getMaxResultsPerPage() {
+        return maxResultsPerPageOverride != 0 ? maxResultsPerPageOverride : super.getMaxResultsPerPage();
+    }
+
+    @Override
+    public void setMaxResultsPerPage(int maxResultsPerPage) {
+        this.maxResultsPerPageOverride = maxResultsPerPage;
     }
 
     @Override

@@ -217,12 +217,11 @@ public abstract class BaseApiDownloadCommand implements Callable<Integer>, IApiD
                     feedType,
                     DEFAULT_POISON,
                     poisonPerCreator,
-                    rpp,
                     endpoint,
                     getOutDir().toPath(),
                     prefix,
-                    queryParams,
                     downloadQueue);
+            producer.setMaxResultsPerPage(rpp);
             consumer = StartIndexConsumer.create(
                     feedType, DEFAULT_POISON, getOutDir().toPath(), prefix, downloadQueue);
         }

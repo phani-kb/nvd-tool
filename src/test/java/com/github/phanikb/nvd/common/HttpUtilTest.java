@@ -57,7 +57,7 @@ class HttpUtilTest {
         String userAgent = HttpUtil.getUserAgent();
         assertNotNull(userAgent, "User agent should not be null");
         assertTrue(userAgent.contains("nvd-tool"), "User agent should contain project name");
-        assertTrue(userAgent.contains("0.1.0-SNAPSHOT"), "User agent should contain version");
+        assertTrue(userAgent.contains("0.3.0-SNAPSHOT"), "User agent should contain version");
     }
 
     @Test
