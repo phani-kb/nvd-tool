@@ -30,7 +30,7 @@
     <jsonschema2pojo.version>1.2.1</jsonschema2pojo.version>
     <jupiter.version>5.12.2</jupiter.version>
     <log4j-slf4j.version>2.24.1</log4j-slf4j.version>
-    <log4j.version>2.24.1</log4j.version>
+    <log4j.version>2.25.3</log4j.version>
     <lombok.version>1.18.42</lombok.version>
     <maven-artifact.version>4.0.0-rc-4</maven-artifact.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
