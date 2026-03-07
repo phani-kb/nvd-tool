@@ -21,8 +21,8 @@
     <findsecbugs.version>1.12.0</findsecbugs.version>
     <httpclient5.version>5.6-alpha1</httpclient5.version>
     <httpcore5.version>5.2.5</httpcore5.version>
-    <jackson-datatype-jsr310.version>2.20.1</jackson-datatype-jsr310.version>
-    <jackson.version>2.20.1</jackson.version>
+    <jackson-datatype-jsr310.version>2.21.1</jackson-datatype-jsr310.version>
+    <jackson.version>2.21.1</jackson.version>
     <jacoco.minimum.coverage>0.60</jacoco.minimum.coverage>
     <jacoco.version>0.8.11</jacoco.version>
     <jarchivelib.version>1.2.0</jarchivelib.version>
