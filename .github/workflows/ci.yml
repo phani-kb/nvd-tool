@@ -59,13 +59,29 @@ jobs:
           ls -la target/site/ || echo "target/site/ does not exist"
         fi
     - name: Verify JAR execution
-      run: java -jar target/nvd-tool-*.jar --help
+      run: |
+        JAR_FILE=$(find target -maxdepth 1 -type f -name 'nvd-tool-*-all.jar' | head -n 1)
+        if [ -z "$JAR_FILE" ]; then
+          JAR_FILE=$(find target -maxdepth 1 -type f -name 'nvd-tool-*.jar' ! -name '*-all.jar' | head -n 1)
+        fi
+        if [ -z "$JAR_FILE" ]; then
+          echo "ERROR: No built JAR found under target/"
+          exit 1
+        fi
+        java -jar "$JAR_FILE" --help
     - name: Extract artifact information
       id: artifact-info
       run: |
-        JAR_FILE=$(ls target/nvd-tool-*.jar)
+        JAR_FILE=$(find target -maxdepth 1 -type f -name 'nvd-tool-*-all.jar' | head -n 1)
+        if [ -z "$JAR_FILE" ]; then
+          JAR_FILE=$(find target -maxdepth 1 -type f -name 'nvd-tool-*.jar' ! -name '*-all.jar' | head -n 1)
+        fi
+        if [ -z "$JAR_FILE" ]; then
+          echo "ERROR: No built JAR found under target/"
+          exit 1
+        fi
         JAR_SIZE=$(du -h "$JAR_FILE" | cut -f1)
-        echo "name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+        echo "name=$(basename "$JAR_FILE")" >> "$GITHUB_OUTPUT"
         echo "size=${JAR_SIZE}" >> $GITHUB_OUTPUT
         echo "path=${JAR_FILE}" >> $GITHUB_OUTPUT
     - name: Extract coverage information
@@ -185,11 +201,18 @@ jobs:
     - name: Get artifact name
       id: artifact
       run: |
-        JAR_FILE=$(ls target/nvd-tool-*.jar)
+        JAR_FILE=$(find target -maxdepth 1 -type f -name 'nvd-tool-*-all.jar' | head -n 1)
+        if [ -z "$JAR_FILE" ]; then
+          JAR_FILE=$(find target -maxdepth 1 -type f -name 'nvd-tool-*.jar' ! -name '*-all.jar' | head -n 1)
+        fi
+        if [ -z "$JAR_FILE" ]; then
+          echo "ERROR: No built JAR found under target/"
+          exit 1
+        fi
         JAR_SIZE=$(du -h "$JAR_FILE" | cut -f1)
         CURRENT_DATE=$(date)
         echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
-        echo "jar_name=$(basename $JAR_FILE)" >> $GITHUB_OUTPUT
+        echo "jar_name=$(basename "$JAR_FILE")" >> $GITHUB_OUTPUT
         echo "jar_size=$JAR_SIZE" >> $GITHUB_OUTPUT
         echo "created_date=$CURRENT_DATE" >> $GITHUB_OUTPUT
     - name: Create GitHub Release (for manual trigger)
