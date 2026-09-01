@@ -47,7 +47,7 @@ class CveHistoryApiOptionsTest {
     void testValidateOptionsThrowsForInvalidChangeDateRange() {
         CveHistoryApiOptions options = new CveHistoryApiOptions();
         CveHistoryApiOptions.ChangeDateRange range = new CveHistoryApiOptions.ChangeDateRange(
-                LocalDateTime.of(2025, 8, 1, 0, 0, 0), LocalDateTime.of(2026, 8, 1, 0, 0, 0)); // invalid range
+                LocalDateTime.of(2025, 8, 10, 0, 0, 0), LocalDateTime.of(2025, 8, 1, 0, 0, 0));
         options.setChangeDateRange(range);
         assertThrows(IllegalArgumentException.class, options::validateOptions);
     }
